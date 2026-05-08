@@ -3,9 +3,34 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic();
 
+export const maxDuration = 60;
+
 // Marked for caching — stable system prompt never changes between requests
 const SYSTEM_PROMPT =
   "You are a certified business valuation analyst with 20+ years of experience in SMB M&A transactions across North America, Europe, and Australia. You apply the three standard valuation methods — SDE multiple, EBITDA multiple, and DCF — weighted by business size and type. Your output must always be defensible (grounded in real market multiples), honest (surface risks clearly), and useful (written for a business owner, not a finance expert). Respond ONLY with valid JSON, no preamble or markdown.";
+
+const MODEL_PARAMS = {
+  model: "claude-opus-4-5" as const,
+  max_tokens: 1024,
+  system: [
+    {
+      type: "text" as const,
+      text: SYSTEM_PROMPT,
+      cache_control: { type: "ephemeral" as const },
+    },
+  ],
+};
+
+async function callClaude(
+  messages: Anthropic.MessageParam[]
+): Promise<Anthropic.Message> {
+  try {
+    return await client.messages.create({ ...MODEL_PARAMS, messages });
+  } catch {
+    // Retry once before giving up
+    return await client.messages.create({ ...MODEL_PARAMS, messages });
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,30 +75,43 @@ Respond ONLY with this JSON object — no other text, no markdown:
   "summary": "<2–3 sentences written plainly for a business owner>"
 }`;
 
-    const response = await client.messages.create({
-      model: "claude-opus-4-5",
-      max_tokens: 1024,
-      system: [
-        {
-          type: "text",
-          text: SYSTEM_PROMPT,
-          cache_control: { type: "ephemeral" },
-        },
-      ],
-      messages: [{ role: "user", content: userContent }],
-    });
+    const messages: Anthropic.MessageParam[] = [
+      { role: "user", content: userContent },
+    ];
+
+    const response = await callClaude(messages);
 
     const block = response.content.find((b) => b.type === "text");
     if (!block || block.type !== "text") {
       throw new Error("No text content in response");
     }
 
-    const result = JSON.parse(block.text);
+    let result: unknown;
+    try {
+      result = JSON.parse(block.text);
+    } catch {
+      // Ask Claude to self-correct its malformed output
+      const fixResponse = await callClaude([
+        ...messages,
+        { role: "assistant", content: block.text },
+        {
+          role: "user",
+          content:
+            "Your previous response was not valid JSON. Return only the valid JSON object — no other text, no markdown.",
+        },
+      ]);
+      const fixBlock = fixResponse.content.find((b) => b.type === "text");
+      if (!fixBlock || fixBlock.type !== "text") {
+        throw new Error("No text content in fix response");
+      }
+      result = JSON.parse(fixBlock.text);
+    }
+
     return NextResponse.json(result);
   } catch (err) {
     console.error("Valuation error:", err);
     return NextResponse.json(
-      { error: "Failed to generate valuation. Please try again." },
+      { error: "Something went wrong, please try again." },
       { status: 500 }
     );
   }
