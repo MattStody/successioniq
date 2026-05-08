@@ -32,16 +32,16 @@ export default function ListingsPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-24">
       <div className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 text-slate-900">
           Business Listings
         </h1>
-        <p className="text-slate-400 text-lg max-w-xl">
+        <p className="text-slate-500 text-lg max-w-xl">
           Browse vetted businesses available for acquisition. All listings are
           confidential and pre-screened by our team.
         </p>
       </div>
 
-      {/* Filter bar placeholder */}
+      {/* Filter bar */}
       <div className="flex gap-3 mb-10 flex-wrap">
         {["All Industries", "SaaS", "Healthcare", "Manufacturing", "Retail"].map(
           (f) => (
@@ -49,8 +49,8 @@ export default function ListingsPage() {
               key={f}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 f === "All Industries"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-slate-800 text-slate-400 hover:text-white"
+                  ? "bg-blue-900 text-white"
+                  : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900"
               }`}
             >
               {f}
@@ -64,14 +64,14 @@ export default function ListingsPage() {
         {mockListings.map((l) => (
           <div
             key={l.id}
-            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-indigo-800/60 transition-colors cursor-pointer group"
+            className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
           >
             <div className="flex items-start justify-between mb-4">
-              <span className="text-xs font-semibold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md">
+              <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
                 {l.industry}
               </span>
               {l.tag && (
-                <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md">
+                <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
                   {l.tag}
                 </span>
               )}
@@ -79,40 +79,40 @@ export default function ListingsPage() {
 
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <div className="text-xs text-slate-500 mb-1">Revenue</div>
-                <div className="text-lg font-semibold">{l.revenue}</div>
+                <div className="text-xs text-slate-400 mb-1">Revenue</div>
+                <div className="text-lg font-semibold text-slate-900">{l.revenue}</div>
               </div>
               <div>
-                <div className="text-xs text-slate-500 mb-1">EBITDA</div>
-                <div className="text-lg font-semibold">{l.ebitda}</div>
+                <div className="text-xs text-slate-400 mb-1">EBITDA</div>
+                <div className="text-lg font-semibold text-slate-900">{l.ebitda}</div>
               </div>
               <div>
-                <div className="text-xs text-slate-500 mb-1">Multiple</div>
-                <div className="text-lg font-semibold">{l.multiple}</div>
+                <div className="text-xs text-slate-400 mb-1">Multiple</div>
+                <div className="text-lg font-semibold text-slate-900">{l.multiple}</div>
               </div>
               <div>
-                <div className="text-xs text-slate-500 mb-1">Location</div>
-                <div className="text-lg font-semibold">{l.location}</div>
+                <div className="text-xs text-slate-400 mb-1">Location</div>
+                <div className="text-lg font-semibold text-slate-900">{l.location}</div>
               </div>
             </div>
 
-            <button className="w-full text-center text-sm font-medium text-indigo-400 group-hover:text-indigo-300 transition-colors">
+            <button className="w-full text-center text-sm font-medium text-blue-800 group-hover:text-blue-900 transition-colors">
               View details →
             </button>
           </div>
         ))}
 
         {/* Coming soon card */}
-        <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[240px]">
+        <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[240px]">
           <div className="text-3xl mb-3">🔍</div>
-          <p className="text-slate-500 text-sm max-w-[160px]">
+          <p className="text-slate-400 text-sm max-w-[160px]">
             More listings added weekly. Check back soon.
           </p>
         </div>
       </div>
 
       <div className="text-center">
-        <p className="text-slate-500 text-sm">
+        <p className="text-slate-400 text-sm">
           Showing sample listings. Full marketplace coming soon.
         </p>
       </div>

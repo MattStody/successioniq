@@ -82,12 +82,12 @@ function fmtCurrency(n: number): string {
 // ─── Shared UI primitives ─────────────────────────────────────────────────────
 
 const inputCls =
-  "w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors";
+  "w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100 transition-colors";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-400 mb-2">{label}</label>
+      <label className="block text-sm font-medium text-slate-600 mb-2">{label}</label>
       {children}
     </div>
   );
@@ -162,17 +162,17 @@ function StepProgress({ current }: { current: number }) {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-all ${
                 i < current
-                  ? "bg-indigo-600 text-white"
+                  ? "bg-blue-900 text-white"
                   : i === current
-                  ? "bg-indigo-600 text-white ring-4 ring-indigo-600/25"
-                  : "bg-slate-800 text-slate-500 border border-slate-700"
+                  ? "bg-blue-900 text-white ring-4 ring-blue-900/20"
+                  : "bg-white text-slate-400 border border-slate-300"
               }`}
             >
               {i < current ? "✓" : i + 1}
             </div>
             <span
               className={`text-xs mt-1.5 text-center hidden sm:block leading-tight ${
-                i === current ? "text-indigo-400" : "text-slate-600"
+                i === current ? "text-blue-900 font-medium" : "text-slate-400"
               }`}
             >
               {label}
@@ -181,7 +181,7 @@ function StepProgress({ current }: { current: number }) {
           {i < STEPS.length - 1 && (
             <div
               className={`flex-1 h-0.5 mx-2 mt-4 sm:mt-4 transition-colors ${
-                i < current ? "bg-indigo-600" : "bg-slate-800"
+                i < current ? "bg-blue-900" : "bg-slate-200"
               }`}
             />
           )}
@@ -196,11 +196,11 @@ function StepProgress({ current }: { current: number }) {
 function LoadingView() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-32 text-center">
-      <div className="w-20 h-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-4xl mx-auto mb-8 animate-pulse">
+      <div className="w-20 h-20 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-4xl mx-auto mb-8 animate-pulse">
         🧠
       </div>
-      <h2 className="text-2xl font-bold mb-3">Analyzing your business…</h2>
-      <p className="text-slate-400 max-w-sm mx-auto leading-relaxed">
+      <h2 className="text-2xl font-bold mb-3 text-slate-900">Analyzing your business…</h2>
+      <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
         Our AI analyst is applying SDE multiple, EBITDA multiple, and DCF models
         to your data. This usually takes 15–20 seconds.
       </p>
@@ -208,7 +208,7 @@ function LoadingView() {
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-bounce"
+            className="w-2.5 h-2.5 rounded-full bg-blue-900 animate-bounce"
             style={{ animationDelay: `${i * 0.18}s` }}
           />
         ))}
@@ -239,86 +239,85 @@ function ResultsView({
 
   const confidenceColor =
     result.confidence === "High"
-      ? "text-emerald-400"
+      ? "text-emerald-600"
       : result.confidence === "Medium"
-      ? "text-yellow-400"
-      : "text-red-400";
+      ? "text-amber-600"
+      : "text-red-600";
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
       {/* Header */}
       <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm px-4 py-1.5 rounded-full mb-6">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+        <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-4 py-1.5 rounded-full mb-6 font-medium">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           Valuation Complete
         </div>
-        <h1 className="text-4xl font-bold mb-2">Your Business Valuation</h1>
-        <p className="text-slate-400">
+        <h1 className="font-serif text-4xl font-bold mb-2 text-slate-900">Your Business Valuation</h1>
+        <p className="text-slate-500">
           {formData.industry} · {formData.region}, {formData.country}
         </p>
       </div>
 
       {/* Valuation range card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 mb-6">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-8">
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 mb-6 shadow-sm">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-8">
           Estimated Value Range
         </p>
 
         {/* Three values */}
         <div className="grid grid-cols-3 gap-4 text-center mb-6">
           <div>
-            <div className="text-xs text-slate-500 mb-1.5 uppercase tracking-wider">
+            <div className="text-xs text-slate-400 mb-1.5 uppercase tracking-wider">
               Conservative
             </div>
-            <div className="text-2xl font-bold text-slate-300">
+            <div className="text-2xl font-bold text-slate-500">
               {fmtCurrency(result.valuation_low)}
             </div>
           </div>
-          <div className="border-x border-slate-800 px-4">
-            <div className="text-xs text-indigo-400 font-semibold mb-1.5 uppercase tracking-wider">
+          <div className="border-x border-slate-200 px-4">
+            <div className="text-xs text-blue-900 font-semibold mb-1.5 uppercase tracking-wider">
               Most Likely
             </div>
-            <div className="text-4xl font-bold text-white">
+            <div className="text-4xl font-bold text-slate-900">
               {fmtCurrency(result.valuation_mid)}
             </div>
           </div>
           <div>
-            <div className="text-xs text-slate-500 mb-1.5 uppercase tracking-wider">
+            <div className="text-xs text-slate-400 mb-1.5 uppercase tracking-wider">
               Optimistic
             </div>
-            <div className="text-2xl font-bold text-slate-300">
+            <div className="text-2xl font-bold text-slate-500">
               {fmtCurrency(result.valuation_high)}
             </div>
           </div>
         </div>
 
         {/* Range bar */}
-        <div className="relative h-3 rounded-full bg-gradient-to-r from-slate-600 via-indigo-500 to-violet-600 shadow-lg shadow-indigo-900/30">
-          {/* Mid-point marker */}
+        <div className="relative h-2.5 rounded-full bg-gradient-to-r from-slate-200 via-blue-500 to-blue-900">
           <div
             style={{ left: `${midPct}%` }}
-            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-white border-2 border-indigo-500 shadow-md shadow-indigo-900/50"
+            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-white border-2 border-blue-900 shadow-md"
           />
         </div>
 
         {/* Method metadata */}
-        <div className="mt-8 pt-6 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+        <div className="mt-8 pt-6 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
           <div>
-            <div className="text-slate-500 mb-1">Primary Method</div>
-            <div className="text-white font-medium">{result.primary_method}</div>
+            <div className="text-slate-400 mb-1">Primary Method</div>
+            <div className="text-slate-900 font-medium">{result.primary_method}</div>
           </div>
           <div>
-            <div className="text-slate-500 mb-1">Multiple Applied</div>
-            <div className="text-white font-medium">{result.multiple_applied}x</div>
+            <div className="text-slate-400 mb-1">Multiple Applied</div>
+            <div className="text-slate-900 font-medium">{result.multiple_applied}x</div>
           </div>
           <div>
-            <div className="text-slate-500 mb-1">Market Range</div>
-            <div className="text-white font-medium">
+            <div className="text-slate-400 mb-1">Market Range</div>
+            <div className="text-slate-900 font-medium">
               {result.comparable_range.low}–{result.comparable_range.high}x
             </div>
           </div>
           <div>
-            <div className="text-slate-500 mb-1">Confidence</div>
+            <div className="text-slate-400 mb-1">Confidence</div>
             <div className={`font-semibold ${confidenceColor}`}>
               {result.confidence}
             </div>
@@ -329,9 +328,9 @@ function ResultsView({
       {/* Drivers & Risks */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         {/* Value drivers */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-emerald-400 mb-5 uppercase tracking-wider">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15 text-xs">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-emerald-700 mb-5 uppercase tracking-wider">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200 text-xs">
               ✓
             </span>
             Key Value Drivers
@@ -340,16 +339,16 @@ function ResultsView({
             {result.key_value_drivers.map((d, i) => (
               <li key={i} className="flex items-start gap-3 text-sm">
                 <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500" />
-                <span className="text-slate-300 leading-relaxed">{d}</span>
+                <span className="text-slate-600 leading-relaxed">{d}</span>
               </li>
             ))}
           </ul>
         </div>
 
         {/* Key risks */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-red-400 mb-5 uppercase tracking-wider">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/15 text-xs">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-red-600 mb-5 uppercase tracking-wider">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-50 border border-red-200 text-xs">
               !
             </span>
             Key Risks
@@ -358,7 +357,7 @@ function ResultsView({
             {result.key_risks.map((r, i) => (
               <li key={i} className="flex items-start gap-3 text-sm">
                 <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-red-500" />
-                <span className="text-slate-300 leading-relaxed">{r}</span>
+                <span className="text-slate-600 leading-relaxed">{r}</span>
               </li>
             ))}
           </ul>
@@ -366,23 +365,23 @@ function ResultsView({
       </div>
 
       {/* Analyst summary */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-6">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
           Analyst Summary
         </p>
-        <p className="text-slate-300 leading-relaxed">{result.summary}</p>
+        <p className="text-slate-600 leading-relaxed">{result.summary}</p>
       </div>
 
       {/* Email capture */}
-      <div className="bg-gradient-to-r from-indigo-900/40 to-violet-900/30 border border-indigo-800/40 rounded-2xl p-8 mb-6">
+      <div className="bg-blue-900 rounded-2xl p-8 mb-6 text-white">
         <h3 className="text-xl font-bold mb-2">Download your full PDF report</h3>
-        <p className="text-slate-400 text-sm mb-6 max-w-md leading-relaxed">
+        <p className="text-blue-200 text-sm mb-6 max-w-md leading-relaxed">
           Get a detailed 10-page valuation report with comparable market data, SDE/EBITDA
           breakdown, and buyer positioning recommendations.
         </p>
         {submitted ? (
-          <div className="flex items-center gap-3 text-emerald-400 font-medium">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-sm">
+          <div className="flex items-center gap-3 text-emerald-300 font-medium">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-400/30 text-sm">
               ✓
             </span>
             Check your inbox — your report is on its way.
@@ -400,12 +399,12 @@ function ResultsView({
               placeholder="you@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="flex-1 bg-blue-800 border border-blue-700 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:border-blue-400 transition-colors"
               required
             />
             <button
               type="submit"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-medium transition-colors whitespace-nowrap"
+              className="bg-white text-blue-900 hover:bg-blue-50 px-6 py-3 rounded-xl font-medium transition-colors whitespace-nowrap"
             >
               Send Report
             </button>
@@ -415,10 +414,10 @@ function ResultsView({
 
       {/* List your business CTA */}
       <div className="text-center">
-        <p className="text-slate-500 text-sm mb-4">Ready to meet qualified buyers?</p>
+        <p className="text-slate-400 text-sm mb-4">Ready to meet qualified buyers?</p>
         <Link
           href="/listings"
-          className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-900/40 hover:-translate-y-0.5"
+          className="inline-block bg-blue-900 hover:bg-blue-800 text-white px-10 py-4 rounded-xl font-semibold transition-all shadow-md hover:-translate-y-0.5"
         >
           List your business on SuccessionIQ →
         </Link>
@@ -500,7 +499,6 @@ export default function ValuateClient() {
     }
   };
 
-  // Results take priority over loading state
   if (result)
     return (
       <ResultsView result={result} formData={formData} email={email} setEmail={setEmail} />
@@ -511,12 +509,12 @@ export default function ValuateClient() {
     <div className="max-w-2xl mx-auto px-6 py-16">
       {/* Page header */}
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm px-4 py-1.5 rounded-full mb-5">
-          <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
+        <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full mb-5 font-medium">
+          <span className="h-1.5 w-1.5 rounded-full bg-blue-700" />
           AI Valuation Engine
         </div>
-        <h1 className="text-4xl font-bold mb-3">Get your free business valuation</h1>
-        <p className="text-slate-400 text-sm">
+        <h1 className="font-serif text-4xl font-bold mb-3 text-slate-900">Get your free business valuation</h1>
+        <p className="text-slate-500 text-sm">
           4 quick steps · takes under 3 minutes · completely free
         </p>
       </div>
@@ -525,8 +523,8 @@ export default function ValuateClient() {
       <StepProgress current={step} />
 
       {/* Form card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8">
-        <h2 className="text-base font-semibold text-slate-300 mb-6 pb-4 border-b border-slate-800">
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+        <h2 className="text-base font-semibold text-slate-700 mb-6 pb-4 border-b border-slate-200">
           Step {step + 1} of {STEPS.length} — {STEPS[step]}
         </h2>
 
@@ -606,9 +604,7 @@ export default function ValuateClient() {
               />
             </Field>
 
-            <Field
-              label={`Owner Dependency — ${formData.ownerDependency}/10`}
-            >
+            <Field label={`Owner Dependency — ${formData.ownerDependency}/10`}>
               <div className="space-y-3">
                 <input
                   type="range"
@@ -618,9 +614,9 @@ export default function ValuateClient() {
                   onChange={(e) =>
                     update({ ownerDependency: parseInt(e.target.value) })
                   }
-                  className="w-full accent-indigo-500 cursor-pointer"
+                  className="w-full accent-blue-900 cursor-pointer"
                 />
-                <div className="flex justify-between text-xs text-slate-500">
+                <div className="flex justify-between text-xs text-slate-400">
                   <span>1 — Business runs itself</span>
                   <span>10 — Owner does everything</span>
                 </div>
@@ -656,7 +652,7 @@ export default function ValuateClient() {
                 onChange={(v) => update({ askingPrice: v })}
                 placeholder="Leave blank if unknown"
               />
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="text-xs text-slate-400 mt-2">
                 If you have a number in mind, our AI will tell you whether it&apos;s
                 in range for your market.
               </p>
@@ -670,7 +666,7 @@ export default function ValuateClient() {
         {step > 0 && (
           <button
             onClick={() => setStep((s) => s - 1)}
-            className="px-6 py-3 rounded-xl border border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white transition-colors text-sm font-medium"
+            className="px-6 py-3 rounded-xl border border-slate-300 text-slate-500 hover:border-slate-400 hover:text-slate-900 transition-colors text-sm font-medium bg-white"
           >
             ← Back
           </button>
@@ -680,7 +676,7 @@ export default function ValuateClient() {
           <button
             onClick={() => setStep((s) => s + 1)}
             disabled={!canProceed()}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-semibold transition-all text-sm"
+            className="bg-blue-900 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-semibold transition-all text-sm"
           >
             Continue →
           </button>
@@ -688,7 +684,7 @@ export default function ValuateClient() {
           <button
             onClick={handleSubmit}
             disabled={!canProceed()}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-semibold transition-all text-sm"
+            className="bg-blue-900 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-semibold transition-all text-sm"
           >
             Get My Valuation →
           </button>
@@ -696,7 +692,7 @@ export default function ValuateClient() {
       </div>
 
       {error && (
-        <p className="text-red-400 text-sm mt-4 text-center bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
+        <p className="text-red-600 text-sm mt-4 text-center bg-red-50 border border-red-200 rounded-lg px-4 py-3">
           {error}
         </p>
       )}
