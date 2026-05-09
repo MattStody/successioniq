@@ -413,13 +413,19 @@ function ResultsView({
       </div>
 
       {/* List your business CTA */}
-      <div className="text-center">
-        <p className="text-slate-400 text-sm mb-4">Ready to meet qualified buyers?</p>
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
+        <h3 className="font-serif text-2xl font-bold text-slate-900 mb-2">
+          Ready to meet qualified buyers?
+        </h3>
+        <p className="text-slate-500 text-sm mb-6 max-w-md mx-auto">
+          List your business on SuccessionIQ and connect with vetted private equity firms,
+          family offices, and strategic acquirers.
+        </p>
         <Link
-          href="/listings"
+          href={`/create-listing?industry=${encodeURIComponent(formData.industry)}&country=${encodeURIComponent(formData.country)}&region=${encodeURIComponent(formData.region)}&annual_revenue=${encodeURIComponent(formData.revenue)}&annual_profit=${encodeURIComponent(formData.netProfit)}&years_operating=${encodeURIComponent(formData.yearsInOperation)}&valuation_low=${encodeURIComponent(result.valuation_low)}&valuation_mid=${encodeURIComponent(result.valuation_mid)}&valuation_high=${encodeURIComponent(result.valuation_high)}&key_value_drivers=${encodeURIComponent(JSON.stringify(result.key_value_drivers))}&key_risks=${encodeURIComponent(JSON.stringify(result.key_risks))}`}
           className="inline-block bg-blue-900 hover:bg-blue-800 text-white px-10 py-4 rounded-xl font-semibold transition-all shadow-md hover:-translate-y-0.5"
         >
-          List your business on SuccessionIQ →
+          List your business for sale →
         </Link>
       </div>
     </div>

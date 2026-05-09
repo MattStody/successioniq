@@ -1,34 +1,46 @@
-const mockListings = [
-  {
-    id: 1,
-    industry: "SaaS",
-    revenue: "$2.4M ARR",
-    ebitda: "$820K",
-    multiple: "4.2x",
-    location: "Remote",
-    tag: "Featured",
-  },
-  {
-    id: 2,
-    industry: "Healthcare Services",
-    revenue: "$5.1M",
-    ebitda: "$1.2M",
-    multiple: "6.1x",
-    location: "Texas, USA",
-    tag: "New",
-  },
-  {
-    id: 3,
-    industry: "Manufacturing",
-    revenue: "$12M",
-    ebitda: "$2.8M",
-    multiple: "5.0x",
-    location: "Midwest, USA",
-    tag: null,
-  },
+import { supabase } from "@/lib/supabase";
+import { Listing } from "@/lib/types";
+import Link from "next/link";
+
+function fmtCurrency(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
+  return `$${n.toLocaleString()}`;
+}
+
+const FILTER_INDUSTRIES = [
+  "All Industries",
+  "SaaS",
+  "Healthcare",
+  "Manufacturing",
+  "Retail",
+  "Professional Services",
+  "Technology",
+  "Construction/Trades",
 ];
 
-export default function ListingsPage() {
+export const revalidate = 60;
+
+export default async function ListingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ industry?: string }>;
+}) {
+  const { industry: industryFilter } = await searchParams;
+
+  let query = supabase
+    .from("listings")
+    .select("*")
+    .eq("status", "active")
+    .order("created_at", { ascending: false });
+
+  if (industryFilter && industryFilter !== "All Industries") {
+    query = query.ilike("industry", `%${industryFilter}%`);
+  }
+
+  const { data, error } = await query;
+  const listings: Listing[] = error ? [] : (data as Listing[]);
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-24">
       <div className="mb-12">
@@ -43,64 +55,106 @@ export default function ListingsPage() {
 
       {/* Filter bar */}
       <div className="flex gap-3 mb-10 flex-wrap">
-        {["All Industries", "SaaS", "Healthcare", "Manufacturing", "Retail"].map(
-          (f) => (
-            <button
+        {FILTER_INDUSTRIES.map((f) => {
+          const isActive =
+            f === "All Industries"
+              ? !industryFilter || industryFilter === "All Industries"
+              : industryFilter === f;
+          return (
+            <Link
               key={f}
+              href={f === "All Industries" ? "/listings" : `/listings?industry=${encodeURIComponent(f)}`}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                f === "All Industries"
+                isActive
                   ? "bg-blue-900 text-white"
                   : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900"
               }`}
             >
               {f}
-            </button>
-          )
-        )}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Listing cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-        {mockListings.map((l) => (
-          <div
-            key={l.id}
-            className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
-                {l.industry}
-              </span>
-              {l.tag && (
-                <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
-                  {l.tag}
-                </span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <div className="text-xs text-slate-400 mb-1">Revenue</div>
-                <div className="text-lg font-semibold text-slate-900">{l.revenue}</div>
-              </div>
-              <div>
-                <div className="text-xs text-slate-400 mb-1">EBITDA</div>
-                <div className="text-lg font-semibold text-slate-900">{l.ebitda}</div>
-              </div>
-              <div>
-                <div className="text-xs text-slate-400 mb-1">Multiple</div>
-                <div className="text-lg font-semibold text-slate-900">{l.multiple}</div>
-              </div>
-              <div>
-                <div className="text-xs text-slate-400 mb-1">Location</div>
-                <div className="text-lg font-semibold text-slate-900">{l.location}</div>
-              </div>
-            </div>
-
-            <button className="w-full text-center text-sm font-medium text-blue-800 group-hover:text-blue-900 transition-colors">
-              View details →
-            </button>
+        {listings.length === 0 && !error ? (
+          <div className="col-span-3 py-24 text-center">
+            <p className="text-slate-400 text-sm">
+              No listings found
+              {industryFilter && industryFilter !== "All Industries"
+                ? ` in ${industryFilter}`
+                : ""}
+              . Check back soon.
+            </p>
           </div>
-        ))}
+        ) : (
+          listings.map((l) => {
+            const displayName =
+              l.is_anonymous || !l.business_name
+                ? `${l.industry} Business`
+                : l.business_name;
+            const askingPrice = l.asking_price ?? l.valuation_mid;
+            const profitMargin = ((l.annual_profit / l.annual_revenue) * 100).toFixed(1);
+
+            return (
+              <Link
+                key={l.id}
+                href={`/listings/${l.id}`}
+                className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group block"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                    {l.industry}
+                  </span>
+                  {l.is_anonymous && (
+                    <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+                      Anonymous
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="font-semibold text-slate-900 mb-1 group-hover:text-blue-900 transition-colors">
+                  {displayName}
+                </h3>
+                <p className="text-xs text-slate-400 mb-4">
+                  {l.region}, {l.country}
+                </p>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <div className="text-xs text-slate-400 mb-1">Revenue</div>
+                    <div className="text-lg font-semibold text-slate-900">
+                      {fmtCurrency(l.annual_revenue)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-400 mb-1">Profit</div>
+                    <div className="text-lg font-semibold text-slate-900">
+                      {fmtCurrency(l.annual_profit)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-400 mb-1">Margin</div>
+                    <div className="text-lg font-semibold text-slate-900">
+                      {profitMargin}%
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-400 mb-1">Asking Price</div>
+                    <div className="text-lg font-semibold text-slate-900">
+                      {fmtCurrency(askingPrice)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-sm font-medium text-blue-800 group-hover:text-blue-900 transition-colors">
+                  View details →
+                </div>
+              </Link>
+            );
+          })
+        )}
 
         {/* Coming soon card */}
         <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[240px]">
@@ -111,11 +165,13 @@ export default function ListingsPage() {
         </div>
       </div>
 
-      <div className="text-center">
-        <p className="text-slate-400 text-sm">
-          Showing sample listings. Full marketplace coming soon.
-        </p>
-      </div>
+      {listings.length > 0 && (
+        <div className="text-center">
+          <p className="text-slate-400 text-sm">
+            Showing {listings.length} active listing{listings.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
