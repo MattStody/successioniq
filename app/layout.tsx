@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,6 +42,7 @@ export default function RootLayout({
         <footer className="border-t border-slate-200 bg-white py-8 text-center text-sm text-slate-400">
           © {new Date().getFullYear()} SuccessionIQ. All rights reserved.
         </footer>
+        <Analytics />
       </body>
     </html>
   );
