@@ -1,7 +1,9 @@
 import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Listing } from "@/lib/types";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import DeleteListingButton from "./DeleteListingButton";
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -16,15 +18,17 @@ export default async function ListingPage({
 }) {
   const { id } = await params;
 
-  const { data, error } = await supabase
-    .from("listings")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const [listingResult, supabaseAuth] = await Promise.all([
+    supabase.from("listings").select("*").eq("id", id).single(),
+    createSupabaseServerClient(),
+  ]);
 
-  if (error || !data) notFound();
+  if (listingResult.error || !listingResult.data) notFound();
 
-  const listing = data as Listing;
+  const listing = listingResult.data as Listing;
+  const { data: { user } } = await supabaseAuth.auth.getUser();
+  const isOwner = !!user && user.id === listing.user_id;
+
   const displayName =
     listing.is_anonymous || !listing.business_name
       ? `${listing.industry} Business`
@@ -58,8 +62,12 @@ export default async function ListingPage({
                   Anonymous Listing
                 </span>
               )}
+              {isOwner && (
+                <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
+                  Your listing
+                </span>
+              )}
             </div>
-
             <h1 className="font-serif text-4xl font-bold text-slate-900 mb-2">
               {displayName}
             </h1>
@@ -129,17 +137,13 @@ export default async function ListingPage({
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
                 Transition Period
               </p>
-              <p className="text-slate-700 text-sm leading-relaxed">
-                {listing.transition_period}
-              </p>
+              <p className="text-slate-700 text-sm leading-relaxed">{listing.transition_period}</p>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
                 Preferred Buyer
               </p>
-              <p className="text-slate-700 text-sm leading-relaxed">
-                {listing.preferred_buyer}
-              </p>
+              <p className="text-slate-700 text-sm leading-relaxed">{listing.preferred_buyer}</p>
             </div>
           </div>
 
@@ -188,13 +192,23 @@ export default async function ListingPage({
               AI Valuation: {fmtCurrency(listing.valuation_low)} – {fmtCurrency(listing.valuation_high)}
             </div>
 
-            {/* NDA button */}
-            <button className="w-full bg-blue-900 hover:bg-blue-800 text-white px-6 py-3.5 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm mb-3">
-              Sign NDA & Get Contact Details
-            </button>
-            <p className="text-center text-xs text-slate-400">
-              NDA is managed electronically — takes 2 minutes
-            </p>
+            {isOwner ? (
+              <div className="space-y-3">
+                <div className="w-full py-3 rounded-xl bg-blue-50 border border-blue-200 text-center text-sm font-medium text-blue-900">
+                  This is your listing
+                </div>
+                <DeleteListingButton listingId={listing.id} />
+              </div>
+            ) : (
+              <>
+                <button className="w-full bg-blue-900 hover:bg-blue-800 text-white px-6 py-3.5 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm mb-3">
+                  Sign NDA & Get Contact Details
+                </button>
+                <p className="text-center text-xs text-slate-400">
+                  NDA is managed electronically — takes 2 minutes
+                </p>
+              </>
+            )}
           </div>
 
           {/* Confidentiality notice */}
@@ -214,7 +228,6 @@ export default async function ListingPage({
             </div>
           </div>
 
-          {/* Listed date */}
           <p className="text-center text-xs text-slate-400">
             Listed{" "}
             {new Date(listing.created_at).toLocaleDateString("en-US", {

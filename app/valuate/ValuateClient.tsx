@@ -30,6 +30,8 @@ interface ValuationResult {
   key_value_drivers: string[];
   key_risks: string[];
   summary: string;
+  saved?: boolean;
+  valuation_id?: string | null;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -371,6 +373,34 @@ function ResultsView({
         </p>
         <p className="text-slate-600 leading-relaxed">{result.summary}</p>
       </div>
+
+      {/* Save banner */}
+      {result.saved ? (
+        <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-6 py-4 mb-6">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-xs flex-shrink-0">
+            ✓
+          </span>
+          <p className="text-sm text-emerald-800 font-medium">
+            Valuation saved to your account — view it anytime in your{" "}
+            <Link href="/dashboard" className="underline">
+              dashboard
+            </Link>
+            .
+          </p>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-4 bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 mb-6">
+          <p className="text-sm text-slate-600">
+            <span className="font-medium text-slate-900">Save this valuation</span> to your account and track your business value over time.
+          </p>
+          <Link
+            href="/auth"
+            className="flex-shrink-0 text-sm font-medium bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Sign in →
+          </Link>
+        </div>
+      )}
 
       {/* Email capture */}
       <div className="bg-blue-900 rounded-2xl p-8 mb-6 text-white">
