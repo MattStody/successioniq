@@ -31,11 +31,14 @@ function AuthForm() {
     setLoading(true);
     setError(null);
 
+    // Store selected role in a cookie so the callback can read it reliably.
+    // This survives the full magic link round-trip on the same device/browser.
+    document.cookie = `pending_role=${role}; path=/; max-age=3600; SameSite=Lax`;
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: { role },
       },
     });
 

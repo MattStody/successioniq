@@ -9,6 +9,12 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
 
+  // Role is stored in a cookie set client-side before the magic link was sent.
+  // This is the most reliable channel — it travels with the redirect request.
+  const pendingRole = request.cookies.get("pending_role")?.value as
+    | UserRole
+    | undefined;
+
   if (code) {
     const cookieStore = await cookies();
     const supabase = createServerClient(
@@ -35,10 +41,6 @@ export async function GET(request: NextRequest) {
       } = await supabase.auth.getUser();
 
       if (user) {
-        // Role is stored in user_metadata (set via options.data in signInWithOtp)
-        const roleFromMeta = user.user_metadata?.role as UserRole | undefined;
-
-        // Fetch the current profile role
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
@@ -47,25 +49,34 @@ export async function GET(request: NextRequest) {
 
         let currentRole: UserRole = (profile?.role as UserRole) ?? "seller";
 
-        // Only update if the user explicitly chose a non-default role
-        // and their profile is still at the default (prevents overwriting on re-login)
+        // Apply the pending role only if:
+        // - a non-seller role was chosen
+        // - the profile is still at the default (prevents overwriting on re-login)
         if (
-          roleFromMeta &&
-          VALID_ROLES.includes(roleFromMeta) &&
-          roleFromMeta !== "seller" &&
+          pendingRole &&
+          VALID_ROLES.includes(pendingRole) &&
+          pendingRole !== "seller" &&
           currentRole === "seller"
         ) {
-          await supabase
+          const { error: updateError } = await supabase
             .from("profiles")
-            .update({ role: roleFromMeta })
+            .update({ role: pendingRole })
             .eq("id", user.id);
-          currentRole = roleFromMeta;
+
+          if (!updateError) {
+            currentRole = pendingRole;
+          }
         }
 
-        if (currentRole === "broker") {
-          return NextResponse.redirect(`${origin}/broker/dashboard`);
-        }
-        return NextResponse.redirect(`${origin}/dashboard`);
+        const destination =
+          currentRole === "broker"
+            ? `${origin}/broker/dashboard`
+            : `${origin}/dashboard`;
+
+        const response = NextResponse.redirect(destination);
+        // Clear the pending_role cookie
+        response.cookies.set("pending_role", "", { maxAge: 0, path: "/" });
+        return response;
       }
     }
   }
