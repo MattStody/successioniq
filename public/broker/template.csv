@@ -1,0 +1,3 @@
+business_name,is_anonymous,industry,country,region,annual_revenue,annual_profit,years_operating,asking_price,owner_dependency,revenue_trend,whats_included,transition_period,preferred_buyer,contact_email
+Sunrise Plumbing Co,false,Construction/Trades,United States,Texas,850000,210000,12,1200000,4,growing,"3 trucks, all tools and equipment, 8 loyal staff, strong referral network",3_months,individual,seller@example.com
+,true,SaaS,Canada,Ontario,2400000,820000,5,,3,growing_fast,"All source code, customer list of 400+ businesses, 2 engineers included",6_months,private_equity,broker@example.com

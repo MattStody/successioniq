@@ -4,11 +4,19 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Suspense } from "react";
+import type { UserRole } from "@/lib/types";
+
+const ROLES: { value: UserRole; label: string; description: string }[] = [
+  { value: "seller", label: "Seller", description: "I want to sell my business" },
+  { value: "buyer", label: "Buyer", description: "I'm looking to acquire" },
+  { value: "broker", label: "Broker", description: "I represent sellers" },
+];
 
 function AuthForm() {
   const searchParams = useSearchParams();
   const hasError = searchParams.get("error") === "true";
 
+  const [role, setRole] = useState<UserRole>("seller");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -26,7 +34,7 @@ function AuthForm() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?role=${role}`,
       },
     });
 
@@ -64,9 +72,16 @@ function AuthForm() {
               Check your inbox
             </h2>
             <p className="text-slate-500 text-sm leading-relaxed mb-6">
-              We sent a magic link to <strong className="text-slate-700">{email}</strong>.
-              Click it to sign in — it expires in 1 hour.
+              We sent a magic link to{" "}
+              <strong className="text-slate-700">{email}</strong>. Click it to
+              sign in — it expires in 1 hour.
             </p>
+            {role === "broker" && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4 text-xs text-blue-800 text-left">
+                Your account will be set up as a <strong>Broker</strong>. You&apos;ll
+                have access to bulk listing tools and a broker dashboard.
+              </div>
+            )}
             <button
               onClick={() => { setSent(false); setEmail(""); }}
               className="text-sm text-blue-900 hover:underline"
@@ -76,6 +91,32 @@ function AuthForm() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Role selector */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                I am a…
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {ROLES.map((r) => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setRole(r.value)}
+                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${
+                      role === r.value
+                        ? "bg-blue-900 text-white border-blue-900 shadow-sm"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-900"
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-slate-400 mt-2">
+                {ROLES.find((r) => r.value === role)?.description}
+              </p>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Email address
@@ -116,7 +157,11 @@ function AuthForm() {
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={<div className="py-24 text-center text-slate-400 text-sm">Loading…</div>}>
+    <Suspense
+      fallback={
+        <div className="py-24 text-center text-slate-400 text-sm">Loading…</div>
+      }
+    >
       <AuthForm />
     </Suspense>
   );

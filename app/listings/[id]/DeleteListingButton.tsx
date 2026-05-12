@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function DeleteListingButton({ listingId }: { listingId: string }) {
+export default function DeleteListingButton({
+  listingId,
+  redirectTo = "/dashboard",
+  compact = false,
+}: {
+  listingId: string;
+  redirectTo?: string;
+  compact?: boolean;
+}) {
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
@@ -12,13 +20,43 @@ export default function DeleteListingButton({ listingId }: { listingId: string }
     setDeleting(true);
     const res = await fetch(`/api/listings/${listingId}`, { method: "DELETE" });
     if (res.ok) {
-      router.push("/dashboard");
+      router.push(redirectTo);
       router.refresh();
     } else {
       setDeleting(false);
       setConfirming(false);
     }
   };
+
+  if (compact) {
+    if (!confirming) {
+      return (
+        <button
+          onClick={() => setConfirming(true)}
+          className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+        >
+          Delete
+        </button>
+      );
+    }
+    return (
+      <div className="flex gap-1.5">
+        <button
+          onClick={() => setConfirming(false)}
+          className="text-xs text-slate-500 hover:text-slate-700"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="text-xs text-red-600 font-semibold hover:text-red-800 disabled:opacity-50"
+        >
+          {deleting ? "…" : "Confirm"}
+        </button>
+      </div>
+    );
+  }
 
   if (!confirming) {
     return (

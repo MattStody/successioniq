@@ -1,4 +1,5 @@
 export type ListingStatus = "draft" | "active" | "under_offer" | "sold";
+export type UserRole = "seller" | "buyer" | "broker";
 
 export interface Listing {
   id: string;
@@ -24,6 +25,7 @@ export interface Listing {
   key_value_drivers: string[];
   key_risks: string[];
   user_id: string | null;
+  broker_id: string | null;
 }
 
 export interface Valuation {
@@ -53,10 +55,20 @@ export interface Profile {
   email: string;
   full_name: string | null;
   phone: string | null;
-  role: string;
+  role: UserRole;
   notification_preferences: {
     new_buyers: boolean;
     valuation_reminders: boolean;
     listing_updates: boolean;
   };
+}
+
+export interface Broker {
+  id: string;
+  created_at: string;
+  agency_name: string;
+  license_number: string | null;
+  phone: string;
+  website: string | null;
+  verified: boolean;
 }
