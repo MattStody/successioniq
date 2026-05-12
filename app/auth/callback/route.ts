@@ -8,7 +8,6 @@ const VALID_ROLES: UserRole[] = ["seller", "buyer", "broker"];
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const roleParam = searchParams.get("role") as UserRole | null;
 
   if (code) {
     const cookieStore = await cookies();
@@ -36,6 +35,9 @@ export async function GET(request: NextRequest) {
       } = await supabase.auth.getUser();
 
       if (user) {
+        // Role is stored in user_metadata (set via options.data in signInWithOtp)
+        const roleFromMeta = user.user_metadata?.role as UserRole | undefined;
+
         // Fetch the current profile role
         const { data: profile } = await supabase
           .from("profiles")
@@ -45,21 +47,21 @@ export async function GET(request: NextRequest) {
 
         let currentRole: UserRole = (profile?.role as UserRole) ?? "seller";
 
-        // Update role if a valid non-default role was selected and current is still default
+        // Only update if the user explicitly chose a non-default role
+        // and their profile is still at the default (prevents overwriting on re-login)
         if (
-          roleParam &&
-          VALID_ROLES.includes(roleParam) &&
-          roleParam !== "seller" &&
+          roleFromMeta &&
+          VALID_ROLES.includes(roleFromMeta) &&
+          roleFromMeta !== "seller" &&
           currentRole === "seller"
         ) {
           await supabase
             .from("profiles")
-            .update({ role: roleParam })
+            .update({ role: roleFromMeta })
             .eq("id", user.id);
-          currentRole = roleParam;
+          currentRole = roleFromMeta;
         }
 
-        // Redirect based on role
         if (currentRole === "broker") {
           return NextResponse.redirect(`${origin}/broker/dashboard`);
         }

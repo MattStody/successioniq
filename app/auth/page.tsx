@@ -34,7 +34,8 @@ function AuthForm() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?role=${role}`,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: { role },
       },
     });
 
