@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Geist_Mono } from "next/font/google";
+import { Hanken_Grotesk, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
 
-const inter = Inter({
+const hankenGrotesk = Hanken_Grotesk({
   variable: "--font-inter",
   subsets: ["latin"],
-});
-
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -33,7 +27,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfairDisplay.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${hankenGrotesk.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-gray-50 text-slate-900">
         <Nav />
