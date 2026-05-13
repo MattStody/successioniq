@@ -39,6 +39,7 @@ function AuthForm() {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: { role },
       },
     });
 

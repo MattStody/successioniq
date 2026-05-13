@@ -33,11 +33,18 @@ function CallbackHandler() {
         return;
       }
 
-      // Read the pending role cookie set client-side before the magic link was sent
-      const pendingRole = document.cookie
+      // Primary source: role stored in user_metadata via signInWithOtp options.data.
+      // This is written into raw_user_meta_data by Supabase at OTP-send time and
+      // survives cross-device/browser usage (unlike a cookie).
+      const metadataRole = user.user_metadata?.role as string | undefined;
+
+      // Fallback: cookie set on the same device before the magic link was sent.
+      const cookieRole = document.cookie
         .split("; ")
         .find((row) => row.startsWith("pending_role="))
         ?.split("=")[1];
+
+      const desiredRole = metadataRole || cookieRole;
 
       // Fetch the current profile role
       const { data: profile } = await supabase
@@ -48,16 +55,18 @@ function CallbackHandler() {
 
       let currentRole = profile?.role ?? "seller";
 
-      // Apply the pending role if it's a non-default role and profile is still at default.
-      // The browser client is authenticated at this point so the RLS UPDATE policy fires correctly.
-      if (pendingRole && pendingRole !== "seller" && currentRole === "seller") {
-        const { error: updateError } = await supabase
+      // Upgrade role if the user signed up as broker/buyer but their profile
+      // still shows the default 'seller' (the trigger may not have had the metadata yet).
+      if (desiredRole && desiredRole !== "seller" && currentRole === "seller") {
+        const { data: updated } = await supabase
           .from("profiles")
-          .update({ role: pendingRole })
-          .eq("id", user.id);
+          .update({ role: desiredRole })
+          .eq("id", user.id)
+          .select("role")
+          .single();
 
-        if (!updateError) {
-          currentRole = pendingRole;
+        if (updated?.role) {
+          currentRole = updated.role;
         }
       }
 
