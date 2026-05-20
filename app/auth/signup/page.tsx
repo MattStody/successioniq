@@ -66,11 +66,12 @@ export default function SignUpPage() {
       return;
     }
 
-    // Session available immediately — update profile with full_name
+    // Trigger defaults role to 'seller' — immediately override with the selected role
     if (data.user) {
       await supabase
         .from("profiles")
-        .upsert({ id: data.user.id, email, full_name: fullName, role });
+        .update({ role, full_name: fullName })
+        .eq("id", data.user.id);
     }
 
     router.replace(role === "broker" ? "/broker/dashboard" : "/dashboard");
