@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/broker"];
+const PROTECTED_PREFIXES = ["/dashboard", "/broker", "/create-listing"];
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
 
   if (!user && isProtected) {
     const url = request.nextUrl.clone();
-    url.pathname = "/auth";
+    url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
@@ -45,5 +45,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/broker/:path*"],
+  matcher: ["/dashboard/:path*", "/broker/:path*", "/create-listing/:path*"],
 };
