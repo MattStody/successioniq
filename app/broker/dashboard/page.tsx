@@ -38,7 +38,7 @@ export default async function BrokerDashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/auth");
+  if (!user) redirect("/auth/login");
 
   const [profileResult, brokerResult, listingsResult] = await Promise.all([
     supabase.from("profiles").select("role, full_name").eq("id", user.id).single(),

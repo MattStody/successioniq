@@ -38,7 +38,7 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/auth");
+  if (!user) redirect("/auth/login");
 
   const [profileResult, valuationsResult, listingsResult] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
@@ -198,7 +198,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Right: Profile settings */}
-        <div className="lg:sticky lg:top-24">
+        <div className="lg:sticky lg:top-24 space-y-5">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h2 className="text-base font-semibold text-slate-900 mb-5 pb-4 border-b border-slate-200">
               Profile Settings
@@ -211,6 +211,26 @@ export default async function DashboardPage() {
               role={profile?.role ?? "seller"}
             />
           </div>
+
+          {profile?.role === "broker" && (
+            <div className="bg-blue-900 rounded-2xl p-6 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-widest text-blue-300 mb-2">
+                Broker Tools
+              </p>
+              <h3 className="text-white font-semibold text-base mb-1">
+                Bulk Upload Listings
+              </h3>
+              <p className="text-blue-200 text-sm mb-4">
+                Import multiple listings at once via CSV.
+              </p>
+              <Link
+                href="/broker/bulk-upload"
+                className="block text-center bg-white text-blue-900 hover:bg-blue-50 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+              >
+                Go to Bulk Upload →
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
