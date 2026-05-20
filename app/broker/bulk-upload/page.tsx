@@ -6,7 +6,7 @@ import BulkUploadClient from "./BulkUploadClient";
 export default async function BulkUploadPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth");
+  if (!user) redirect("/auth/login");
 
   const { data: profile } = await supabase
     .from("profiles")

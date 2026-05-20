@@ -80,6 +80,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Broker access required" }, { status: 403 });
     }
 
+    // Check if broker has a brokers table record (needed for broker_id FK)
+    const { data: brokerRecord } = await supabase
+      .from("brokers")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
     const { rows } = await req.json() as { rows: Record<string, unknown>[] };
 
     if (!rows || rows.length === 0) {
@@ -92,7 +99,7 @@ export async function POST(req: NextRequest) {
     // Build listing payloads
     const payloads = rows.map((row, i) => ({
       user_id: user.id,
-      broker_id: user.id,
+      broker_id: brokerRecord ? user.id : null,
       status: "active",
       is_anonymous: row.is_anonymous === true || String(row.is_anonymous).toLowerCase() === "true",
       business_name: row.business_name || null,
