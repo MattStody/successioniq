@@ -41,13 +41,19 @@ const MODEL_PARAMS = {
   ],
 };
 
+const TRANSIENT_STATUS_CODES = new Set([429, 503, 529]);
+
 async function callClaude(
   messages: Anthropic.MessageParam[]
 ): Promise<Anthropic.Message> {
   try {
     return await client.messages.create({ ...MODEL_PARAMS, messages });
-  } catch {
-    return await client.messages.create({ ...MODEL_PARAMS, messages });
+  } catch (err) {
+    if (err instanceof Anthropic.APIError && TRANSIENT_STATUS_CODES.has(err.status)) {
+      console.warn("callClaude transient error, retrying once:", err.status, err.message);
+      return await client.messages.create({ ...MODEL_PARAMS, messages });
+    }
+    throw err;
   }
 }
 
