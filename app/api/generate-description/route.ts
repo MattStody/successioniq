@@ -2,6 +2,23 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const DescriptionSchema = z.object({
+  industry: z.string().min(1).max(100),
+  country: z.string().min(1).max(100),
+  region: z.string().min(1).max(100),
+  annual_revenue: z.number().nonnegative(),
+  annual_profit: z.number(),
+  years_operating: z.number().int().nonnegative(),
+  valuation_mid: z.number().nonnegative(),
+  key_value_drivers: z.array(z.string().max(300)).max(10),
+  key_risks: z.array(z.string().max(300)).max(10),
+});
+
+function sanitize(value: string): string {
+  return value.replace(/[<>]/g, "").trim();
+}
 
 const client = new Anthropic();
 
@@ -40,6 +57,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const parsed = DescriptionSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+
     const {
       industry,
       country,
@@ -50,16 +72,16 @@ export async function POST(req: NextRequest) {
       valuation_mid,
       key_value_drivers,
       key_risks,
-    } = body;
+    } = parsed.data;
 
     const profitMargin = ((annual_profit / annual_revenue) * 100).toFixed(1);
-    const driversText = (key_value_drivers as string[]).map((d, i) => `${i + 1}. ${d}`).join("\n");
-    const risksText = (key_risks as string[]).map((r, i) => `${i + 1}. ${r}`).join("\n");
+    const driversText = key_value_drivers.map((d, i) => `${i + 1}. ${sanitize(d)}`).join("\n");
+    const risksText = key_risks.map((r, i) => `${i + 1}. ${sanitize(r)}`).join("\n");
 
     const userPrompt = `Write a confidential business listing description for the following business:
 
-Industry: ${industry}
-Location: ${region}, ${country}
+Industry: <industry>${sanitize(industry)}</industry>
+Location: <location>${sanitize(region)}, ${sanitize(country)}</location>
 Years Operating: ${years_operating}
 Annual Revenue: $${Number(annual_revenue).toLocaleString()}
 Annual Profit: $${Number(annual_profit).toLocaleString()} (${profitMargin}% margin)

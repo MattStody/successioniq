@@ -2,6 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { z } from "zod";
+
+const ValuateSchema = z.object({
+  industry: z.string().min(1).max(100),
+  country: z.string().min(1).max(100),
+  region: z.string().min(1).max(100),
+  revenue: z.number().nonnegative(),
+  netProfit: z.number(),
+  yearsInOperation: z.number().int().nonnegative(),
+  revenueTrend: z.enum(["growing", "stable", "declining"]),
+  ownerDependency: z.number().int().min(1).max(10),
+  customerConcentration: z.string().min(1).max(200),
+  reasonForSelling: z.string().min(1).max(500),
+  askingPrice: z.number().nonnegative().nullable().optional(),
+});
+
+function sanitize(value: string): string {
+  return value.replace(/[<>]/g, "").trim();
+}
 
 const client = new Anthropic();
 
@@ -56,6 +75,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const parsed = ValuateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+
     const {
       industry,
       country,
@@ -68,19 +92,19 @@ export async function POST(req: NextRequest) {
       customerConcentration,
       reasonForSelling,
       askingPrice,
-    } = body;
+    } = parsed.data;
 
     const userContent = `Provide a business valuation for the following:
 
-Industry: ${industry}
-Location: ${region}, ${country}
+Industry: <industry>${sanitize(industry)}</industry>
+Location: <location>${sanitize(region)}, ${sanitize(country)}</location>
 Annual Revenue: $${Number(revenue).toLocaleString()}
 Annual Net Profit: $${Number(netProfit).toLocaleString()}
 Years in Operation: ${yearsInOperation}
 Revenue Trend (last 3 years): ${revenueTrend}
 Owner Dependency: ${ownerDependency}/10 — 1 = business runs itself, 10 = owner does everything
-Customer Concentration: ${customerConcentration}
-Reason for Selling: ${reasonForSelling}
+Customer Concentration: <customer_concentration>${sanitize(customerConcentration)}</customer_concentration>
+Reason for Selling: <reason_for_selling>${sanitize(reasonForSelling)}</reason_for_selling>
 ${askingPrice ? `Owner Asking Price: $${Number(askingPrice).toLocaleString()}` : "No asking price specified"}
 
 Respond ONLY with this JSON object — no other text, no markdown:
@@ -124,31 +148,12 @@ Respond ONLY with this JSON object — no other text, no markdown:
       result = JSON.parse(fixBlock.text);
     }
 
-    // Save to DB if user is logged in
+    // Save to DB
     let saved = false;
     let valuation_id: string | null = null;
 
     try {
-      const cookieStore = await cookies();
-      const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            getAll() { return cookieStore.getAll(); },
-            setAll(cookiesToSet) {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              );
-            },
-          },
-        }
-      );
-
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        const { data } = await supabase.from("valuations").insert([{
+      const { data } = await supabase.from("valuations").insert([{
           user_id: user.id,
           industry,
           country,
@@ -167,10 +172,9 @@ Respond ONLY with this JSON object — no other text, no markdown:
           key_risks: result.key_risks,
         }]).select().single();
 
-        if (data) {
-          saved = true;
-          valuation_id = data.id;
-        }
+      if (data) {
+        saved = true;
+        valuation_id = data.id;
       }
     } catch {
       // Non-fatal — valuation result still returned
