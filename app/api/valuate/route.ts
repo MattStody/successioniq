@@ -11,7 +11,7 @@ const ValuateSchema = z.object({
   revenue: z.number().nonnegative(),
   netProfit: z.number(),
   yearsInOperation: z.number().int().nonnegative(),
-  revenueTrend: z.enum(["growing", "stable", "declining"]),
+  revenueTrend: z.enum(["Growing 20%+", "Growing 10-20%", "Growing 0-10%", "Flat", "Declining"]),
   ownerDependency: z.number().int().min(1).max(10),
   customerConcentration: z.string().min(1).max(200),
   reasonForSelling: z.string().min(1).max(500),
