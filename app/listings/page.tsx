@@ -1,11 +1,18 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Listing } from "@/lib/types";
 import Link from "next/link";
+import BookmarkButton from "@/components/BookmarkButton";
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
   return `$${n.toLocaleString()}`;
+}
+
+function scoreColor(score: number) {
+  if (score >= 75) return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (score >= 50) return "bg-amber-50 text-amber-700 border-amber-200";
+  return "bg-slate-50 text-slate-500 border-slate-200";
 }
 
 const FILTER_INDUSTRIES = [
@@ -19,14 +26,53 @@ const FILTER_INDUSTRIES = [
   "Construction/Trades",
 ];
 
-export const revalidate = 60;
-
 export default async function ListingsPage({
   searchParams,
 }: {
   searchParams: Promise<{ industry?: string }>;
 }) {
   const { industry: industryFilter } = await searchParams;
+
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let isBuyer = false;
+  let matchMap = new Map<string, { score: number; reason: string }>();
+  let savedIds = new Set<string>();
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    isBuyer = profile?.role === "buyer";
+
+    if (isBuyer) {
+      const [matchesResult, savedResult, profileCheck] = await Promise.all([
+        supabase
+          .from("listing_matches")
+          .select("listing_id, match_score, match_reason")
+          .eq("buyer_id", user.id),
+        supabase.from("saved_listings").select("listing_id").eq("buyer_id", user.id),
+        supabase.from("buyer_profiles").select("id").eq("id", user.id).single(),
+      ]);
+
+      if (profileCheck.data) {
+        matchMap = new Map(
+          (matchesResult.data ?? []).map((m) => [
+            m.listing_id,
+            { score: m.match_score, reason: m.match_reason },
+          ])
+        );
+        savedIds = new Set((savedResult.data ?? []).map((s) => s.listing_id));
+      }
+    }
+  }
 
   let query = supabase
     .from("listings")
@@ -39,7 +85,21 @@ export default async function ListingsPage({
   }
 
   const { data, error } = await query;
-  const listings: Listing[] = error ? [] : (data as Listing[]);
+  let listings: Listing[] = error ? [] : (data as Listing[]);
+
+  // Sort by match score for buyers; unmatched listings fall to the end
+  if (isBuyer && matchMap.size > 0) {
+    listings = [
+      ...listings
+        .filter((l) => matchMap.has(l.id))
+        .sort(
+          (a, b) => (matchMap.get(b.id)?.score ?? 0) - (matchMap.get(a.id)?.score ?? 0)
+        ),
+      ...listings.filter((l) => !matchMap.has(l.id)),
+    ];
+  }
+
+  const hasMatches = isBuyer && matchMap.size > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-24">
@@ -48,13 +108,13 @@ export default async function ListingsPage({
           Business Listings
         </h1>
         <p className="text-slate-500 text-lg max-w-xl">
-          Browse vetted businesses available for acquisition. All listings are
-          confidential and pre-screened by our team.
+          Browse vetted businesses available for acquisition. All listings are confidential and
+          pre-screened by our team.
         </p>
       </div>
 
       {/* Filter bar */}
-      <div className="flex gap-3 mb-10 flex-wrap">
+      <div className="flex gap-3 mb-6 flex-wrap">
         {FILTER_INDUSTRIES.map((f) => {
           const isActive =
             f === "All Industries"
@@ -63,7 +123,11 @@ export default async function ListingsPage({
           return (
             <Link
               key={f}
-              href={f === "All Industries" ? "/listings" : `/listings?industry=${encodeURIComponent(f)}`}
+              href={
+                f === "All Industries"
+                  ? "/listings"
+                  : `/listings?industry=${encodeURIComponent(f)}`
+              }
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-blue-900 text-white"
@@ -75,6 +139,13 @@ export default async function ListingsPage({
           );
         })}
       </div>
+
+      {hasMatches && (
+        <p className="text-sm text-slate-500 mb-8 flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-900 inline-block" />
+          Based on your criteria — sorted by match score
+        </p>
+      )}
 
       {/* Listing cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -91,11 +162,10 @@ export default async function ListingsPage({
         ) : (
           listings.map((l) => {
             const displayName =
-              l.is_anonymous || !l.business_name
-                ? `${l.industry} Business`
-                : l.business_name;
+              l.is_anonymous || !l.business_name ? `${l.industry} Business` : l.business_name;
             const askingPrice = l.asking_price ?? l.valuation_mid;
             const profitMargin = ((l.annual_profit / l.annual_revenue) * 100).toFixed(1);
+            const match = matchMap.get(l.id);
 
             return (
               <Link
@@ -103,15 +173,30 @@ export default async function ListingsPage({
                 href={`/listings/${l.id}`}
                 className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group block"
               >
+                {/* Header row: industry badge + right-side badges + bookmark */}
                 <div className="flex items-start justify-between mb-4">
                   <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
                     {l.industry}
                   </span>
-                  {l.is_anonymous && (
-                    <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
-                      Anonymous
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5">
+                    {match && match.score >= 75 && (
+                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                        Matches criteria
+                      </span>
+                    )}
+                    {l.is_anonymous && (
+                      <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+                        Anonymous
+                      </span>
+                    )}
+                    {isBuyer && (
+                      <BookmarkButton
+                        listingId={l.id}
+                        initialSaved={savedIds.has(l.id)}
+                        variant="icon"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 <h3 className="font-semibold text-slate-900 mb-1 group-hover:text-blue-900 transition-colors">
@@ -136,9 +221,7 @@ export default async function ListingsPage({
                   </div>
                   <div>
                     <div className="text-xs text-slate-400 mb-1">Margin</div>
-                    <div className="text-lg font-semibold text-slate-900">
-                      {profitMargin}%
-                    </div>
+                    <div className="text-lg font-semibold text-slate-900">{profitMargin}%</div>
                   </div>
                   <div>
                     <div className="text-xs text-slate-400 mb-1">Asking Price</div>
@@ -148,8 +231,17 @@ export default async function ListingsPage({
                   </div>
                 </div>
 
-                <div className="text-sm font-medium text-blue-800 group-hover:text-blue-900 transition-colors">
-                  View details →
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-blue-800 group-hover:text-blue-900 transition-colors">
+                    View details →
+                  </span>
+                  {match && (
+                    <span
+                      className={`text-xs font-bold px-2 py-0.5 rounded-md border ${scoreColor(match.score)}`}
+                    >
+                      {match.score}% match
+                    </span>
+                  )}
                 </div>
               </Link>
             );

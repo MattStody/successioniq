@@ -1,5 +1,7 @@
 export type ListingStatus = "draft" | "active" | "under_offer" | "sold";
 export type UserRole = "seller" | "buyer" | "broker";
+export type AcquisitionType = "full_acquisition" | "partial_stake" | "either";
+export type BuyerType = "individual" | "search_fund" | "private_equity" | "strategic";
 
 export interface Listing {
   id: string;
@@ -71,4 +73,44 @@ export interface Broker {
   phone: string;
   website: string | null;
   verified: boolean;
+}
+
+export interface BuyerProfile {
+  id: string;
+  created_at: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  capital_min: number;
+  capital_max: number;
+  preferred_industries: string[];
+  preferred_countries: string[];
+  preferred_regions: string[] | null;
+  experience_years: number;
+  acquisition_type: AcquisitionType;
+  buyer_type: BuyerType;
+  background_summary: string | null;
+  is_verified: boolean;
+  notification_preferences: {
+    new_matches: boolean;
+    price_changes: boolean;
+    weekly_digest: boolean;
+  };
+}
+
+export interface ListingMatch {
+  id: string;
+  listing_id: string;
+  buyer_id: string;
+  match_score: number;
+  match_reason: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SavedListing {
+  id: string;
+  buyer_id: string;
+  listing_id: string;
+  created_at: string;
 }

@@ -4,6 +4,7 @@ import { Listing } from "@/lib/types";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteListingButton from "./DeleteListingButton";
+import BookmarkButton from "@/components/BookmarkButton";
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -28,6 +29,33 @@ export default async function ListingPage({
   const listing = listingResult.data as Listing;
   const { data: { user } } = await supabaseAuth.auth.getUser();
   const isOwner = !!user && user.id === listing.user_id;
+
+  let isBuyer = false;
+  let isBookmarked = false;
+  let matchScore: number | null = null;
+  let matchReason: string | null = null;
+
+  if (user && !isOwner) {
+    const [profileResult, savedResult, matchResult] = await Promise.all([
+      supabaseAuth.from("profiles").select("role").eq("id", user.id).single(),
+      supabaseAuth
+        .from("saved_listings")
+        .select("id")
+        .eq("buyer_id", user.id)
+        .eq("listing_id", id)
+        .single(),
+      supabaseAuth
+        .from("listing_matches")
+        .select("match_score, match_reason")
+        .eq("buyer_id", user.id)
+        .eq("listing_id", id)
+        .single(),
+    ]);
+    isBuyer = profileResult.data?.role === "buyer";
+    isBookmarked = !!savedResult.data && !savedResult.error;
+    matchScore = matchResult.data?.match_score ?? null;
+    matchReason = matchResult.data?.match_reason ?? null;
+  }
 
   const displayName =
     listing.is_anonymous || !listing.business_name
@@ -201,10 +229,46 @@ export default async function ListingPage({
               </div>
             ) : (
               <>
+                {matchScore !== null && (
+                  <div
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl border mb-4 text-sm ${
+                      matchScore >= 75
+                        ? "bg-emerald-50 border-emerald-200"
+                        : matchScore >= 50
+                        ? "bg-amber-50 border-amber-200"
+                        : "bg-slate-50 border-slate-200"
+                    }`}
+                  >
+                    <span className="font-medium text-slate-700">Your match score</span>
+                    <span
+                      className={`font-bold ${
+                        matchScore >= 75
+                          ? "text-emerald-700"
+                          : matchScore >= 50
+                          ? "text-amber-700"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      {matchScore}%
+                    </span>
+                  </div>
+                )}
+                {matchReason && (
+                  <p className="text-xs text-slate-500 italic mb-4 leading-relaxed">
+                    &ldquo;{matchReason}&rdquo;
+                  </p>
+                )}
                 <button className="w-full bg-blue-900 hover:bg-blue-800 text-white px-6 py-3.5 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm mb-3">
-                  Sign NDA & Get Contact Details
+                  Sign NDA &amp; Get Contact Details
                 </button>
-                <p className="text-center text-xs text-slate-400">
+                {isBuyer && (
+                  <BookmarkButton
+                    listingId={listing.id}
+                    initialSaved={isBookmarked}
+                    variant="full"
+                  />
+                )}
+                <p className="text-center text-xs text-slate-400 mt-2">
                   NDA is managed electronically — takes 2 minutes
                 </p>
               </>

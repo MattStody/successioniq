@@ -47,7 +47,12 @@ export default function NavAuth({ initialUser, firstName, userRole }: NavAuthPro
   };
 
   const displayName = firstName || user?.email?.split("@")[0] || "Account";
-  const dashboardHref = userRole === "broker" ? "/broker/dashboard" : "/dashboard";
+  const dashboardHref =
+    userRole === "broker"
+      ? "/broker/dashboard"
+      : userRole === "buyer"
+      ? "/buyer/dashboard"
+      : "/dashboard";
 
   if (!user) {
     return (
@@ -98,13 +103,24 @@ export default function NavAuth({ initialUser, firstName, userRole }: NavAuthPro
           >
             Dashboard
           </Link>
-          <Link
-            href={dashboardHref}
-            onClick={() => setDropdownOpen(false)}
-            className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-          >
-            My Listings
-          </Link>
+          {userRole !== "buyer" && (
+            <Link
+              href="/dashboard"
+              onClick={() => setDropdownOpen(false)}
+              className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+            >
+              My Listings
+            </Link>
+          )}
+          {userRole === "buyer" && (
+            <Link
+              href="/listings"
+              onClick={() => setDropdownOpen(false)}
+              className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+            >
+              Browse Listings
+            </Link>
+          )}
           <Link
             href="/dashboard"
             onClick={() => setDropdownOpen(false)}
