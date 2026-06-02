@@ -76,9 +76,6 @@ export async function POST(req: NextRequest) {
     );
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const body = await req.json();
     const parsed = ValuateSchema.safeParse(body);
@@ -154,11 +151,17 @@ Respond ONLY with this JSON object — no other text, no markdown:
       result = JSON.parse(fixBlock.text);
     }
 
-    // Save to DB
+    // Save to DB — only when authenticated
     let saved = false;
     let valuation_id: string | null = null;
+    let share_token: string | null = null;
+
+    if (!user) {
+      return NextResponse.json({ ...result, saved, valuation_id, share_token });
+    }
 
     try {
+      const token = crypto.randomUUID();
       const { data } = await supabase.from("valuations").insert([{
           user_id: user.id,
           industry,
@@ -176,17 +179,21 @@ Respond ONLY with this JSON object — no other text, no markdown:
           summary: result.summary,
           key_value_drivers: result.key_value_drivers,
           key_risks: result.key_risks,
+          share_token: token,
+          is_public: true,
+          shared_at: new Date().toISOString(),
         }]).select().single();
 
       if (data) {
         saved = true;
         valuation_id = data.id;
+        share_token = token;
       }
     } catch {
       // Non-fatal — valuation result still returned
     }
 
-    return NextResponse.json({ ...result, saved, valuation_id });
+    return NextResponse.json({ ...result, saved, valuation_id, share_token });
   } catch (err) {
     console.error("Valuation error:", err);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -32,6 +32,7 @@ interface ValuationResult {
   summary: string;
   saved?: boolean;
   valuation_id?: string | null;
+  share_token?: string | null;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -219,6 +220,175 @@ function LoadingView() {
   );
 }
 
+// ─── Share section ────────────────────────────────────────────────────────────
+
+function ShareSection({
+  shareToken,
+  valuation_id,
+  saved,
+}: {
+  shareToken: string | null | undefined;
+  valuation_id: string | null | undefined;
+  saved: boolean | undefined;
+}) {
+  const [shareUrl, setShareUrl] = useState(
+    shareToken ? `https://successioniq.vercel.app/valuation/${shareToken}` : ""
+  );
+  const [copied, setCopied] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
+  const [toggling, setToggling] = useState(false);
+
+  useEffect(() => {
+    if (shareToken) {
+      setShareUrl(`${window.location.origin}/valuation/${shareToken}`);
+    }
+  }, [shareToken]);
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API not available — fail silently
+    }
+  }
+
+  async function togglePrivacy() {
+    if (!valuation_id || toggling) return;
+    setToggling(true);
+    const newValue = !isPublic;
+    try {
+      const res = await fetch(`/api/valuations/${valuation_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_public: newValue }),
+      });
+      if (res.ok) setIsPublic(newValue);
+    } finally {
+      setToggling(false);
+    }
+  }
+
+  const emailSubject = encodeURIComponent("My Business Valuation Report");
+  const emailBody = encodeURIComponent(
+    `I used SuccessionIQ to get a free AI-powered valuation of my business. Here's the report: ${shareUrl}`
+  );
+  const whatsAppText = encodeURIComponent(
+    `Check out my business valuation report: ${shareUrl}`
+  );
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
+      <h3 className="text-base font-semibold text-slate-900 mb-5 pb-4 border-b border-slate-100">
+        Save &amp; Share Your Report
+      </h3>
+
+      {/* Shareable URL or private state */}
+      {isPublic && shareToken ? (
+        <div className="mb-5">
+          <div className="text-xs text-slate-400 uppercase tracking-widest mb-2">
+            Shareable link
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 font-mono truncate">
+              {shareUrl}
+            </div>
+            <button
+              onClick={copyLink}
+              className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                copied
+                  ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+                  : "bg-blue-900 hover:bg-blue-800 text-white"
+              }`}
+            >
+              {copied ? "Copied!" : "Copy link"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-5 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+          <span className="text-slate-400">🔒</span>
+          <span className="text-sm text-slate-500">
+            This report is private — sharing is disabled.
+          </span>
+        </div>
+      )}
+
+      {/* Share buttons */}
+      {isPublic && shareToken && (
+        <div className="flex items-center gap-3 mb-5 flex-wrap">
+          <span className="text-xs text-slate-400">Share via:</span>
+          <a
+            href={`mailto:?subject=${emailSubject}&body=${emailBody}`}
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-lg transition-colors"
+          >
+            📧 Email
+          </a>
+          <a
+            href={`https://wa.me/?text=${whatsAppText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-lg transition-colors"
+          >
+            📱 WhatsApp
+          </a>
+        </div>
+      )}
+
+      {/* Saved status */}
+      {saved ? (
+        <div className="flex items-center gap-2 text-sm text-emerald-700 mb-4">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-xs flex-shrink-0">
+            ✓
+          </span>
+          Saved to your account ·{" "}
+          <Link href="/dashboard" className="underline hover:text-emerald-900 transition-colors">
+            View in dashboard →
+          </Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-4 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 mb-4">
+          <p className="text-sm text-slate-600">
+            Sign in to save this valuation to your account.
+          </p>
+          <Link
+            href="/auth"
+            className="flex-shrink-0 text-sm font-medium bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Sign in →
+          </Link>
+        </div>
+      )}
+
+      {/* Privacy toggle — only shown if the valuation is saved */}
+      {saved && valuation_id && (
+        <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+          <button
+            type="button"
+            onClick={togglePrivacy}
+            disabled={toggling}
+            className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${
+              !isPublic ? "bg-blue-900" : "bg-slate-200"
+            }`}
+            aria-label="Toggle report privacy"
+          >
+            <span
+              className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-150 ${
+                !isPublic ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+          <div>
+            <div className="text-sm font-medium text-slate-900">Make this report private</div>
+            <div className="text-xs text-slate-400">Disables the shareable link</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Results view ─────────────────────────────────────────────────────────────
 
 function ResultsView({
@@ -374,33 +544,11 @@ function ResultsView({
         <p className="text-slate-600 leading-relaxed">{result.summary}</p>
       </div>
 
-      {/* Save banner */}
-      {result.saved ? (
-        <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-6 py-4 mb-6">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-xs flex-shrink-0">
-            ✓
-          </span>
-          <p className="text-sm text-emerald-800 font-medium">
-            Valuation saved to your account — view it anytime in your{" "}
-            <Link href="/dashboard" className="underline">
-              dashboard
-            </Link>
-            .
-          </p>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between gap-4 bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 mb-6">
-          <p className="text-sm text-slate-600">
-            <span className="font-medium text-slate-900">Save this valuation</span> to your account and track your business value over time.
-          </p>
-          <Link
-            href="/auth"
-            className="flex-shrink-0 text-sm font-medium bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Sign in →
-          </Link>
-        </div>
-      )}
+      <ShareSection
+        shareToken={result.share_token}
+        valuation_id={result.valuation_id}
+        saved={result.saved}
+      />
 
       {/* Email capture */}
       <div className="bg-blue-900 rounded-2xl p-8 mb-6 text-white">
