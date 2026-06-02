@@ -25,7 +25,7 @@ interface ValuationResult {
   valuation_high: number;
   primary_method: string;
   multiple_applied: number;
-  comparable_range: { low: number; high: number };
+  comparable_range?: { low: number; high: number };
   confidence: string;
   key_value_drivers: string[];
   key_risks: string[];
@@ -34,6 +34,8 @@ interface ValuationResult {
   valuation_id?: string | null;
   share_token?: string | null;
 }
+
+type Phase = "form" | "gating" | "waiting" | "result";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -194,6 +196,112 @@ function StepProgress({ current }: { current: number }) {
   );
 }
 
+// ─── Email gate view ──────────────────────────────────────────────────────────
+
+function EmailGateView({
+  industry,
+  isAiReady,
+  onSubmit,
+}: {
+  industry: string;
+  isAiReady: boolean;
+  onSubmit: (email: string) => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email || submitting) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      await fetch("/api/capture-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "valuation_gate", industry }),
+      });
+      if (typeof window !== "undefined") {
+        localStorage.setItem("siq_email_captured", "1");
+      }
+      onSubmit(email);
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="max-w-md mx-auto px-6 py-24 text-center">
+      {/* Status icon */}
+      <div className="flex justify-center mb-8">
+        {isAiReady ? (
+          <div className="w-20 h-20 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-3xl">
+            ✓
+          </div>
+        ) : (
+          <div className="w-20 h-20 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-4xl animate-pulse">
+            🧠
+          </div>
+        )}
+      </div>
+
+      {/* Status badge */}
+      <div
+        className={`inline-flex items-center gap-2 text-sm px-4 py-1.5 rounded-full mb-6 font-medium ${
+          isAiReady
+            ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+            : "bg-blue-50 border border-blue-200 text-blue-700"
+        }`}
+      >
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${
+            isAiReady ? "bg-emerald-500" : "bg-blue-500 animate-pulse"
+          }`}
+        />
+        {isAiReady ? "Valuation complete" : "Analysing your business…"}
+      </div>
+
+      <h2 className="font-serif text-3xl font-bold text-slate-900 mb-3">
+        Where should we send your results?
+      </h2>
+      <p className="text-slate-500 text-sm mb-8 leading-relaxed">
+        Enter your email to reveal your {industry} valuation and receive a free copy of
+        your report.
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-3 text-left">
+        <input
+          type="email"
+          placeholder="you@company.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100 transition-colors text-base"
+          required
+          autoFocus
+        />
+        {error && <p className="text-red-600 text-sm">{error}</p>}
+        <button
+          type="submit"
+          disabled={submitting || !email}
+          className="w-full bg-blue-900 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-semibold transition-all text-base"
+        >
+          {submitting
+            ? "One moment…"
+            : isAiReady
+            ? "Show My Valuation →"
+            : "Continue to My Results →"}
+        </button>
+      </form>
+
+      <p className="text-xs text-slate-400 mt-4">
+        No spam, ever. Unsubscribe any time.
+      </p>
+    </div>
+  );
+}
+
 // ─── Loading view ─────────────────────────────────────────────────────────────
 
 function LoadingView() {
@@ -284,7 +392,6 @@ function ShareSection({
         Save &amp; Share Your Report
       </h3>
 
-      {/* Shareable URL or private state */}
       {isPublic && shareToken ? (
         <div className="mb-5">
           <div className="text-xs text-slate-400 uppercase tracking-widest mb-2">
@@ -315,7 +422,6 @@ function ShareSection({
         </div>
       )}
 
-      {/* Share buttons */}
       {isPublic && shareToken && (
         <div className="flex items-center gap-3 mb-5 flex-wrap">
           <span className="text-xs text-slate-400">Share via:</span>
@@ -336,7 +442,6 @@ function ShareSection({
         </div>
       )}
 
-      {/* Saved status */}
       {saved ? (
         <div className="flex items-center gap-2 text-sm text-emerald-700 mb-4">
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-xs flex-shrink-0">
@@ -361,7 +466,6 @@ function ShareSection({
         </div>
       )}
 
-      {/* Privacy toggle — only shown if the valuation is saved */}
       {saved && valuation_id && (
         <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
           <button
@@ -394,16 +498,10 @@ function ShareSection({
 function ResultsView({
   result,
   formData,
-  email,
-  setEmail,
 }: {
   result: ValuationResult;
   formData: FormData;
-  email: string;
-  setEmail: (v: string) => void;
 }) {
-  const [submitted, setSubmitted] = useState(false);
-
   const midPct =
     ((result.valuation_mid - result.valuation_low) /
       (result.valuation_high - result.valuation_low)) *
@@ -436,7 +534,6 @@ function ResultsView({
           Estimated Value Range
         </p>
 
-        {/* Three values */}
         <div className="grid grid-cols-3 gap-4 text-center mb-6">
           <div>
             <div className="text-xs text-slate-400 mb-1.5 uppercase tracking-wider">
@@ -482,12 +579,14 @@ function ResultsView({
             <div className="text-slate-400 mb-1">Multiple Applied</div>
             <div className="text-slate-900 font-medium">{result.multiple_applied}x</div>
           </div>
-          <div>
-            <div className="text-slate-400 mb-1">Market Range</div>
-            <div className="text-slate-900 font-medium">
-              {result.comparable_range.low}–{result.comparable_range.high}x
+          {result.comparable_range && (
+            <div>
+              <div className="text-slate-400 mb-1">Market Range</div>
+              <div className="text-slate-900 font-medium">
+                {result.comparable_range.low}–{result.comparable_range.high}x
+              </div>
             </div>
-          </div>
+          )}
           <div>
             <div className="text-slate-400 mb-1">Confidence</div>
             <div className={`font-semibold ${confidenceColor}`}>
@@ -499,7 +598,6 @@ function ResultsView({
 
       {/* Drivers & Risks */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        {/* Value drivers */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-emerald-700 mb-5 uppercase tracking-wider">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200 text-xs">
@@ -517,7 +615,6 @@ function ResultsView({
           </ul>
         </div>
 
-        {/* Key risks */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-red-600 mb-5 uppercase tracking-wider">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-50 border border-red-200 text-xs">
@@ -550,46 +647,6 @@ function ResultsView({
         saved={result.saved}
       />
 
-      {/* Email capture */}
-      <div className="bg-blue-900 rounded-2xl p-8 mb-6 text-white">
-        <h3 className="text-xl font-bold mb-2">Download your full PDF report</h3>
-        <p className="text-blue-200 text-sm mb-6 max-w-md leading-relaxed">
-          Get a detailed 10-page valuation report with comparable market data, SDE/EBITDA
-          breakdown, and buyer positioning recommendations.
-        </p>
-        {submitted ? (
-          <div className="flex items-center gap-3 text-emerald-300 font-medium">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-400/30 text-sm">
-              ✓
-            </span>
-            Check your inbox — your report is on its way.
-          </div>
-        ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (email) setSubmitted(true);
-            }}
-            className="flex gap-3"
-          >
-            <input
-              type="email"
-              placeholder="you@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 bg-blue-800 border border-blue-700 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:border-blue-400 transition-colors"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-white text-blue-900 hover:bg-blue-50 px-6 py-3 rounded-xl font-medium transition-colors whitespace-nowrap"
-            >
-              Send Report
-            </button>
-          </form>
-        )}
-      </div>
-
       {/* List your business CTA */}
       <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
         <h3 className="font-serif text-2xl font-bold text-slate-900 mb-2">
@@ -612,7 +669,7 @@ function ResultsView({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function ValuateClient() {
+export default function ValuateClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     industry: "",
@@ -627,10 +684,18 @@ export default function ValuateClient() {
     reasonForSelling: "",
     askingPrice: "",
   });
+  const [phase, setPhase] = useState<Phase>("form");
   const [result, setResult] = useState<ValuationResult | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [pendingResult, setPendingResult] = useState<ValuationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
+
+  // When AI finishes while user is on the waiting screen (after gate), show results
+  useEffect(() => {
+    if (phase === "waiting" && pendingResult) {
+      setResult(pendingResult);
+      setPhase("result");
+    }
+  }, [phase, pendingResult]);
 
   const update = (fields: Partial<FormData>) =>
     setFormData((prev) => ({ ...prev, ...fields }));
@@ -656,39 +721,84 @@ export default function ValuateClient() {
     }
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/valuate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          revenue: Number(formData.revenue),
-          netProfit: Number(formData.netProfit),
-          yearsInOperation: Number(formData.yearsInOperation),
-          askingPrice: formData.askingPrice ? Number(formData.askingPrice) : null,
-        }),
+  const runValuation = () =>
+    fetch("/api/valuate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...formData,
+        revenue: Number(formData.revenue),
+        netProfit: Number(formData.netProfit),
+        yearsInOperation: Number(formData.yearsInOperation),
+        askingPrice: formData.askingPrice ? Number(formData.askingPrice) : null,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.error) throw new Error(data.error);
+        return data as ValuationResult;
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setResult(data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong. Please try again."
-      );
-      setLoading(false);
+
+  const handleSubmit = () => {
+    setError(null);
+    const skipGate =
+      isLoggedIn ||
+      (typeof window !== "undefined" && localStorage.getItem("siq_email_captured") === "1");
+
+    if (skipGate) {
+      setPhase("waiting");
+      runValuation()
+        .then((data) => {
+          setResult(data);
+          setPhase("result");
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+          setPhase("form");
+        });
+    } else {
+      setPhase("gating");
+      runValuation()
+        .then((data) => setPendingResult(data))
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+          setPhase("form");
+        });
     }
   };
 
-  if (result)
-    return (
-      <ResultsView result={result} formData={formData} email={email} setEmail={setEmail} />
-    );
-  if (loading) return <LoadingView />;
+  const handleGateSubmit = () => {
+    if (pendingResult) {
+      setResult(pendingResult);
+      setPhase("result");
+    } else {
+      // AI still running — show brief loading screen until it resolves
+      setPhase("waiting");
+    }
+  };
 
+  if (phase === "result" && result) {
+    return <ResultsView result={result} formData={formData} />;
+  }
+
+  if (phase === "waiting") {
+    return <LoadingView />;
+  }
+
+  if (phase === "gating") {
+    return (
+      <EmailGateView
+        industry={formData.industry}
+        isAiReady={!!pendingResult}
+        onSubmit={handleGateSubmit}
+      />
+    );
+  }
+
+  // ── Form ──
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
       {/* Page header */}
