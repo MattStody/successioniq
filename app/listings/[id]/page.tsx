@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Listing } from "@/lib/types";
+import { getListingDisplayName } from "@/lib/listing-display";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteListingButton from "./DeleteListingButton";
@@ -57,10 +58,7 @@ export default async function ListingPage({
     matchReason = matchResult.data?.match_reason ?? null;
   }
 
-  const displayName =
-    listing.is_anonymous || !listing.business_name
-      ? `${listing.industry} Business`
-      : listing.business_name;
+  const displayName = getListingDisplayName(listing);
 
   const askingPrice = listing.asking_price ?? listing.valuation_mid;
   const profitMargin = ((listing.annual_profit / listing.annual_revenue) * 100).toFixed(1);

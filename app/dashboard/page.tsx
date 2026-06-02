@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import ProfileForm from "./ProfileForm";
 import type { Listing, ListingStatus, Valuation } from "@/lib/types";
+import { getListingDisplayName } from "@/lib/listing-display";
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -178,10 +179,7 @@ export default async function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {listings.map((l) => {
-                  const displayName =
-                    l.is_anonymous || !l.business_name
-                      ? `${l.industry} Business`
-                      : l.business_name;
+                  const displayName = getListingDisplayName(l);
                   return (
                     <Link
                       key={l.id}

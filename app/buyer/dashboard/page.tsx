@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Listing, BuyerProfile } from "@/lib/types";
+import { getListingDisplayName } from "@/lib/listing-display";
 import BookmarkButton from "@/components/BookmarkButton";
 import GenerateMatchesButton from "./GenerateMatchesButton";
 
@@ -146,10 +147,7 @@ export default async function BuyerDashboardPage() {
               <div className="grid sm:grid-cols-2 gap-4">
                 {rankedListings.map((l) => {
                   const match = matchMap.get(l.id);
-                  const displayName =
-                    l.is_anonymous || !l.business_name
-                      ? `${l.industry} Business`
-                      : l.business_name;
+                  const displayName = getListingDisplayName(l);
                   const askingPrice = l.asking_price ?? l.valuation_mid;
 
                   return (
@@ -243,10 +241,7 @@ export default async function BuyerDashboardPage() {
             ) : (
               <div className="space-y-3">
                 {savedListings.map((l) => {
-                  const displayName =
-                    l.is_anonymous || !l.business_name
-                      ? `${l.industry} Business`
-                      : l.business_name;
+                  const displayName = getListingDisplayName(l);
                   const askingPrice = l.asking_price ?? l.valuation_mid;
                   const match = matchMap.get(l.id);
 

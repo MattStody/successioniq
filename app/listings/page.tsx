@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Listing } from "@/lib/types";
+import { getListingDisplayName } from "@/lib/listing-display";
 import Link from "next/link";
 import BookmarkButton from "@/components/BookmarkButton";
 
@@ -161,8 +162,7 @@ export default async function ListingsPage({
           </div>
         ) : (
           listings.map((l) => {
-            const displayName =
-              l.is_anonymous || !l.business_name ? `${l.industry} Business` : l.business_name;
+            const displayName = getListingDisplayName(l);
             const askingPrice = l.asking_price ?? l.valuation_mid;
             const profitMargin = ((l.annual_profit / l.annual_revenue) * 100).toFixed(1);
             const match = matchMap.get(l.id);

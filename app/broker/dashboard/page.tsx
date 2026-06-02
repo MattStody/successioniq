@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Listing, ListingStatus } from "@/lib/types";
+import { getListingDisplayName } from "@/lib/listing-display";
 import DeleteListingButton from "@/app/listings/[id]/DeleteListingButton";
 
 function fmtCurrency(n: number): string {
@@ -167,10 +168,7 @@ export default async function BrokerDashboardPage() {
         ) : (
           <div className="divide-y divide-slate-100">
             {listings.map((l) => {
-              const displayName =
-                l.is_anonymous || !l.business_name
-                  ? `${l.industry} Business`
-                  : l.business_name;
+              const displayName = getListingDisplayName(l);
               return (
                 <div
                   key={l.id}
