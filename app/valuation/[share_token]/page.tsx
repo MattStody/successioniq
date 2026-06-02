@@ -32,7 +32,6 @@ type Valuation = {
   valuation_high: number;
   primary_method: string;
   multiple_applied: number;
-  comparable_range: { low: number; high: number } | null;
   confidence: string;
   key_value_drivers: string[];
   key_risks: string[];
@@ -51,7 +50,7 @@ export default async function PublicValuationPage({
   const { data, error } = await supabase
     .from("valuations")
     .select(
-      "id, created_at, industry, country, region, annual_revenue, annual_profit, years_operating, valuation_low, valuation_mid, valuation_high, primary_method, multiple_applied, comparable_range, confidence, key_value_drivers, key_risks, summary, view_count, title"
+      "id, created_at, industry, country, region, annual_revenue, annual_profit, years_operating, valuation_low, valuation_mid, valuation_high, primary_method, multiple_applied, confidence, key_value_drivers, key_risks, summary, view_count, title"
     )
     .eq("share_token", share_token)
     .eq("is_public", true)
@@ -176,14 +175,6 @@ export default async function PublicValuationPage({
               <div className="text-slate-400 mb-1">Multiple Applied</div>
               <div className="text-slate-900 font-medium">{v.multiple_applied}x</div>
             </div>
-            {v.comparable_range && (
-              <div>
-                <div className="text-slate-400 mb-1">Market Range</div>
-                <div className="text-slate-900 font-medium">
-                  {v.comparable_range.low}–{v.comparable_range.high}x
-                </div>
-              </div>
-            )}
             <div>
               <div className="text-slate-400 mb-1">Confidence</div>
               <div className={`font-semibold ${confidenceColor}`}>{v.confidence}</div>
