@@ -99,39 +99,54 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 gap-4">
-                {valuations.map((v) => (
-                  <div
-                    key={v.id}
-                    className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
-                        {v.industry}
-                      </span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-md border ${
-                        v.confidence === "High"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : v.confidence === "Medium"
-                          ? "bg-amber-50 text-amber-700 border-amber-200"
-                          : "bg-red-50 text-red-700 border-red-200"
-                      }`}>
-                        {v.confidence} confidence
-                      </span>
-                    </div>
-                    <div className="mb-3">
-                      <div className="text-xs text-slate-400 mb-0.5">Valuation Range</div>
-                      <div className="text-lg font-bold text-slate-900">
-                        {fmtCurrency(v.valuation_low)} – {fmtCurrency(v.valuation_high)}
+                {valuations.map((v) => {
+                  const cardClass = "bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all" +
+                    (v.share_token ? " hover:shadow-md hover:border-blue-200 cursor-pointer group block" : "");
+                  const inner = (
+                    <>
+                      <div className="flex items-start justify-between mb-3">
+                        <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                          {v.industry}
+                        </span>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md border ${
+                          v.confidence === "High"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : v.confidence === "Medium"
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-red-50 text-red-700 border-red-200"
+                        }`}>
+                          {v.confidence} confidence
+                        </span>
                       </div>
-                      <div className="text-sm text-blue-900 font-semibold">
-                        Most likely: {fmtCurrency(v.valuation_mid)}
+                      <div className="mb-3">
+                        <div className="text-xs text-slate-400 mb-0.5">Valuation Range</div>
+                        <div className="text-lg font-bold text-slate-900">
+                          {fmtCurrency(v.valuation_low)} – {fmtCurrency(v.valuation_high)}
+                        </div>
+                        <div className="text-sm text-blue-900 font-semibold">
+                          Most likely: {fmtCurrency(v.valuation_mid)}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      {v.region}, {v.country} · {fmtDate(v.created_at)}
-                    </div>
-                  </div>
-                ))}
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-slate-400">
+                          {v.region}, {v.country} · {fmtDate(v.created_at)}
+                        </div>
+                        {v.share_token && (
+                          <span className="text-xs font-medium text-blue-900 group-hover:text-blue-700 transition-colors">
+                            View report →
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  );
+                  return v.share_token ? (
+                    <Link key={v.id} href={`/valuation/${v.share_token}`} className={cardClass}>
+                      {inner}
+                    </Link>
+                  ) : (
+                    <div key={v.id} className={cardClass}>{inner}</div>
+                  );
+                })}
               </div>
             )}
           </section>

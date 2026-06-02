@@ -49,6 +49,10 @@ export interface Valuation {
   summary: string;
   key_value_drivers: string[];
   key_risks: string[];
+  share_token: string | null;
+  is_public: boolean;
+  view_count: number;
+  title: string | null;
 }
 
 export interface Profile {
