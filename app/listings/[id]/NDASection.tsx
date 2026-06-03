@@ -17,21 +17,6 @@ interface NDAProps {
   buyerEmail?: string;
 }
 
-const NDA_TEXT = `NON-DISCLOSURE AGREEMENT
-
-In consideration of access to information about this business opportunity, I agree to:
-
-1. Confidentiality — Keep all disclosed information, including financial data, customer lists, trade secrets, and operations ("Confidential Information"), strictly confidential.
-
-2. Non-Disclosure — Not disclose Confidential Information to any third party without prior written consent from the seller.
-
-3. Non-Solicitation — Not directly solicit employees, customers, or suppliers of the business for 24 months from the date of this agreement.
-
-4. Permitted Use — Use Confidential Information solely to evaluate a potential acquisition of this business.
-
-5. Term — This agreement is effective upon signing and remains in force for 24 months.
-
-This is a legally binding agreement. By signing below I confirm I have read and understood these terms.`;
 
 export default function NDASection({
   listingId,
@@ -184,13 +169,6 @@ export default function NDASection({
             </div>
 
             <div className="px-6 py-5">
-              {/* NDA text */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-5 max-h-52 overflow-y-auto">
-                <pre className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap font-sans">
-                  {NDA_TEXT}
-                </pre>
-              </div>
-
               {/* Form */}
               <form onSubmit={handleSign} className="space-y-4">
                 <div>
@@ -232,8 +210,17 @@ export default function NDASection({
                     className="mt-0.5 flex-shrink-0 w-4 h-4 accent-blue-900 cursor-pointer"
                   />
                   <span className="text-sm text-slate-600 leading-relaxed group-hover:text-slate-900 transition-colors">
-                    I have read and agree to the Non-Disclosure Agreement above and understand
-                    this constitutes a legally binding commitment.
+                    I have read and agree to the{" "}
+                    <a
+                      href="/nda"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-blue-900 underline hover:text-blue-700 transition-colors"
+                    >
+                      Non-Disclosure Agreement
+                    </a>{" "}
+                    and understand this constitutes a legally binding commitment.
                   </span>
                 </label>
 
