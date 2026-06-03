@@ -20,7 +20,7 @@ export function getIndustryImage(industry: string): string {
   if (s.includes("retail") || s.includes("restaurant") || s.includes("food") || s.includes("ecommerce") || s.includes("shop") || s.includes("store"))
     return "/industries/retail.webp";
   if (s.includes("professional") || s.includes("consult") || s.includes("legal") || s.includes("account") || s.includes("financ") || s.includes("real estate") || s.includes("insurance"))
-    return "/industries/professional services.webp";
+    return "/industries/professional-services.webp";
 
-  return "/industries/professional services.webp";
+  return "/industries/professional-services.webp";
 }

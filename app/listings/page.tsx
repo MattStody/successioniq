@@ -3,7 +3,6 @@ import { Listing } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
 import { getIndustryImage } from "@/lib/industry-image";
 import Link from "next/link";
-import Image from "next/image";
 import BookmarkButton from "@/components/BookmarkButton";
 
 function fmtCurrency(n: number): string {
@@ -177,12 +176,10 @@ export default async function ListingsPage({
               >
                 {/* Cover image */}
                 <div className="relative h-44 w-full">
-                  <Image
+                  <img
                     src={getIndustryImage(l.industry)}
                     alt={l.industry}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                   {/* Overlay badges */}
                   <div className="absolute top-3 left-3 right-3 flex items-start justify-between">

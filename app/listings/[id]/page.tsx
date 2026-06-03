@@ -4,7 +4,6 @@ import { Listing } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
 import { getIndustryImage } from "@/lib/industry-image";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import DeleteListingButton from "./DeleteListingButton";
 import BookmarkButton from "@/components/BookmarkButton";
@@ -89,13 +88,10 @@ export default async function ListingPage({
     <div className="max-w-5xl mx-auto px-6 py-16">
       {/* Hero image */}
       <div className="relative h-64 w-full rounded-2xl overflow-hidden mb-8 shadow-sm">
-        <Image
+        <img
           src={getIndustryImage(listing.industry)}
           alt={listing.industry}
-          fill
-          className="object-cover"
-          priority
-          sizes="(max-width: 1024px) 100vw, 1024px"
+          className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
         <div className="absolute bottom-5 left-6 flex items-center gap-3">
