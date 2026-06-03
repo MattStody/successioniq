@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteListingButton from "./DeleteListingButton";
 import BookmarkButton from "@/components/BookmarkButton";
+import NDASection from "./NDASection";
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -35,10 +36,15 @@ export default async function ListingPage({
   let isBookmarked = false;
   let matchScore: number | null = null;
   let matchReason: string | null = null;
+  let hasSigned = false;
+  let ndaContactEmail: string | undefined;
+  let ndaBusinessName: string | null | undefined;
+  let buyerProfileName: string | undefined;
+  let buyerProfileEmail: string | undefined;
 
   if (user && !isOwner) {
-    const [profileResult, savedResult, matchResult] = await Promise.all([
-      supabaseAuth.from("profiles").select("role").eq("id", user.id).single(),
+    const [profileResult, savedResult, matchResult, ndaResult] = await Promise.all([
+      supabaseAuth.from("profiles").select("role, full_name").eq("id", user.id).single(),
       supabaseAuth
         .from("saved_listings")
         .select("id")
@@ -51,11 +57,25 @@ export default async function ListingPage({
         .eq("buyer_id", user.id)
         .eq("listing_id", id)
         .single(),
+      supabaseAuth
+        .from("ndas")
+        .select("id")
+        .eq("buyer_id", user.id)
+        .eq("listing_id", id)
+        .single(),
     ]);
     isBuyer = profileResult.data?.role === "buyer";
     isBookmarked = !!savedResult.data && !savedResult.error;
     matchScore = matchResult.data?.match_score ?? null;
     matchReason = matchResult.data?.match_reason ?? null;
+    hasSigned = !!ndaResult.data && !ndaResult.error;
+    buyerProfileName = profileResult.data?.full_name ?? undefined;
+    buyerProfileEmail = user.email ?? undefined;
+
+    if (hasSigned) {
+      ndaContactEmail = listing.contact_email;
+      ndaBusinessName = listing.is_anonymous ? listing.business_name : null;
+    }
   }
 
   const displayName = getListingDisplayName(listing);
@@ -256,19 +276,26 @@ export default async function ListingPage({
                     &ldquo;{matchReason}&rdquo;
                   </p>
                 )}
-                <button className="w-full bg-blue-900 hover:bg-blue-800 text-white px-6 py-3.5 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm mb-3">
-                  Sign NDA &amp; Get Contact Details
-                </button>
+                <NDASection
+                  listingId={listing.id}
+                  industry={listing.industry}
+                  isAnonymous={listing.is_anonymous}
+                  isLoggedIn={!!user}
+                  hasSigned={hasSigned}
+                  initialContactEmail={ndaContactEmail}
+                  initialBusinessName={ndaBusinessName}
+                  buyerName={buyerProfileName}
+                  buyerEmail={buyerProfileEmail}
+                />
                 {isBuyer && (
-                  <BookmarkButton
-                    listingId={listing.id}
-                    initialSaved={isBookmarked}
-                    variant="full"
-                  />
+                  <div className="mt-3">
+                    <BookmarkButton
+                      listingId={listing.id}
+                      initialSaved={isBookmarked}
+                      variant="full"
+                    />
+                  </div>
                 )}
-                <p className="text-center text-xs text-slate-400 mt-2">
-                  NDA is managed electronically — takes 2 minutes
-                </p>
               </>
             )}
           </div>

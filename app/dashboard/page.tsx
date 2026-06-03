@@ -41,7 +41,7 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/auth/login");
 
-  const [profileResult, valuationsResult, listingsResult] = await Promise.all([
+  const [profileResult, valuationsResult, listingsResult, ndasResult] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase
       .from("valuations")
@@ -53,11 +53,25 @@ export default async function DashboardPage() {
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("ndas")
+      .select("id, created_at, full_name, email, listing_id, listings!inner(id, industry, business_name, is_anonymous)")
+      .order("created_at", { ascending: false })
+      .limit(20),
   ]);
 
   const profile = profileResult.data;
   const valuations: Valuation[] = valuationsResult.data ?? [];
   const listings: Listing[] = listingsResult.data ?? [];
+  type NdaRow = {
+    id: string;
+    created_at: string;
+    full_name: string;
+    email: string;
+    listing_id: string;
+    listings: { id: string; industry: string; business_name: string | null; is_anonymous: boolean };
+  };
+  const ndaRequests: NdaRow[] = (ndasResult.data ?? []) as unknown as NdaRow[];
 
   const displayName = profile?.full_name || user.email?.split("@")[0] || "there";
 
@@ -208,6 +222,57 @@ export default async function DashboardPage() {
               </div>
             )}
           </section>
+
+          {/* NDA Requests */}
+          {ndaRequests.length > 0 && (
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-slate-900">NDA Requests</h2>
+                <span className="text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-md">
+                  {ndaRequests.length} signed
+                </span>
+              </div>
+              <div className="space-y-3">
+                {ndaRequests.map((nda) => {
+                  const listingName =
+                    nda.listings.is_anonymous || !nda.listings.business_name
+                      ? `${nda.listings.industry} Business`
+                      : nda.listings.business_name;
+                  return (
+                    <div
+                      key={nda.id}
+                      className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl px-5 py-4 shadow-sm"
+                    >
+                      <div>
+                        <div className="font-medium text-slate-900">{nda.full_name}</div>
+                        <div className="text-xs text-slate-400 mt-0.5">
+                          <a
+                            href={`mailto:${nda.email}`}
+                            className="hover:text-blue-700 transition-colors"
+                          >
+                            {nda.email}
+                          </a>
+                          {" · "}
+                          {fmtDate(nda.created_at)}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/listings/${nda.listing_id}`}
+                          className="text-xs text-slate-500 hover:text-slate-800 transition-colors"
+                        >
+                          {listingName} →
+                        </Link>
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 border border-emerald-200 text-xs text-emerald-700 flex-shrink-0">
+                          ✓
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </div>
 
         {/* Right: Profile settings */}
