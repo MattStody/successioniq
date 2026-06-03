@@ -2,7 +2,9 @@ import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Listing } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
+import { getIndustryImage } from "@/lib/industry-image";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import DeleteListingButton from "./DeleteListingButton";
 import BookmarkButton from "@/components/BookmarkButton";
@@ -85,6 +87,29 @@ export default async function ListingPage({
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
+      {/* Hero image */}
+      <div className="relative h-64 w-full rounded-2xl overflow-hidden mb-8 shadow-sm">
+        <Image
+          src={getIndustryImage(listing.industry)}
+          alt={listing.industry}
+          fill
+          className="object-cover"
+          priority
+          sizes="(max-width: 1024px) 100vw, 1024px"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
+        <div className="absolute bottom-5 left-6 flex items-center gap-3">
+          <span className="text-xs font-semibold uppercase tracking-widest text-white bg-blue-900/80 backdrop-blur-sm px-3 py-1.5 rounded-md border border-blue-700/50">
+            {listing.industry}
+          </span>
+          {listing.is_anonymous && (
+            <span className="text-xs font-medium text-white/90 bg-slate-900/60 backdrop-blur-sm px-2.5 py-1.5 rounded-md border border-white/20">
+              Anonymous Listing
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-slate-400 mb-8">
         <Link href="/listings" className="hover:text-slate-700 transition-colors">
@@ -99,21 +124,13 @@ export default async function ListingPage({
         <div>
           {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
-                {listing.industry}
-              </span>
-              {listing.is_anonymous && (
-                <span className="text-xs font-medium text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
-                  Anonymous Listing
-                </span>
-              )}
-              {isOwner && (
+            {isOwner && (
+              <div className="flex items-center gap-3 mb-4">
                 <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
                   Your listing
                 </span>
-              )}
-            </div>
+              </div>
+            )}
             <h1 className="font-serif text-4xl font-bold text-slate-900 mb-2">
               {displayName}
             </h1>

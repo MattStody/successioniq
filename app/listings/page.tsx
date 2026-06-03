@@ -1,7 +1,9 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Listing } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
+import { getIndustryImage } from "@/lib/industry-image";
 import Link from "next/link";
+import Image from "next/image";
 import BookmarkButton from "@/components/BookmarkButton";
 
 function fmtCurrency(n: number): string {
@@ -171,34 +173,46 @@ export default async function ListingsPage({
               <Link
                 key={l.id}
                 href={`/listings/${l.id}`}
-                className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group block"
+                className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group block overflow-hidden"
               >
-                {/* Header row: industry badge + right-side badges + bookmark */}
-                <div className="flex items-start justify-between mb-4">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
-                    {l.industry}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {match && match.score >= 75 && (
-                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                        Matches criteria
-                      </span>
-                    )}
-                    {l.is_anonymous && (
-                      <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
-                        Anonymous
-                      </span>
-                    )}
-                    {isBuyer && (
-                      <BookmarkButton
-                        listingId={l.id}
-                        initialSaved={savedIds.has(l.id)}
-                        variant="icon"
-                      />
-                    )}
+                {/* Cover image */}
+                <div className="relative h-44 w-full">
+                  <Image
+                    src={getIndustryImage(l.industry)}
+                    alt={l.industry}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  {/* Overlay badges */}
+                  <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-blue-100 shadow-sm">
+                      {l.industry}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {match && match.score >= 75 && (
+                        <span className="text-xs font-semibold text-emerald-700 bg-white/90 backdrop-blur-sm border border-emerald-200 px-2 py-0.5 rounded-md shadow-sm">
+                          Matches criteria
+                        </span>
+                      )}
+                      {l.is_anonymous && (
+                        <span className="text-xs font-medium text-slate-500 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-slate-200 shadow-sm">
+                          Anonymous
+                        </span>
+                      )}
+                      {isBuyer && (
+                        <BookmarkButton
+                          listingId={l.id}
+                          initialSaved={savedIds.has(l.id)}
+                          variant="icon"
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
 
+                {/* Card body */}
+                <div className="p-6">
                 <h3 className="font-semibold text-slate-900 mb-1 group-hover:text-blue-900 transition-colors">
                   {displayName}
                 </h3>
@@ -243,6 +257,7 @@ export default async function ListingsPage({
                     </span>
                   )}
                 </div>
+                </div>{/* end card body */}
               </Link>
             );
           })
