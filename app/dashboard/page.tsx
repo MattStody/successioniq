@@ -4,6 +4,7 @@ import Link from "next/link";
 import ProfileForm from "./ProfileForm";
 import type { Listing, ListingStatus, Valuation } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
+import { completenessLabel } from "@/lib/profile-completeness";
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -191,35 +192,80 @@ export default async function DashboardPage() {
                 </Link>
               </div>
             ) : (
-              <div className="space-y-3">
-                {listings.map((l) => {
-                  const displayName = getListingDisplayName(l);
-                  return (
-                    <Link
-                      key={l.id}
-                      href={`/listings/${l.id}`}
-                      className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl px-5 py-4 shadow-sm hover:border-blue-200 hover:shadow-md transition-all group"
-                    >
-                      <div>
-                        <div className="font-medium text-slate-900 group-hover:text-blue-900 transition-colors">
-                          {displayName}
-                        </div>
-                        <div className="text-xs text-slate-400 mt-0.5">
-                          {fmtCurrency(l.annual_revenue)} revenue · Listed {fmtDate(l.created_at)}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`text-xs font-medium px-2.5 py-1 rounded-md border ${STATUS_BADGE[l.status]}`}
-                        >
-                          {STATUS_LABEL[l.status]}
-                        </span>
-                        <span className="text-slate-400 text-sm">→</span>
-                      </div>
-                    </Link>
+              <>
+                {listings.some((l) => (l.profile_completeness ?? 0) < 70) && (() => {
+                  const lowest = listings.reduce((min, l) =>
+                    (l.profile_completeness ?? 0) < (min.profile_completeness ?? 0) ? l : min
                   );
-                })}
-              </div>
+                  return (
+                    <div className="mb-4 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-amber-700 text-lg">✦</span>
+                        <p className="text-sm text-amber-800 font-medium">
+                          Complete your listing profiles to attract more buyers
+                        </p>
+                      </div>
+                      <Link
+                        href={`/seller/profile/${lowest.id}`}
+                        className="text-xs font-semibold text-amber-800 border border-amber-300 hover:border-amber-500 bg-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                      >
+                        Complete now →
+                      </Link>
+                    </div>
+                  );
+                })()}
+                <div className="space-y-3">
+                  {listings.map((l) => {
+                    const listingDisplayName = getListingDisplayName(l);
+                    const pc = l.profile_completeness ?? 0;
+                    const { label: pcLabel, color: pcColor } = completenessLabel(pc);
+                    const pcColorMap: Record<string, string> = {
+                      emerald: "bg-emerald-50 text-emerald-700 border-emerald-200",
+                      amber: "bg-amber-50 text-amber-700 border-amber-200",
+                      slate: "bg-slate-50 text-slate-500 border-slate-200",
+                    };
+                    return (
+                      <div
+                        key={l.id}
+                        className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl px-5 py-4 shadow-sm hover:border-blue-200 hover:shadow-md transition-all"
+                      >
+                        <div>
+                          <div className="font-medium text-slate-900">
+                            {listingDisplayName}
+                          </div>
+                          <div className="text-xs text-slate-400 mt-0.5">
+                            {fmtCurrency(l.annual_revenue)} revenue · Listed {fmtDate(l.created_at)}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {pc > 0 && (
+                            <span className={`text-xs font-medium px-2.5 py-1 rounded-md border ${pcColorMap[pcColor] ?? pcColorMap.slate}`}>
+                              {pc}% · {pcLabel}
+                            </span>
+                          )}
+                          <span
+                            className={`text-xs font-medium px-2.5 py-1 rounded-md border ${STATUS_BADGE[l.status]}`}
+                          >
+                            {STATUS_LABEL[l.status]}
+                          </span>
+                          <Link
+                            href={`/seller/profile/${l.id}`}
+                            className="text-xs font-medium text-blue-900 border border-blue-200 hover:border-blue-400 hover:bg-blue-50 px-2.5 py-1 rounded-md transition-colors"
+                          >
+                            Edit Profile →
+                          </Link>
+                          <Link
+                            href={`/listings/${l.id}`}
+                            className="text-slate-400 text-sm hover:text-slate-700 transition-colors"
+                          >
+                            →
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </section>
 

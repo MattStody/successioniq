@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Listing } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
 import { getIndustryImage } from "@/lib/industry-image";
+import { calculateCompleteness, completenessLabel } from "@/lib/profile-completeness";
 import Link from "next/link";
 import BookmarkButton from "@/components/BookmarkButton";
 
@@ -197,6 +198,16 @@ export default async function ListingsPage({
                           Anonymous
                         </span>
                       )}
+                      {(() => {
+                        const pc = l.profile_completeness ?? calculateCompleteness(l as unknown as Partial<Record<string, unknown>>)
+                        if (pc <= 0) return null
+                        const { label, color } = completenessLabel(pc)
+                        return (
+                          <span className={`text-xs px-2 py-0.5 rounded-md border bg-${color}-50 border-${color}-200 text-${color}-700 bg-white/90 backdrop-blur-sm shadow-sm`}>
+                            {label}
+                          </span>
+                        )
+                      })()}
                       {isBuyer && (
                         <BookmarkButton
                           listingId={l.id}

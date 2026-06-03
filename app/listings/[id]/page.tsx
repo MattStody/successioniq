@@ -3,11 +3,13 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Listing } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
 import { getIndustryImage } from "@/lib/industry-image";
+import { completenessLabel } from "@/lib/profile-completeness";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteListingButton from "./DeleteListingButton";
 import BookmarkButton from "@/components/BookmarkButton";
 import NDASection from "./NDASection";
+import ListingTabs from "./ListingTabs";
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -125,14 +127,35 @@ export default async function ListingPage({
                 <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
                   Your listing
                 </span>
+                <Link
+                  href={`/seller/profile/${listing.id}`}
+                  className="text-xs font-medium text-slate-600 hover:text-blue-900 border border-slate-200 hover:border-blue-200 bg-white px-2.5 py-1 rounded-md transition-colors"
+                >
+                  Edit Profile →
+                </Link>
               </div>
             )}
             <h1 className="font-serif text-4xl font-bold text-slate-900 mb-2">
               {displayName}
             </h1>
-            <p className="text-slate-500">
-              {listing.region}, {listing.country} · {listing.years_operating} years operating
-            </p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <p className="text-slate-500">
+                {listing.region}, {listing.country} · {listing.years_operating} years operating
+              </p>
+              {listing.profile_completeness != null && listing.profile_completeness > 0 && (() => {
+                const { label, color } = completenessLabel(listing.profile_completeness)
+                const colorMap: Record<string, string> = {
+                  emerald: "bg-emerald-50 text-emerald-700 border-emerald-200",
+                  amber: "bg-amber-50 text-amber-700 border-amber-200",
+                  slate: "bg-slate-50 text-slate-600 border-slate-200",
+                }
+                return (
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-md border ${colorMap[color] ?? colorMap.slate}`}>
+                    {label}
+                  </span>
+                )
+              })()}
+            </div>
           </div>
 
           {/* Financials */}
@@ -172,69 +195,104 @@ export default async function ListingPage({
             </div>
           </div>
 
-          {/* Description */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
-              About this Business
-            </p>
-            <div className="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm">
-              {listing.description}
-            </div>
-          </div>
+          {/* Tabbed content or fallback */}
+          {(() => {
+            const descriptionNode = (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
+                  About this Business
+                </p>
+                <div className="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm">
+                  {listing.description}
+                </div>
+              </div>
+            )
+            const whatsIncludedNode = (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
+                  What&apos;s Included
+                </p>
+                <p className="text-slate-600 leading-relaxed text-sm">{listing.whats_included}</p>
+              </div>
+            )
+            const transitionNode = (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
+                  Transition Period
+                </p>
+                <p className="text-slate-700 text-sm leading-relaxed">{listing.transition_period}</p>
+              </div>
+            )
+            const preferredBuyerNode = (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
+                  Preferred Buyer
+                </p>
+                <p className="text-slate-700 text-sm leading-relaxed">{listing.preferred_buyer}</p>
+              </div>
+            )
+            const valueDriversNode = (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <p className="text-xs font-semibold text-emerald-700 uppercase tracking-widest mb-4">
+                  Key Value Drivers
+                </p>
+                <ul className="space-y-3">
+                  {listing.key_value_drivers.map((d, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500" />
+                      <span className="text-slate-600 leading-relaxed">{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+            const risksNode = (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <p className="text-xs font-semibold text-red-600 uppercase tracking-widest mb-4">
+                  Key Risks
+                </p>
+                <ul className="space-y-3">
+                  {listing.key_risks.map((r, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-red-400" />
+                      <span className="text-slate-600 leading-relaxed">{r}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
 
-          {/* What's included */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
-              What&apos;s Included
-            </p>
-            <p className="text-slate-600 leading-relaxed text-sm">{listing.whats_included}</p>
-          </div>
+            const tabs = (
+              <ListingTabs
+                listing={listing}
+                descriptionContent={descriptionNode}
+                whatsIncludedContent={whatsIncludedNode}
+                transitionContent={transitionNode}
+                preferredBuyerContent={preferredBuyerNode}
+                valueDriversContent={valueDriversNode}
+                risksContent={risksNode}
+              />
+            )
 
-          {/* Transition & Buyer */}
-          <div className="grid sm:grid-cols-2 gap-6 mb-6">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
-                Transition Period
-              </p>
-              <p className="text-slate-700 text-sm leading-relaxed">{listing.transition_period}</p>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
-                Preferred Buyer
-              </p>
-              <p className="text-slate-700 text-sm leading-relaxed">{listing.preferred_buyer}</p>
-            </div>
-          </div>
+            if (tabs === null) {
+              return (
+                <div className="space-y-6">
+                  {descriptionNode}
+                  {whatsIncludedNode}
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    {transitionNode}
+                    {preferredBuyerNode}
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    {valueDriversNode}
+                    {risksNode}
+                  </div>
+                </div>
+              )
+            }
 
-          {/* Value drivers & risks */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <p className="text-xs font-semibold text-emerald-700 uppercase tracking-widest mb-4">
-                Key Value Drivers
-              </p>
-              <ul className="space-y-3">
-                {listing.key_value_drivers.map((d, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm">
-                    <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500" />
-                    <span className="text-slate-600 leading-relaxed">{d}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <p className="text-xs font-semibold text-red-600 uppercase tracking-widest mb-4">
-                Key Risks
-              </p>
-              <ul className="space-y-3">
-                {listing.key_risks.map((r, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm">
-                    <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-red-400" />
-                    <span className="text-slate-600 leading-relaxed">{r}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+            return tabs
+          })()}
         </div>
 
         {/* ── Right: Sticky sidebar ── */}

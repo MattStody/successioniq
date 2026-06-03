@@ -28,6 +28,44 @@ export interface Listing {
   key_risks: string[];
   user_id: string | null;
   broker_id: string | null;
+  tagline?: string | null;
+  founded_year?: number | null;
+  business_model?: string | null;
+  revenue_type?: string | null;
+  recurring_revenue_percent?: number | null;
+  competitive_advantages?: string | null;
+  growth_opportunities?: string | null;
+  employee_count?: number | null;
+  full_time_employees?: number | null;
+  part_time_employees?: number | null;
+  owner_hours_per_week?: number | null;
+  key_person_dependencies?: string | null;
+  systems_and_processes?: string | null;
+  real_estate_included?: boolean | null;
+  real_estate_value?: number | null;
+  has_equipment?: boolean | null;
+  equipment_value?: number | null;
+  equipment_description?: string | null;
+  has_intellectual_property?: boolean | null;
+  ip_description?: string | null;
+  has_licenses_permits?: boolean | null;
+  licenses_description?: string | null;
+  has_lease?: boolean | null;
+  lease_monthly_cost?: number | null;
+  lease_expiry?: string | null;
+  active_customer_count?: number | null;
+  top_customer_count?: number | null;
+  longest_customer_relationship?: number | null;
+  avg_customer_relationship?: number | null;
+  is_seasonal?: boolean | null;
+  seasonal_description?: string | null;
+  seller_financing_available?: boolean | null;
+  seller_financing_details?: string | null;
+  training_included?: boolean | null;
+  training_description?: string | null;
+  non_compete_willing?: boolean | null;
+  reason_for_sale_detail?: string | null;
+  profile_completeness?: number | null;
 }
 
 export interface Valuation {
