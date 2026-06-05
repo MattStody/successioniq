@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -21,6 +22,7 @@ function fmtDate(iso: string): string {
 type Valuation = {
   id: string;
   created_at: string;
+  user_id: string | null;
   industry: string;
   country: string;
   region: string;
@@ -47,18 +49,37 @@ export default async function PublicValuationPage({
 }) {
   const { share_token } = await params;
 
-  const { data, error } = await supabase
-    .from("valuations")
-    .select(
-      "id, created_at, industry, country, region, annual_revenue, annual_profit, years_operating, valuation_low, valuation_mid, valuation_high, primary_method, multiple_applied, confidence, key_value_drivers, key_risks, summary, view_count, title"
-    )
-    .eq("share_token", share_token)
-    .eq("is_public", true)
-    .single();
+  const [{ data, error }, authClient] = await Promise.all([
+    supabase
+      .from("valuations")
+      .select(
+        "id, created_at, user_id, industry, country, region, annual_revenue, annual_profit, years_operating, valuation_low, valuation_mid, valuation_high, primary_method, multiple_applied, confidence, key_value_drivers, key_risks, summary, view_count, title"
+      )
+      .eq("share_token", share_token)
+      .eq("is_public", true)
+      .single(),
+    createSupabaseServerClient(),
+  ]);
 
   if (error || !data) notFound();
 
   const v = data as Valuation;
+  const { data: { user } } = await authClient.auth.getUser();
+  const isOwner = !!user && user.id === v.user_id;
+
+  const createListingUrl = `/create-listing?${new URLSearchParams({
+    industry: v.industry,
+    country: v.country,
+    region: v.region,
+    annual_revenue: String(v.annual_revenue),
+    annual_profit: String(v.annual_profit),
+    years_operating: String(v.years_operating),
+    valuation_low: String(v.valuation_low),
+    valuation_mid: String(v.valuation_mid),
+    valuation_high: String(v.valuation_high),
+    key_value_drivers: JSON.stringify(v.key_value_drivers),
+    key_risks: JSON.stringify(v.key_risks),
+  }).toString()}`;
 
   // Increment view count (fire-and-forget, non-fatal)
   supabase.rpc("increment_valuation_view", { token: share_token }).then(() => {});
@@ -226,6 +247,26 @@ export default async function PublicValuationPage({
           </p>
           <p className="text-slate-600 leading-relaxed">{v.summary}</p>
         </div>
+
+        {/* Owner CTA — only visible to the valuation owner */}
+        {isOwner && (
+          <div className="mb-6 flex items-center justify-between bg-white border border-blue-200 rounded-2xl px-6 py-5 shadow-sm print:hidden">
+            <div>
+              <p className="text-sm font-semibold text-slate-900 mb-0.5">
+                Ready to sell?
+              </p>
+              <p className="text-xs text-slate-500">
+                Turn this valuation into a live listing in minutes.
+              </p>
+            </div>
+            <Link
+              href={createListingUrl}
+              className="flex-shrink-0 bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+            >
+              Create listing →
+            </Link>
+          </div>
+        )}
 
         {/* CTA banner — hidden when printing */}
         <div className="bg-blue-900 rounded-2xl p-8 text-white text-center print:hidden">

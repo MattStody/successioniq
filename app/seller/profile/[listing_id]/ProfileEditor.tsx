@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import { Listing } from "@/lib/types"
 import { calculateCompleteness, completenessLabel } from "@/lib/profile-completeness"
+import SuggestionChips from "@/components/SuggestionChips"
 
 function SectionHeader({
   title,
@@ -123,6 +124,81 @@ function SubFields({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   )
+}
+
+function appendToField(
+  setter: React.Dispatch<React.SetStateAction<string>>,
+  text: string
+) {
+  setter((prev) => {
+    const trimmed = prev.trimEnd()
+    if (!trimmed) return text
+    return trimmed.endsWith(",") ? `${trimmed} ${text}` : `${trimmed}, ${text}`
+  })
+}
+
+const INDUSTRY_NUDGES: Record<string, string[]> = {
+  construction: [
+    "Buyers always ask about equipment age — include purchase years where possible",
+    "Transferable contractor licences are a major value driver",
+    "Document key subcontractor relationships for buyer confidence",
+  ],
+  restaurant: [
+    "Liquor licence details increase inquiry rates by 25%",
+    "Include health inspection scores — buyers will ask for them",
+    "Recurring catering contracts significantly boost valuation",
+  ],
+  food: [
+    "Health permit history reassures buyers and speeds due diligence",
+    "Supplier relationships with favourable terms are a sellable asset",
+  ],
+  health: [
+    "HIPAA compliance documentation is critical for healthcare buyers",
+    "Accreditations and certifications are major value drivers",
+    "Patient record transfer procedures ease buyer concerns significantly",
+  ],
+  medical: [
+    "DEA registration and state licences should be listed explicitly",
+    "Payer mix (insurance vs. private pay) is a common buyer question",
+  ],
+  saas: [
+    "MRR and churn rate are the #1 metrics SaaS buyers examine first",
+    "Tech stack documentation reduces buyer due diligence time",
+    "Customer contract transferability must be clarified upfront",
+  ],
+  software: [
+    "Source code ownership and documentation affect valuation directly",
+    "List all third-party licences and API dependencies",
+  ],
+  retail: [
+    "Specify inventory value at time of sale — it affects asking price",
+    "E-commerce expansion is the top growth opportunity retail buyers seek",
+    "Explain seasonal patterns proactively — don't let buyers discover surprises",
+  ],
+  manufacturing: [
+    "Equipment maintenance history significantly affects buyer confidence",
+    "Supplier relationship documentation is key for continuity planning",
+    "Quality certifications (ISO, etc.) are major differentiators",
+  ],
+  professional: [
+    "Client contract transferability is the #1 concern for service business buyers",
+    "Listings with recurring revenue highlighted get 40% more inquiries",
+    "Documenting your methodology shows the business isn't owner-dependent",
+  ],
+}
+
+const DEFAULT_NUDGES = [
+  "Complete listings (80%+ score) get 2× more buyer inquiries",
+  "Recurring revenue details are the most valuable thing you can highlight",
+  "Documenting processes shows buyers the business can run without you",
+]
+
+function getNudges(industry: string): string[] {
+  const lower = industry.toLowerCase()
+  for (const [key, nudges] of Object.entries(INDUSTRY_NUDGES)) {
+    if (lower.includes(key)) return nudges
+  }
+  return DEFAULT_NUDGES
 }
 
 export default function ProfileEditor({ listing }: { listing: Listing }) {
@@ -406,16 +482,23 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
         body: JSON.stringify(payload),
       })
 
+      let data: Record<string, unknown> = {}
+      try { data = await res.json() } catch { /* non-JSON response */ }
+
+      console.log("Save response:", res.status, data)
+
       if (res.ok) {
         setSaveMessage("Profile saved!")
         setTimeout(() => setSaveMessage(""), 3000)
       } else {
-        setSaveMessage("Failed to save. Please try again.")
-        setTimeout(() => setSaveMessage(""), 3000)
+        const msg = data?.error ? String(data.error) : `Save failed (HTTP ${res.status})`
+        setSaveMessage(msg)
+        setTimeout(() => setSaveMessage(""), 8000)
       }
-    } catch {
-      setSaveMessage("Failed to save. Please try again.")
-      setTimeout(() => setSaveMessage(""), 3000)
+    } catch (err) {
+      console.error("Save fetch error:", err)
+      setSaveMessage("Network error — check console")
+      setTimeout(() => setSaveMessage(""), 6000)
     } finally {
       setSaving(false)
     }
@@ -471,6 +554,21 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
                     style={{ width: `${completeness}%` }}
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* Buyer insights — static per industry */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
+                Buyer Insights
+              </p>
+              <div className="space-y-2.5">
+                {getNudges(listing.industry).map((nudge, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-blue-900 text-xs mt-0.5 flex-shrink-0">✦</span>
+                    <p className="text-xs text-slate-600 leading-relaxed">{nudge}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -569,6 +667,12 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
                     className={textareaClass}
                   />
                 </Field>
+                <SuggestionChips
+                  industry={listing.industry}
+                  section="competitive_advantages"
+                  listingContext={{ years_operating: listing.years_operating, annual_revenue: listing.annual_revenue }}
+                  onAdd={(text) => appendToField(setCompetitiveAdvantages, text)}
+                />
 
                 <Field label="Growth Opportunities">
                   <textarea
@@ -578,6 +682,12 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
                     className={textareaClass}
                   />
                 </Field>
+                <SuggestionChips
+                  industry={listing.industry}
+                  section="growth_opportunities"
+                  listingContext={{ business_model: businessModel }}
+                  onAdd={(text) => appendToField(setGrowthOpportunities, text)}
+                />
               </div>
             </section>
 
@@ -725,6 +835,11 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
                           className={textareaClass}
                         />
                       </Field>
+                      <SuggestionChips
+                        industry={listing.industry}
+                        section="equipment"
+                        onAdd={(text) => appendToField(setEquipmentDescription, text)}
+                      />
                     </SubFields>
                   )}
                 </Field>
@@ -744,6 +859,11 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
                           className={textareaClass}
                         />
                       </Field>
+                      <SuggestionChips
+                        industry={listing.industry}
+                        section="ip"
+                        onAdd={(text) => appendToField(setIpDescription, text)}
+                      />
                     </SubFields>
                   )}
                 </Field>
@@ -760,6 +880,11 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
                           className={textareaClass}
                         />
                       </Field>
+                      <SuggestionChips
+                        industry={listing.industry}
+                        section="licenses"
+                        onAdd={(text) => appendToField(setLicensesDescription, text)}
+                      />
                     </SubFields>
                   )}
                 </Field>
@@ -884,6 +1009,13 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
                 title="Deal Terms"
                 onAiSuggest={() => handleAiSuggest("Deal Terms", dealSummary())}
                 suggesting={!!suggesting["Deal Terms"]}
+              />
+
+              <SuggestionChips
+                industry={listing.industry}
+                section="deal_terms"
+                listingContext={{ asking_price: listing.asking_price ?? listing.valuation_mid }}
+                onAdd={(text) => appendToField(setSellerFinancingDetails, text)}
               />
 
               {suggestions["Deal Terms"] && (

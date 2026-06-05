@@ -116,10 +116,25 @@ export default async function DashboardPage() {
             ) : (
               <div className="grid sm:grid-cols-2 gap-4">
                 {valuations.map((v) => {
-                  const cardClass = "bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all" +
-                    (v.share_token ? " hover:shadow-md hover:border-blue-200 cursor-pointer group block" : "");
-                  const inner = (
-                    <>
+                  const createUrl = `/create-listing?${new URLSearchParams({
+                    industry: v.industry,
+                    country: v.country,
+                    region: v.region,
+                    annual_revenue: String(v.annual_revenue),
+                    annual_profit: String(v.annual_profit),
+                    years_operating: String(v.years_operating),
+                    valuation_low: String(v.valuation_low),
+                    valuation_mid: String(v.valuation_mid),
+                    valuation_high: String(v.valuation_high),
+                    key_value_drivers: JSON.stringify(v.key_value_drivers),
+                    key_risks: JSON.stringify(v.key_risks),
+                  }).toString()}`;
+
+                  return (
+                    <div
+                      key={v.id}
+                      className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all hover:shadow-md hover:border-blue-200"
+                    >
                       <div className="flex items-start justify-between mb-3">
                         <span className="text-xs font-semibold uppercase tracking-widest text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
                           {v.industry}
@@ -134,7 +149,7 @@ export default async function DashboardPage() {
                           {v.confidence} confidence
                         </span>
                       </div>
-                      <div className="mb-3">
+                      <div className="mb-4">
                         <div className="text-xs text-slate-400 mb-0.5">Valuation Range</div>
                         <div className="text-lg font-bold text-slate-900">
                           {fmtCurrency(v.valuation_low)} – {fmtCurrency(v.valuation_high)}
@@ -143,24 +158,26 @@ export default async function DashboardPage() {
                           Most likely: {fmtCurrency(v.valuation_mid)}
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs text-slate-400">
-                          {v.region}, {v.country} · {fmtDate(v.created_at)}
-                        </div>
-                        {v.share_token && (
-                          <span className="text-xs font-medium text-blue-900 group-hover:text-blue-700 transition-colors">
-                            View report →
-                          </span>
-                        )}
+                      <div className="text-xs text-slate-400 mb-4">
+                        {v.region}, {v.country} · {fmtDate(v.created_at)}
                       </div>
-                    </>
-                  );
-                  return v.share_token ? (
-                    <Link key={v.id} href={`/valuation/${v.share_token}`} className={cardClass}>
-                      {inner}
-                    </Link>
-                  ) : (
-                    <div key={v.id} className={cardClass}>{inner}</div>
+                      <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                        {v.share_token && (
+                          <Link
+                            href={`/valuation/${v.share_token}`}
+                            className="text-xs font-medium text-slate-500 hover:text-blue-900 transition-colors"
+                          >
+                            View report →
+                          </Link>
+                        )}
+                        <Link
+                          href={createUrl}
+                          className="ml-auto text-xs font-semibold text-white bg-blue-900 hover:bg-blue-800 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          Create listing →
+                        </Link>
+                      </div>
+                    </div>
                   );
                 })}
               </div>

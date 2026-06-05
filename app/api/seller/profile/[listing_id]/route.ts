@@ -90,21 +90,28 @@ export async function PATCH(
     const body = await req.json()
     const parsed = ProfileSchema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
+      console.error("Profile PATCH validation error:", parsed.error.flatten())
+      return NextResponse.json({ error: "Invalid request body", details: parsed.error.flatten() }, { status: 400 })
     }
 
     const payload = parsed.data
-    const profile_completeness = calculateCompleteness(payload as Partial<Record<string, unknown>>)
+
+    // transition_period is NOT NULL in the DB — only include it in the update when non-empty.
+    const { transition_period, ...profilePayload } = payload
+    const safeUpdate: Record<string, unknown> = { ...profilePayload }
+    if (transition_period) safeUpdate.transition_period = transition_period
+
+    const profile_completeness = calculateCompleteness(safeUpdate as Partial<Record<string, unknown>>)
 
     const { error: updateError } = await supabase
       .from("listings")
-      .update({ ...payload, profile_completeness })
+      .update({ ...safeUpdate, profile_completeness })
       .eq("id", listing_id)
       .eq("user_id", user.id)
 
     if (updateError) {
       console.error("Profile update error:", updateError)
-      return NextResponse.json({ error: "Failed to save profile" }, { status: 500 })
+      return NextResponse.json({ error: updateError.message, code: updateError.code }, { status: 500 })
     }
 
     return NextResponse.json({ ok: true, profile_completeness })
