@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -669,7 +670,18 @@ function ResultsView({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function ValuateClient({ isLoggedIn }: { isLoggedIn: boolean }) {
+export default function ValuateClient({
+  isLoggedIn,
+  initialData,
+  editMode,
+  editValuationId,
+}: {
+  isLoggedIn: boolean;
+  initialData?: Partial<FormData>;
+  editMode?: boolean;
+  editValuationId?: string;
+}) {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     industry: "",
@@ -683,6 +695,7 @@ export default function ValuateClient({ isLoggedIn }: { isLoggedIn: boolean }) {
     customerConcentration: "",
     reasonForSelling: "",
     askingPrice: "",
+    ...initialData,
   });
   const [phase, setPhase] = useState<Phase>("form");
   const [result, setResult] = useState<ValuationResult | null>(null);
@@ -731,6 +744,7 @@ export default function ValuateClient({ isLoggedIn }: { isLoggedIn: boolean }) {
         netProfit: Number(formData.netProfit),
         yearsInOperation: Number(formData.yearsInOperation),
         askingPrice: formData.askingPrice ? Number(formData.askingPrice) : null,
+        ...(editMode && editValuationId ? { updateId: editValuationId } : {}),
       }),
     })
       .then((res) => {
@@ -745,6 +759,7 @@ export default function ValuateClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   const handleSubmit = () => {
     setError(null);
     const skipGate =
+      editMode ||
       isLoggedIn ||
       (typeof window !== "undefined" && localStorage.getItem("siq_email_captured") === "1");
 
@@ -752,8 +767,12 @@ export default function ValuateClient({ isLoggedIn }: { isLoggedIn: boolean }) {
       setPhase("waiting");
       runValuation()
         .then((data) => {
-          setResult(data);
-          setPhase("result");
+          if (editMode && data.share_token) {
+            router.push(`/valuation/${data.share_token}`);
+          } else {
+            setResult(data);
+            setPhase("result");
+          }
         })
         .catch((err) => {
           setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -807,9 +826,11 @@ export default function ValuateClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           <span className="h-1.5 w-1.5 rounded-full bg-blue-700" />
           AI Valuation Engine
         </div>
-        <h1 className="font-serif text-4xl font-bold mb-3 text-slate-900">Get your free business valuation</h1>
+        <h1 className="font-serif text-4xl font-bold mb-3 text-slate-900">
+          {editMode ? "Refine your valuation" : "Get your free business valuation"}
+        </h1>
         <p className="text-slate-500 text-sm">
-          4 quick steps · takes under 3 minutes · completely free
+          {editMode ? "Update your inputs below and recalculate" : "4 quick steps · takes under 3 minutes · completely free"}
         </p>
       </div>
 
@@ -980,7 +1001,7 @@ export default function ValuateClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             disabled={!canProceed()}
             className="bg-blue-900 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-semibold transition-all text-sm"
           >
-            Get My Valuation →
+            {editMode ? "Recalculate →" : "Get My Valuation →"}
           </button>
         )}
       </div>

@@ -171,6 +171,12 @@ export default async function DashboardPage() {
                           </Link>
                         )}
                         <Link
+                          href={`/valuate/edit/${v.id}`}
+                          className="text-xs font-medium text-slate-400 hover:text-blue-900 transition-colors"
+                        >
+                          Refine →
+                        </Link>
+                        <Link
                           href={createUrl}
                           className="ml-auto text-xs font-semibold text-white bg-blue-900 hover:bg-blue-800 px-3 py-1.5 rounded-lg transition-colors"
                         >

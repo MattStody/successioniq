@@ -16,6 +16,7 @@ const ValuateSchema = z.object({
   customerConcentration: z.string().min(1).max(200),
   reasonForSelling: z.string().min(1).max(500),
   askingPrice: z.number().nonnegative().nullable().optional(),
+  updateId: z.string().uuid().optional(),
 });
 
 function sanitize(value: string): string {
@@ -95,6 +96,7 @@ export async function POST(req: NextRequest) {
       customerConcentration,
       reasonForSelling,
       askingPrice,
+      updateId,
     } = parsed.data;
 
     const userContent = `Provide a business valuation for the following:
@@ -160,34 +162,61 @@ Respond ONLY with this JSON object — no other text, no markdown:
       return NextResponse.json({ ...result, saved, valuation_id, share_token });
     }
 
-    try {
-      const token = crypto.randomUUID();
-      const { data } = await supabase.from("valuations").insert([{
-          user_id: user.id,
-          industry,
-          country,
-          region,
-          annual_revenue: Number(revenue),
-          annual_profit: Number(netProfit),
-          years_operating: Number(yearsInOperation),
-          valuation_low: result.valuation_low,
-          valuation_mid: result.valuation_mid,
-          valuation_high: result.valuation_high,
-          primary_method: result.primary_method,
-          multiple_applied: result.multiple_applied,
-          confidence: result.confidence,
-          summary: result.summary,
-          key_value_drivers: result.key_value_drivers,
-          key_risks: result.key_risks,
-          share_token: token,
-          is_public: true,
-          shared_at: new Date().toISOString(),
-        }]).select().single();
+    const inputFields = {
+      industry,
+      country,
+      region,
+      annual_revenue: Number(revenue),
+      annual_profit: Number(netProfit),
+      years_operating: Number(yearsInOperation),
+      revenue_trend: revenueTrend,
+      owner_dependency: ownerDependency,
+      customer_concentration: customerConcentration,
+      reason_for_selling: reasonForSelling,
+      asking_price: askingPrice ?? null,
+      valuation_low: result.valuation_low,
+      valuation_mid: result.valuation_mid,
+      valuation_high: result.valuation_high,
+      primary_method: result.primary_method,
+      multiple_applied: result.multiple_applied,
+      confidence: result.confidence,
+      summary: result.summary,
+      key_value_drivers: result.key_value_drivers,
+      key_risks: result.key_risks,
+    };
 
-      if (data) {
-        saved = true;
-        valuation_id = data.id;
-        share_token = token;
+    try {
+      if (updateId) {
+        const { data } = await supabase
+          .from("valuations")
+          .update(inputFields)
+          .eq("id", updateId)
+          .eq("user_id", user.id)
+          .select("id, share_token")
+          .single();
+        if (data) {
+          saved = true;
+          valuation_id = data.id;
+          share_token = data.share_token;
+        }
+      } else {
+        const token = crypto.randomUUID();
+        const { data } = await supabase
+          .from("valuations")
+          .insert([{
+            user_id: user.id,
+            ...inputFields,
+            share_token: token,
+            is_public: true,
+            shared_at: new Date().toISOString(),
+          }])
+          .select()
+          .single();
+        if (data) {
+          saved = true;
+          valuation_id = data.id;
+          share_token = token;
+        }
       }
     } catch {
       // Non-fatal — valuation result still returned

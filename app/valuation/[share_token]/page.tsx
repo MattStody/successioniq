@@ -250,21 +250,31 @@ export default async function PublicValuationPage({
 
         {/* Owner CTA — only visible to the valuation owner */}
         {isOwner && (
-          <div className="mb-6 flex items-center justify-between bg-white border border-blue-200 rounded-2xl px-6 py-5 shadow-sm print:hidden">
-            <div>
-              <p className="text-sm font-semibold text-slate-900 mb-0.5">
-                Ready to sell?
-              </p>
-              <p className="text-xs text-slate-500">
-                Turn this valuation into a live listing in minutes.
-              </p>
+          <div className="mb-6 bg-white border border-blue-200 rounded-2xl px-6 py-5 shadow-sm print:hidden">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold text-slate-900 mb-0.5">
+                  Your valuation
+                </p>
+                <p className="text-xs text-slate-500">
+                  Refine your inputs or turn this into a live listing.
+                </p>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <Link
+                  href={`/valuate/edit/${v.id}`}
+                  className="flex-shrink-0 border border-blue-200 text-blue-900 hover:bg-blue-50 text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+                >
+                  Refine valuation →
+                </Link>
+                <Link
+                  href={createListingUrl}
+                  className="flex-shrink-0 bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+                >
+                  Create listing →
+                </Link>
+              </div>
             </div>
-            <Link
-              href={createListingUrl}
-              className="flex-shrink-0 bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
-            >
-              Create listing →
-            </Link>
           </div>
         )}
 
