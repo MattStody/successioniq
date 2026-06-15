@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { instantValuationRange } from "@/lib/financials";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -675,11 +676,13 @@ export default function ValuateClient({
   initialData,
   editMode,
   editValuationId,
+  quickMode = false,
 }: {
   isLoggedIn: boolean;
   initialData?: Partial<FormData>;
   editMode?: boolean;
   editValuationId?: string;
+  quickMode?: boolean;
 }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -713,6 +716,19 @@ export default function ValuateClient({
   const update = (fields: Partial<FormData>) =>
     setFormData((prev) => ({ ...prev, ...fields }));
 
+  // In quick mode the funnel is a single condensed step — industry and revenue
+  // arrive from the homepage hero, so we only validate the remaining inputs.
+  const canSubmitQuick = !!(
+    formData.industry &&
+    formData.revenue &&
+    Number(formData.revenue) > 0 &&
+    formData.netProfit !== "" &&
+    formData.yearsInOperation &&
+    Number(formData.yearsInOperation) > 0 &&
+    formData.country &&
+    formData.region
+  );
+
   const canProceed = () => {
     switch (step) {
       case 0:
@@ -734,18 +750,29 @@ export default function ValuateClient({
     }
   };
 
-  const runValuation = () =>
-    fetch("/api/valuate", {
+  const runValuation = () => {
+    // Build the payload explicitly so optional inputs left blank in quick mode
+    // are omitted entirely (an empty string would fail the API's enum checks).
+    const payload: Record<string, unknown> = {
+      industry: formData.industry,
+      country: formData.country,
+      region: formData.region,
+      revenue: Number(formData.revenue),
+      yearsInOperation: Number(formData.yearsInOperation),
+      ownerDependency: formData.ownerDependency,
+      askingPrice: formData.askingPrice ? Number(formData.askingPrice) : null,
+    };
+    if (formData.netProfit !== "") payload.netProfit = Number(formData.netProfit);
+    if (formData.revenueTrend) payload.revenueTrend = formData.revenueTrend;
+    if (formData.customerConcentration)
+      payload.customerConcentration = formData.customerConcentration;
+    if (formData.reasonForSelling) payload.reasonForSelling = formData.reasonForSelling;
+    if (editMode && editValuationId) payload.updateId = editValuationId;
+
+    return fetch("/api/valuate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...formData,
-        revenue: Number(formData.revenue),
-        netProfit: Number(formData.netProfit),
-        yearsInOperation: Number(formData.yearsInOperation),
-        askingPrice: formData.askingPrice ? Number(formData.askingPrice) : null,
-        ...(editMode && editValuationId ? { updateId: editValuationId } : {}),
-      }),
+      body: JSON.stringify(payload),
     })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -755,6 +782,7 @@ export default function ValuateClient({
         if (data.error) throw new Error(data.error);
         return data as ValuationResult;
       });
+  };
 
   const handleSubmit = () => {
     setError(null);
@@ -814,6 +842,105 @@ export default function ValuateClient({
         isAiReady={!!pendingResult}
         onSubmit={handleGateSubmit}
       />
+    );
+  }
+
+  // ── Quick form (step 3 of the homepage funnel) ──
+  if (quickMode) {
+    const quickRange = instantValuationRange(
+      Number(formData.revenue),
+      formData.industry
+    );
+    return (
+      <div className="max-w-xl mx-auto px-6 py-16">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full mb-5 font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-700" />
+            Almost there
+          </div>
+          <h1 className="font-serif text-4xl font-bold mb-3 text-slate-900">
+            Unlock your full valuation
+          </h1>
+          <p className="text-slate-500 text-sm">
+            Three quick details and our AI gives you an exact, defensible figure.
+          </p>
+        </div>
+
+        {quickRange && (
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-6 text-center">
+            <div className="text-xs text-blue-700 uppercase tracking-widest mb-1">
+              Your instant range
+            </div>
+            <div className="text-2xl font-bold text-slate-900">
+              {fmtCurrency(quickRange.low)} – {fmtCurrency(quickRange.high)}
+            </div>
+            <div className="text-xs text-slate-500 mt-1">
+              {formData.industry} · {fmtCurrency(Number(formData.revenue))} revenue
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-5">
+          <Field label="Annual Net Profit (USD)">
+            <MoneyInput
+              value={formData.netProfit}
+              onChange={(v) => update({ netProfit: v })}
+              placeholder="120000"
+            />
+          </Field>
+          <Field label="Years in Operation">
+            <input
+              type="number"
+              min="1"
+              placeholder="e.g. 8"
+              value={formData.yearsInOperation}
+              onChange={(e) => update({ yearsInOperation: e.target.value })}
+              className={inputCls}
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Country">
+              <input
+                type="text"
+                placeholder="e.g. United States"
+                value={formData.country}
+                onChange={(e) => update({ country: e.target.value })}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Region / State">
+              <input
+                type="text"
+                placeholder="e.g. California"
+                value={formData.region}
+                onChange={(e) => update({ region: e.target.value })}
+                className={inputCls}
+              />
+            </Field>
+          </div>
+        </div>
+
+        <button
+          onClick={handleSubmit}
+          disabled={!canSubmitQuick}
+          className="w-full mt-6 bg-blue-900 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-xl font-semibold transition-all"
+        >
+          Reveal my valuation →
+        </button>
+
+        {error && (
+          <p className="text-red-600 text-sm mt-4 text-center bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+            {error}
+          </p>
+        )}
+
+        <p className="text-center text-xs text-slate-400 mt-6">
+          Want a more thorough analysis?{" "}
+          <Link href="/valuate" className="text-blue-700 hover:underline">
+            Use the detailed valuation →
+          </Link>
+        </p>
+      </div>
     );
   }
 

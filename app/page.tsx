@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HeroFunnel from "./HeroFunnel";
 
 const stats = [
   { label: "Businesses Listed", value: "2,400+" },
@@ -52,20 +53,8 @@ export default function Home() {
             succession — on their terms.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/valuate"
-              className="bg-blue-900 hover:bg-blue-800 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
-            >
-              Get your free business valuation
-            </Link>
-            <Link
-              href="/listings"
-              className="text-slate-700 hover:text-slate-900 px-8 py-4 rounded-xl text-lg font-medium border border-slate-300 hover:border-slate-400 transition-all bg-white"
-            >
-              Browse listings →
-            </Link>
-          </div>
+          {/* Steps 1–2: instant valuation range, no signup */}
+          <HeroFunnel />
 
           {/* Stats */}
           <div className="mt-20 grid grid-cols-3 gap-8 max-w-2xl mx-auto">

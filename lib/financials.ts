@@ -1,5 +1,54 @@
 import { Listing } from "@/lib/types";
 
+/**
+ * Industry options shown across the funnel. Kept here so the homepage hero and
+ * the valuation form draw from one source of truth.
+ */
+export const INDUSTRIES = [
+  "Retail",
+  "Restaurant/Food",
+  "Healthcare",
+  "Professional Services",
+  "Construction/Trades",
+  "Manufacturing",
+  "Technology",
+  "Real Estate",
+  "Other",
+] as const;
+
+/**
+ * Rough revenue-multiple bands by industry for the *instant* (non-AI) range we
+ * show before any wall. These are deliberately wide ballpark figures for SMB
+ * sale comps — the AI valuation later refines this with profit and other inputs.
+ */
+const INDUSTRY_REVENUE_MULTIPLES: Record<string, { low: number; high: number }> = {
+  Retail: { low: 0.3, high: 0.6 },
+  "Restaurant/Food": { low: 0.3, high: 0.5 },
+  Healthcare: { low: 0.6, high: 1.2 },
+  "Professional Services": { low: 0.5, high: 1.1 },
+  "Construction/Trades": { low: 0.4, high: 0.8 },
+  Manufacturing: { low: 0.5, high: 1.0 },
+  Technology: { low: 1.5, high: 4.0 },
+  "Real Estate": { low: 0.8, high: 1.5 },
+  Other: { low: 0.5, high: 1.0 },
+};
+
+/**
+ * Instant ballpark value range from revenue alone, banded by industry. Returns
+ * null when revenue isn't a positive number so callers can gate the reveal.
+ */
+export function instantValuationRange(
+  revenue: number,
+  industry: string
+): { low: number; high: number } | null {
+  if (!Number.isFinite(revenue) || revenue <= 0) return null;
+  const band = INDUSTRY_REVENUE_MULTIPLES[industry] ?? INDUSTRY_REVENUE_MULTIPLES.Other;
+  return {
+    low: Math.round(revenue * band.low),
+    high: Math.round(revenue * band.high),
+  };
+}
+
 /** Compact money formatter: $1.2M, $850K, $1,200. */
 export function fmtMoney(n: number): string {
   if (!Number.isFinite(n)) return "—";

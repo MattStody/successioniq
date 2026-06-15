@@ -9,12 +9,16 @@ const ValuateSchema = z.object({
   country: z.string().min(1).max(100),
   region: z.string().min(1).max(100),
   revenue: z.number().nonnegative(),
-  netProfit: z.number(),
+  // The quick funnel collects fewer inputs than the detailed form, so the
+  // softer signals below are optional and default to neutral values.
+  netProfit: z.number().optional(),
   yearsInOperation: z.number().int().nonnegative(),
-  revenueTrend: z.enum(["Growing 20%+", "Growing 10-20%", "Growing 0-10%", "Flat", "Declining"]),
-  ownerDependency: z.number().int().min(1).max(10),
-  customerConcentration: z.string().min(1).max(200),
-  reasonForSelling: z.string().min(1).max(500),
+  revenueTrend: z
+    .enum(["Growing 20%+", "Growing 10-20%", "Growing 0-10%", "Flat", "Declining"])
+    .optional(),
+  ownerDependency: z.number().int().min(1).max(10).optional(),
+  customerConcentration: z.string().min(1).max(200).optional(),
+  reasonForSelling: z.string().min(1).max(500).optional(),
   askingPrice: z.number().nonnegative().nullable().optional(),
   updateId: z.string().uuid().optional(),
 });
@@ -91,20 +95,27 @@ export async function POST(req: NextRequest) {
       revenue,
       netProfit,
       yearsInOperation,
-      revenueTrend,
-      ownerDependency,
-      customerConcentration,
-      reasonForSelling,
       askingPrice,
       updateId,
     } = parsed.data;
+
+    // Default the optional soft signals so both the prompt and the saved row
+    // stay coherent when the quick funnel omits them.
+    const revenueTrend = parsed.data.revenueTrend ?? "Not specified";
+    const ownerDependency = parsed.data.ownerDependency ?? 5;
+    const customerConcentration = parsed.data.customerConcentration ?? "Not specified";
+    const reasonForSelling = parsed.data.reasonForSelling ?? "Not specified";
 
     const userContent = `Provide a business valuation for the following:
 
 Industry: <industry>${sanitize(industry)}</industry>
 Location: <location>${sanitize(region)}, ${sanitize(country)}</location>
 Annual Revenue: $${Number(revenue).toLocaleString()}
-Annual Net Profit: $${Number(netProfit).toLocaleString()}
+${
+  netProfit != null
+    ? `Annual Net Profit: $${Number(netProfit).toLocaleString()}`
+    : "Annual Net Profit: not provided — estimate a typical net margin for this industry and size."
+}
 Years in Operation: ${yearsInOperation}
 Revenue Trend (last 3 years): ${revenueTrend}
 Owner Dependency: ${ownerDependency}/10 — 1 = business runs itself, 10 = owner does everything
@@ -167,7 +178,7 @@ Respond ONLY with this JSON object — no other text, no markdown:
       country,
       region,
       annual_revenue: Number(revenue),
-      annual_profit: Number(netProfit),
+      annual_profit: netProfit != null ? Number(netProfit) : null,
       years_operating: Number(yearsInOperation),
       revenue_trend: revenueTrend,
       owner_dependency: ownerDependency,
