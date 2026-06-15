@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { impliedEarningsFromValuation, fmtMultiple } from "@/lib/financials";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -284,6 +285,18 @@ export default function CreateListingClient() {
     }
   }, [searchParams]);
 
+  // Pre-fill the contact email with the signed-in user's address — they're
+  // already authenticated to publish, so retyping it is pure friction.
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const email = data.user?.email;
+      if (email) {
+        setForm((prev) => (prev.contact_email ? prev : { ...prev, contact_email: email }));
+      }
+    });
+  }, []);
+
   const generateDescription = useCallback(async () => {
     if (!valuation) return;
     setDescLoading(true);
@@ -295,6 +308,14 @@ export default function CreateListingClient() {
       });
       const data = await res.json();
       if (data.description) setDescription(data.description);
+      // Seed the supporting fields with first drafts, but never overwrite
+      // anything the seller has already typed.
+      setForm((prev) => ({
+        ...prev,
+        whats_included: prev.whats_included || data.whats_included || "",
+        transition_period: prev.transition_period || data.transition_period || "",
+        preferred_buyer: prev.preferred_buyer || data.preferred_buyer || "",
+      }));
     } catch {
       // silently fail — user can regenerate
     } finally {
@@ -309,13 +330,9 @@ export default function CreateListingClient() {
     }
   }, [valuation, description, descLoading, generateDescription]);
 
-  const canPublish =
-    description &&
-    form.whats_included &&
-    form.transition_period &&
-    form.preferred_buyer &&
-    form.contact_email &&
-    valuation;
+  // Only a description and a contact email gate publishing — everything else
+  // is AI-prefilled and refinable later via the seller profile builder.
+  const canPublish = description && form.contact_email && valuation;
 
   const handlePublish = async () => {
     if (!canPublish || !valuation) return;
@@ -348,9 +365,16 @@ export default function CreateListingClient() {
         description,
         is_anonymous: form.is_anonymous,
         business_name: form.is_anonymous ? null : form.business_name || null,
-        whats_included: form.whats_included,
-        transition_period: form.transition_period,
-        preferred_buyer: form.preferred_buyer,
+        // These columns are NOT NULL; fall back to sensible defaults so a
+        // seller can publish fast and refine later.
+        whats_included:
+          form.whats_included || "Full details provided to qualified buyers upon NDA.",
+        transition_period:
+          form.transition_period ||
+          "Reasonable transition and handover available; terms negotiable.",
+        preferred_buyer:
+          form.preferred_buyer ||
+          "Open to qualified individual, strategic, and financial buyers.",
         contact_email: form.contact_email,
         asking_price: form.asking_price ? Number(form.asking_price) : null,
         status: "active",
@@ -534,9 +558,13 @@ export default function CreateListingClient() {
 
           {/* Listing Details */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-slate-900 mb-5 pb-4 border-b border-slate-200">
-              Listing Details
-            </h2>
+            <div className="mb-5 pb-4 border-b border-slate-200">
+              <h2 className="text-base font-semibold text-slate-900">Listing Details</h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                AI-drafted from your valuation — optional, edit or leave as-is. You can
+                refine everything later from your listing.
+              </p>
+            </div>
             <div className="space-y-5">
               <Field
                 label="What's Included in the Sale"
