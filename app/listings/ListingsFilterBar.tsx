@@ -14,7 +14,7 @@ export type SortOption =
   | "profit_desc"
   | "margin_desc";
 
-const SORT_LABELS: { value: SortOption; label: string }[] = [
+export const SORT_LABELS: { value: SortOption; label: string }[] = [
   { value: "newest", label: "Newest first" },
   { value: "oldest", label: "Oldest first" },
   { value: "price_asc", label: "Price: low to high" },
@@ -27,10 +27,8 @@ const SORT_LABELS: { value: SortOption; label: string }[] = [
 
 export default function ListingsFilterBar({
   regions,
-  hasMatches,
 }: {
   regions: string[];
-  hasMatches: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -76,7 +74,6 @@ export default function ListingsFilterBar({
   const minPrice = searchParams.get("minPrice") ?? "";
   const maxPrice = searchParams.get("maxPrice") ?? "";
   const minRevenue = searchParams.get("minRevenue") ?? "";
-  const sort = (searchParams.get("sort") as SortOption | null) ?? "";
 
   const activeFilterCount = [
     searchParams.get("q"),
@@ -193,27 +190,6 @@ export default function ListingsFilterBar({
             placeholder="$0"
             className={inputClass}
           />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-500">
-            Sort by
-          </label>
-          <select
-            value={sort}
-            onChange={(e) => updateParams({ sort: e.target.value || null })}
-            className={inputClass}
-          >
-            {hasMatches && <option value="">Best match</option>}
-            {!hasMatches && <option value="">Newest first</option>}
-            {SORT_LABELS.filter(
-              (o) => !(o.value === "newest" && !hasMatches)
-            ).map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 

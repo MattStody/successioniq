@@ -6,6 +6,7 @@ import { calculateCompleteness, completenessLabel } from "@/lib/profile-complete
 import Link from "next/link";
 import BookmarkButton from "@/components/BookmarkButton";
 import ListingsFilterBar, { SortOption } from "./ListingsFilterBar";
+import SortControl from "./SortControl";
 import { deriveFinancials, fmtMoney, fmtMultiple } from "@/lib/financials";
 
 // The price shown on a card is asking_price when set, else the mid valuation.
@@ -238,17 +239,29 @@ export default async function ListingsPage({
             </div>
           </div>
 
-          <ListingsFilterBar regions={regions} hasMatches={hasMatches} />
+          <ListingsFilterBar regions={regions} />
         </aside>
 
         {/* ── Right: results ── */}
         <div>
-          {usingMatchSort && (
-            <p className="text-sm text-slate-500 mb-6 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-900 inline-block" />
-              Based on your criteria — sorted by match score
+          {/* Top bar: result count / match note + sort */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-slate-500 flex items-center gap-1.5">
+              {usingMatchSort ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-900 inline-block" />
+                  Based on your criteria — sorted by match score
+                </>
+              ) : (
+                <>
+                  {listings.length}
+                  {filtersActive ? ` of ${allListings.length}` : ""} active listing
+                  {allListings.length !== 1 ? "s" : ""}
+                </>
+              )}
             </p>
-          )}
+            <SortControl hasMatches={hasMatches} />
+          </div>
 
           {/* Listing cards */}
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
