@@ -188,7 +188,7 @@ export default async function ListingsPage({
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-24">
-      <div className="mb-12">
+      <div className="mb-10">
         <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 text-slate-900">
           Business Listings
         </h1>
@@ -198,51 +198,62 @@ export default async function ListingsPage({
         </p>
       </div>
 
-      {/* Industry pills — preserve other active filters when switching */}
-      <div className="flex gap-3 mb-6 flex-wrap">
-        {FILTER_INDUSTRIES.map((f) => {
-          const isActive =
-            f === "All Industries"
-              ? !industryFilter || industryFilter === "All Industries"
-              : industryFilter === f;
-          const pillParams = new URLSearchParams();
-          if (searchTerm) pillParams.set("q", q ?? "");
-          if (regionFilter) pillParams.set("region", regionFilter);
-          if (minPriceRaw) pillParams.set("minPrice", minPriceRaw);
-          if (maxPriceRaw) pillParams.set("maxPrice", maxPriceRaw);
-          if (minRevenueRaw) pillParams.set("minRevenue", minRevenueRaw);
-          if (sortRaw) pillParams.set("sort", sortRaw);
-          if (f !== "All Industries") pillParams.set("industry", f);
-          const qs = pillParams.toString();
-          return (
-            <Link
-              key={f}
-              href={qs ? `/listings?${qs}` : "/listings"}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-blue-900 text-white"
-                  : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900"
-              }`}
-            >
-              {f}
-            </Link>
-          );
-        })}
-      </div>
+      <div className="grid lg:grid-cols-[260px_1fr] gap-8 items-start">
+        {/* ── Left: filter rail ── */}
+        <aside className="lg:sticky lg:top-24 space-y-4">
+          {/* Industry — vertical list, preserves other active filters */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
+              Industry
+            </p>
+            <div className="space-y-1">
+              {FILTER_INDUSTRIES.map((f) => {
+                const isActive =
+                  f === "All Industries"
+                    ? !industryFilter || industryFilter === "All Industries"
+                    : industryFilter === f;
+                const pillParams = new URLSearchParams();
+                if (searchTerm) pillParams.set("q", q ?? "");
+                if (regionFilter) pillParams.set("region", regionFilter);
+                if (minPriceRaw) pillParams.set("minPrice", minPriceRaw);
+                if (maxPriceRaw) pillParams.set("maxPrice", maxPriceRaw);
+                if (minRevenueRaw) pillParams.set("minRevenue", minRevenueRaw);
+                if (sortRaw) pillParams.set("sort", sortRaw);
+                if (f !== "All Industries") pillParams.set("industry", f);
+                const qs = pillParams.toString();
+                return (
+                  <Link
+                    key={f}
+                    href={qs ? `/listings?${qs}` : "/listings"}
+                    className={`block rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-blue-900 text-white"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    }`}
+                  >
+                    {f}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
 
-      <ListingsFilterBar regions={regions} hasMatches={hasMatches} />
+          <ListingsFilterBar regions={regions} hasMatches={hasMatches} />
+        </aside>
 
-      {usingMatchSort && (
-        <p className="text-sm text-slate-500 mb-8 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-900 inline-block" />
-          Based on your criteria — sorted by match score
-        </p>
-      )}
+        {/* ── Right: results ── */}
+        <div>
+          {usingMatchSort && (
+            <p className="text-sm text-slate-500 mb-6 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-900 inline-block" />
+              Based on your criteria — sorted by match score
+            </p>
+          )}
 
-      {/* Listing cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {/* Listing cards */}
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
         {listings.length === 0 && !error ? (
-          <div className="col-span-3 py-24 text-center">
+          <div className="col-span-full py-24 text-center">
             <p className="text-slate-400 text-sm">
               No listings found
               {industryFilter && industryFilter !== "All Industries"
@@ -393,15 +404,17 @@ export default async function ListingsPage({
         )}
       </div>
 
-      {listings.length > 0 && (
-        <div className="text-center">
-          <p className="text-slate-400 text-sm">
-            Showing {listings.length}
-            {filtersActive ? ` of ${allListings.length}` : ""} active listing
-            {allListings.length !== 1 ? "s" : ""}
-          </p>
+          {listings.length > 0 && (
+            <div className="text-center">
+              <p className="text-slate-400 text-sm">
+                Showing {listings.length}
+                {filtersActive ? ` of ${allListings.length}` : ""} active listing
+                {allListings.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

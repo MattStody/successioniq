@@ -1290,6 +1290,12 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
                 {saveMessage}
               </span>
             )}
+            <a
+              href={`/listings/${listing.id}`}
+              className="text-sm font-semibold text-blue-900 border border-slate-200 hover:border-blue-300 hover:bg-blue-50 px-5 py-2.5 rounded-xl transition-colors"
+            >
+              View Listing →
+            </a>
             <button
               type="button"
               onClick={handleSave}

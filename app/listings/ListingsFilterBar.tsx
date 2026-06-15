@@ -94,10 +94,25 @@ export default function ListingsFilterBar({
     "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400";
 
   return (
-    <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      {/* Search row */}
-      <div className="mb-3 flex items-center gap-2">
-        <div className="relative flex-1">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+          Filters
+        </p>
+        {activeFilterCount > 0 && (
+          <button
+            type="button"
+            onClick={() => router.push(pathname, { scroll: false })}
+            className="text-xs font-medium text-blue-700 hover:text-blue-900"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+
+      {/* Search */}
+      <div className="mb-4">
+        <div className="relative">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
             🔍
           </span>
@@ -105,15 +120,15 @@ export default function ListingsFilterBar({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, industry, region, or keyword…"
+            placeholder="Search listings…"
             className={`${inputClass} pl-9`}
             aria-label="Search listings"
           />
         </div>
       </div>
 
-      {/* Filter grid */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+      {/* Filter fields — stacked for the sidebar rail */}
+      <div className="space-y-4">
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-500">
             Region
@@ -134,34 +149,32 @@ export default function ListingsFilterBar({
 
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-500">
-            Min price
+            Price range
           </label>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={0}
-            step={50000}
-            value={minPrice}
-            onChange={(e) => updateParams({ minPrice: e.target.value || null })}
-            placeholder="$0"
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-500">
-            Max price
-          </label>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={0}
-            step={50000}
-            value={maxPrice}
-            onChange={(e) => updateParams({ maxPrice: e.target.value || null })}
-            placeholder="Any"
-            className={inputClass}
-          />
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={50000}
+              value={minPrice}
+              onChange={(e) => updateParams({ minPrice: e.target.value || null })}
+              placeholder="Min"
+              className={inputClass}
+              aria-label="Minimum price"
+            />
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={50000}
+              value={maxPrice}
+              onChange={(e) => updateParams({ maxPrice: e.target.value || null })}
+              placeholder="Max"
+              className={inputClass}
+              aria-label="Maximum price"
+            />
+          </div>
         </div>
 
         <div>
@@ -205,21 +218,9 @@ export default function ListingsFilterBar({
       </div>
 
       {activeFilterCount > 0 && (
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs text-slate-500">
-            {activeFilterCount} active filter
-            {activeFilterCount !== 1 ? "s" : ""}
-          </span>
-          <button
-            type="button"
-            onClick={() =>
-              router.push(pathname, { scroll: false })
-            }
-            className="text-xs font-medium text-blue-700 hover:text-blue-900"
-          >
-            Clear all
-          </button>
-        </div>
+        <p className="mt-4 text-xs text-slate-400">
+          {activeFilterCount} active filter{activeFilterCount !== 1 ? "s" : ""}
+        </p>
       )}
     </div>
   );
