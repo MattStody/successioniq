@@ -10,6 +10,7 @@ import DeleteListingButton from "./DeleteListingButton";
 import BookmarkButton from "@/components/BookmarkButton";
 import NDASection from "./NDASection";
 import ListingTabs from "./ListingTabs";
+import { deriveFinancials, fmtMoney, fmtMultiple, fmtGrowth } from "@/lib/financials";
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -83,8 +84,41 @@ export default async function ListingPage({
 
   const displayName = getListingDisplayName(listing);
 
-  const askingPrice = listing.asking_price ?? listing.valuation_mid;
-  const profitMargin = ((listing.annual_profit / listing.annual_revenue) * 100).toFixed(1);
+  const fin = deriveFinancials(listing);
+  const askingPrice = fin.effectivePrice;
+  const profitMargin = (fin.profitMargin ?? 0).toFixed(1);
+
+  // Secondary stats shown as chips below the primary figures, only when present.
+  const secondaryStats: { label: string; value: string; tone?: "pos" | "neg" }[] = [];
+  if (fin.ebitdaMargin != null)
+    secondaryStats.push({ label: "EBITDA Margin", value: `${fin.ebitdaMargin.toFixed(1)}%` });
+  if (fin.revenueGrowth != null)
+    secondaryStats.push({
+      label: "Revenue Growth (YoY)",
+      value: fmtGrowth(fin.revenueGrowth),
+      tone: fin.revenueGrowth >= 0 ? "pos" : "neg",
+    });
+  if (fin.ebitdaGrowth != null)
+    secondaryStats.push({
+      label: "EBITDA Growth (YoY)",
+      value: fmtGrowth(fin.ebitdaGrowth),
+      tone: fin.ebitdaGrowth >= 0 ? "pos" : "neg",
+    });
+  if (fin.mrr != null) secondaryStats.push({ label: "MRR", value: fmtMoney(fin.mrr) });
+  if (fin.arr != null) secondaryStats.push({ label: "ARR", value: fmtMoney(fin.arr) });
+  if (fin.recurringRevenuePercent != null && fin.recurringRevenuePercent > 0)
+    secondaryStats.push({
+      label: "Recurring Revenue",
+      value: `${fin.recurringRevenuePercent}%`,
+    });
+  if (listing.sde != null) secondaryStats.push({ label: "SDE", value: fmtMoney(listing.sde) });
+  if (listing.gross_profit != null)
+    secondaryStats.push({ label: "Gross Profit", value: fmtMoney(listing.gross_profit) });
+  if (listing.customer_concentration_percent != null)
+    secondaryStats.push({
+      label: "Top Customer Concentration",
+      value: `${listing.customer_concentration_percent}%`,
+    });
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
@@ -167,23 +201,42 @@ export default async function ListingPage({
               <div>
                 <div className="text-xs text-slate-400 mb-1">Annual Revenue</div>
                 <div className="text-2xl font-bold text-slate-900">
-                  {fmtCurrency(listing.annual_revenue)}
+                  {fmtMoney(listing.annual_revenue)}
                 </div>
               </div>
-              <div>
-                <div className="text-xs text-slate-400 mb-1">Annual Profit</div>
-                <div className="text-2xl font-bold text-slate-900">
-                  {fmtCurrency(listing.annual_profit)}
+              {fin.ebitda != null ? (
+                <div>
+                  <div className="text-xs text-slate-400 mb-1">EBITDA</div>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {fmtMoney(fin.ebitda)}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-xs text-slate-400 mb-1">Profit Margin</div>
-                <div className="text-2xl font-bold text-slate-900">{profitMargin}%</div>
-              </div>
+              ) : (
+                <div>
+                  <div className="text-xs text-slate-400 mb-1">Annual Profit</div>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {fmtMoney(listing.annual_profit)}
+                  </div>
+                </div>
+              )}
+              {fin.multiple != null ? (
+                <div>
+                  <div className="text-xs text-slate-400 mb-1">Multiple</div>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {fmtMultiple(fin.multiple)}
+                  </div>
+                  <div className="text-[10px] text-slate-400">price ÷ EBITDA</div>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-xs text-slate-400 mb-1">Profit Margin</div>
+                  <div className="text-2xl font-bold text-slate-900">{profitMargin}%</div>
+                </div>
+              )}
               <div>
                 <div className="text-xs text-slate-400 mb-1">Valuation Range</div>
                 <div className="text-sm font-semibold text-slate-700">
-                  {fmtCurrency(listing.valuation_low)} – {fmtCurrency(listing.valuation_high)}
+                  {fmtMoney(listing.valuation_low)} – {fmtMoney(listing.valuation_high)}
                 </div>
               </div>
               <div>
@@ -193,6 +246,27 @@ export default async function ListingPage({
                 </div>
               </div>
             </div>
+
+            {secondaryStats.length > 0 && (
+              <div className="mt-5 pt-5 border-t border-slate-100 flex flex-wrap gap-x-8 gap-y-4">
+                {secondaryStats.map((s) => (
+                  <div key={s.label}>
+                    <div className="text-xs text-slate-400 mb-0.5">{s.label}</div>
+                    <div
+                      className={`text-base font-semibold ${
+                        s.tone === "pos"
+                          ? "text-emerald-700"
+                          : s.tone === "neg"
+                          ? "text-red-600"
+                          : "text-slate-800"
+                      }`}
+                    >
+                      {s.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Tabbed content or fallback */}

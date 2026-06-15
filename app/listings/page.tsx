@@ -6,16 +6,11 @@ import { calculateCompleteness, completenessLabel } from "@/lib/profile-complete
 import Link from "next/link";
 import BookmarkButton from "@/components/BookmarkButton";
 import ListingsFilterBar, { SortOption } from "./ListingsFilterBar";
+import { deriveFinancials, fmtMoney, fmtMultiple } from "@/lib/financials";
 
 // The price shown on a card is asking_price when set, else the mid valuation.
 function effectivePrice(l: Listing): number {
   return l.asking_price ?? l.valuation_mid;
-}
-
-function fmtCurrency(n: number): string {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
-  return `$${n.toLocaleString()}`;
 }
 
 function scoreColor(score: number) {
@@ -171,6 +166,9 @@ export default async function ListingsPage({
     listings.sort((a, b) => b.annual_profit - a.annual_profit);
   } else if (sort === "margin_desc") {
     listings.sort((a, b) => margin(b) - margin(a));
+  } else if (sort === "ebitda_desc") {
+    // Listings without a reported EBITDA sort to the end.
+    listings.sort((a, b) => (b.ebitda ?? -Infinity) - (a.ebitda ?? -Infinity));
   } else if (hasMatches) {
     // Default for buyers with matches: match score, unmatched listings last.
     listings = [
@@ -259,8 +257,9 @@ export default async function ListingsPage({
         ) : (
           listings.map((l) => {
             const displayName = getListingDisplayName(l);
-            const askingPrice = l.asking_price ?? l.valuation_mid;
-            const profitMargin = ((l.annual_profit / l.annual_revenue) * 100).toFixed(1);
+            const fin = deriveFinancials(l);
+            const askingPrice = fin.effectivePrice;
+            const profitMargin = (fin.profitMargin ?? 0).toFixed(1);
             const match = matchMap.get(l.id);
 
             return (
@@ -326,23 +325,41 @@ export default async function ListingsPage({
                   <div>
                     <div className="text-xs text-slate-400 mb-1">Revenue</div>
                     <div className="text-lg font-semibold text-slate-900">
-                      {fmtCurrency(l.annual_revenue)}
+                      {fmtMoney(l.annual_revenue)}
                     </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-slate-400 mb-1">Profit</div>
-                    <div className="text-lg font-semibold text-slate-900">
-                      {fmtCurrency(l.annual_profit)}
+                  {fin.ebitda != null ? (
+                    <div>
+                      <div className="text-xs text-slate-400 mb-1">EBITDA</div>
+                      <div className="text-lg font-semibold text-slate-900">
+                        {fmtMoney(fin.ebitda)}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400 mb-1">Margin</div>
-                    <div className="text-lg font-semibold text-slate-900">{profitMargin}%</div>
-                  </div>
+                  ) : (
+                    <div>
+                      <div className="text-xs text-slate-400 mb-1">Profit</div>
+                      <div className="text-lg font-semibold text-slate-900">
+                        {fmtMoney(l.annual_profit)}
+                      </div>
+                    </div>
+                  )}
+                  {fin.multiple != null ? (
+                    <div>
+                      <div className="text-xs text-slate-400 mb-1">Multiple</div>
+                      <div className="text-lg font-semibold text-slate-900">
+                        {fmtMultiple(fin.multiple)}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="text-xs text-slate-400 mb-1">Margin</div>
+                      <div className="text-lg font-semibold text-slate-900">{profitMargin}%</div>
+                    </div>
+                  )}
                   <div>
                     <div className="text-xs text-slate-400 mb-1">Asking Price</div>
                     <div className="text-lg font-semibold text-slate-900">
-                      {fmtCurrency(askingPrice)}
+                      {fmtMoney(askingPrice)}
                     </div>
                   </div>
                 </div>

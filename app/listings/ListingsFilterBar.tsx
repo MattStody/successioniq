@@ -10,6 +10,7 @@ export type SortOption =
   | "price_asc"
   | "price_desc"
   | "revenue_desc"
+  | "ebitda_desc"
   | "profit_desc"
   | "margin_desc";
 
@@ -19,6 +20,7 @@ const SORT_LABELS: { value: SortOption; label: string }[] = [
   { value: "price_asc", label: "Price: low to high" },
   { value: "price_desc", label: "Price: high to low" },
   { value: "revenue_desc", label: "Revenue: high to low" },
+  { value: "ebitda_desc", label: "EBITDA: high to low" },
   { value: "profit_desc", label: "Profit: high to low" },
   { value: "margin_desc", label: "Margin: high to low" },
 ];

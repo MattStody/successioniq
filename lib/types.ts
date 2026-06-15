@@ -66,6 +66,16 @@ export interface Listing {
   non_compete_willing?: boolean | null;
   reason_for_sale_detail?: string | null;
   profile_completeness?: number | null;
+  // Snapshot financials (migration 013). Margin / multiple / growth are derived.
+  ebitda?: number | null;
+  adjusted_ebitda?: number | null;
+  sde?: number | null;
+  gross_profit?: number | null;
+  revenue_prior_year?: number | null;
+  ebitda_prior_year?: number | null;
+  mrr?: number | null;
+  arr?: number | null;
+  customer_concentration_percent?: number | null;
 }
 
 export interface Valuation {

@@ -216,6 +216,22 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
     listing.growth_opportunities ?? ""
   )
 
+  const [ebitda, setEbitda] = useState(listing.ebitda?.toString() ?? "")
+  const [adjustedEbitda, setAdjustedEbitda] = useState(listing.adjusted_ebitda?.toString() ?? "")
+  const [sde, setSde] = useState(listing.sde?.toString() ?? "")
+  const [grossProfit, setGrossProfit] = useState(listing.gross_profit?.toString() ?? "")
+  const [revenuePriorYear, setRevenuePriorYear] = useState(
+    listing.revenue_prior_year?.toString() ?? ""
+  )
+  const [ebitdaPriorYear, setEbitdaPriorYear] = useState(
+    listing.ebitda_prior_year?.toString() ?? ""
+  )
+  const [mrr, setMrr] = useState(listing.mrr?.toString() ?? "")
+  const [arr, setArr] = useState(listing.arr?.toString() ?? "")
+  const [customerConcentrationPercent, setCustomerConcentrationPercent] = useState(
+    listing.customer_concentration_percent?.toString() ?? ""
+  )
+
   const [employeeCount, setEmployeeCount] = useState(listing.employee_count?.toString() ?? "")
   const [fullTimeEmployees, setFullTimeEmployees] = useState(
     listing.full_time_employees?.toString() ?? ""
@@ -344,6 +360,7 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
 
   const sections = [
     { id: "overview", label: "Overview" },
+    { id: "financials", label: "Financials" },
     { id: "operations", label: "Operations" },
     { id: "assets", label: "Assets" },
     { id: "customers", label: "Customers" },
@@ -439,6 +456,17 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
         recurring_revenue_percent: recurringRevenuePercent,
         competitive_advantages: competitiveAdvantages || null,
         growth_opportunities: growthOpportunities || null,
+        ebitda: ebitda ? parseFloat(ebitda) : null,
+        adjusted_ebitda: adjustedEbitda ? parseFloat(adjustedEbitda) : null,
+        sde: sde ? parseFloat(sde) : null,
+        gross_profit: grossProfit ? parseFloat(grossProfit) : null,
+        revenue_prior_year: revenuePriorYear ? parseFloat(revenuePriorYear) : null,
+        ebitda_prior_year: ebitdaPriorYear ? parseFloat(ebitdaPriorYear) : null,
+        mrr: mrr ? parseFloat(mrr) : null,
+        arr: arr ? parseFloat(arr) : null,
+        customer_concentration_percent: customerConcentrationPercent
+          ? parseInt(customerConcentrationPercent)
+          : null,
         employee_count: employeeCount ? parseInt(employeeCount) : null,
         full_time_employees: fullTimeEmployees ? parseInt(fullTimeEmployees) : null,
         part_time_employees: partTimeEmployees ? parseInt(partTimeEmployees) : null,
@@ -688,6 +716,155 @@ export default function ProfileEditor({ listing }: { listing: Listing }) {
                   listingContext={{ business_model: businessModel }}
                   onAdd={(text) => appendToField(setGrowthOpportunities, text)}
                 />
+              </div>
+            </section>
+
+            {/* Section: Financials */}
+            <section
+              id="financials"
+              className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm"
+            >
+              <h2 className="text-xl font-semibold text-slate-900 mb-1">Financials</h2>
+              <p className="text-sm text-slate-500 mb-6">
+                Buyers screen on EBITDA and multiple first. Margin, multiple, and
+                year-over-year growth are calculated automatically from these figures.
+              </p>
+
+              <div className="space-y-6">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Field label="EBITDA ($)" hint="Earnings before interest, tax, depreciation & amortization">
+                    <input
+                      type="number"
+                      value={ebitda}
+                      onChange={(e) => setEbitda(e.target.value)}
+                      min={0}
+                      placeholder="e.g. 450000"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Adjusted EBITDA ($)" hint="After owner add-backs / normalizations">
+                    <input
+                      type="number"
+                      value={adjustedEbitda}
+                      onChange={(e) => setAdjustedEbitda(e.target.value)}
+                      min={0}
+                      placeholder="e.g. 520000"
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Field label="SDE ($)" hint="Seller's discretionary earnings">
+                    <input
+                      type="number"
+                      value={sde}
+                      onChange={(e) => setSde(e.target.value)}
+                      min={0}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Gross Profit ($)">
+                    <input
+                      type="number"
+                      value={grossProfit}
+                      onChange={(e) => setGrossProfit(e.target.value)}
+                      min={0}
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Field label="Prior Year Revenue ($)" hint="Used to show year-over-year growth">
+                    <input
+                      type="number"
+                      value={revenuePriorYear}
+                      onChange={(e) => setRevenuePriorYear(e.target.value)}
+                      min={0}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Prior Year EBITDA ($)">
+                    <input
+                      type="number"
+                      value={ebitdaPriorYear}
+                      onChange={(e) => setEbitdaPriorYear(e.target.value)}
+                      min={0}
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Field label="MRR ($)" hint="Monthly recurring revenue (if applicable)">
+                    <input
+                      type="number"
+                      value={mrr}
+                      onChange={(e) => setMrr(e.target.value)}
+                      min={0}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="ARR ($)" hint="Annual recurring revenue — defaults to MRR × 12 if left blank">
+                    <input
+                      type="number"
+                      value={arr}
+                      onChange={(e) => setArr(e.target.value)}
+                      min={0}
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+
+                <Field
+                  label="Top Customer Concentration (%)"
+                  hint="Share of revenue from your single largest customer"
+                >
+                  <input
+                    type="number"
+                    value={customerConcentrationPercent}
+                    onChange={(e) => setCustomerConcentrationPercent(e.target.value)}
+                    min={0}
+                    max={100}
+                    className={inputClass}
+                  />
+                </Field>
+
+                {/* Live derived preview */}
+                {(() => {
+                  const ebitdaNum = ebitda ? parseFloat(ebitda) : null
+                  const price = listing.asking_price ?? listing.valuation_mid
+                  const margin =
+                    ebitdaNum != null && listing.annual_revenue > 0
+                      ? ((ebitdaNum / listing.annual_revenue) * 100).toFixed(1) + "%"
+                      : "—"
+                  const multiple =
+                    ebitdaNum != null && ebitdaNum > 0
+                      ? (price / ebitdaNum).toFixed(1) + "×"
+                      : "—"
+                  const priorRev = revenuePriorYear ? parseFloat(revenuePriorYear) : null
+                  const growth =
+                    priorRev != null && priorRev > 0
+                      ? Math.round(((listing.annual_revenue - priorRev) / priorRev) * 100) + "%"
+                      : "—"
+                  return (
+                    <div className="grid grid-cols-3 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                      <div>
+                        <div className="text-xs text-slate-400 mb-1">EBITDA Margin</div>
+                        <div className="text-base font-semibold text-slate-800">{margin}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-400 mb-1">Multiple</div>
+                        <div className="text-base font-semibold text-slate-800">{multiple}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-400 mb-1">Revenue Growth</div>
+                        <div className="text-base font-semibold text-slate-800">{growth}</div>
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             </section>
 
