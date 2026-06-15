@@ -5,6 +5,12 @@ import { getIndustryImage } from "@/lib/industry-image";
 import { calculateCompleteness, completenessLabel } from "@/lib/profile-completeness";
 import Link from "next/link";
 import BookmarkButton from "@/components/BookmarkButton";
+import ListingsFilterBar, { SortOption } from "./ListingsFilterBar";
+
+// The price shown on a card is asking_price when set, else the mid valuation.
+function effectivePrice(l: Listing): number {
+  return l.asking_price ?? l.valuation_mid;
+}
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -32,9 +38,30 @@ const FILTER_INDUSTRIES = [
 export default async function ListingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ industry?: string }>;
+  searchParams: Promise<{
+    industry?: string;
+    q?: string;
+    region?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    minRevenue?: string;
+    sort?: string;
+  }>;
 }) {
-  const { industry: industryFilter } = await searchParams;
+  const {
+    industry: industryFilter,
+    q,
+    region: regionFilter,
+    minPrice: minPriceRaw,
+    maxPrice: maxPriceRaw,
+    minRevenue: minRevenueRaw,
+    sort: sortRaw,
+  } = await searchParams;
+
+  const searchTerm = (q ?? "").trim().toLowerCase();
+  const minPrice = minPriceRaw ? Number(minPriceRaw) : null;
+  const maxPrice = maxPriceRaw ? Number(maxPriceRaw) : null;
+  const minRevenue = minRevenueRaw ? Number(minRevenueRaw) : null;
 
   const supabase = await createSupabaseServerClient();
 
@@ -88,10 +115,64 @@ export default async function ListingsPage({
   }
 
   const { data, error } = await query;
-  let listings: Listing[] = error ? [] : (data as Listing[]);
+  const allListings: Listing[] = error ? [] : (data as Listing[]);
 
-  // Sort by match score for buyers; unmatched listings fall to the end
-  if (isBuyer && matchMap.size > 0) {
+  const hasMatches = isBuyer && matchMap.size > 0;
+
+  // Region options reflect what's available within the current industry filter.
+  const regions = Array.from(
+    new Set(allListings.map((l) => l.region).filter(Boolean))
+  ).sort();
+
+  // Apply the in-memory filters (search / region / price / revenue) against the
+  // values shown on the cards, including the anonymized display name.
+  let listings = allListings.filter((l) => {
+    if (regionFilter && l.region !== regionFilter) return false;
+
+    if (minRevenue !== null && l.annual_revenue < minRevenue) return false;
+
+    const price = effectivePrice(l);
+    if (minPrice !== null && price < minPrice) return false;
+    if (maxPrice !== null && price > maxPrice) return false;
+
+    if (searchTerm) {
+      const haystack = [
+        getListingDisplayName(l),
+        l.industry,
+        l.region,
+        l.country,
+        l.tagline ?? "",
+        l.description,
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(searchTerm)) return false;
+    }
+
+    return true;
+  });
+
+  const margin = (l: Listing) =>
+    l.annual_revenue > 0 ? l.annual_profit / l.annual_revenue : 0;
+
+  // Sort: explicit sort param wins; otherwise buyers see best-match ordering.
+  const sort = (sortRaw as SortOption | undefined) ?? "";
+  if (sort === "newest" || (!sort && !hasMatches)) {
+    listings.sort((a, b) => b.created_at.localeCompare(a.created_at));
+  } else if (sort === "oldest") {
+    listings.sort((a, b) => a.created_at.localeCompare(b.created_at));
+  } else if (sort === "price_asc") {
+    listings.sort((a, b) => effectivePrice(a) - effectivePrice(b));
+  } else if (sort === "price_desc") {
+    listings.sort((a, b) => effectivePrice(b) - effectivePrice(a));
+  } else if (sort === "revenue_desc") {
+    listings.sort((a, b) => b.annual_revenue - a.annual_revenue);
+  } else if (sort === "profit_desc") {
+    listings.sort((a, b) => b.annual_profit - a.annual_profit);
+  } else if (sort === "margin_desc") {
+    listings.sort((a, b) => margin(b) - margin(a));
+  } else if (hasMatches) {
+    // Default for buyers with matches: match score, unmatched listings last.
     listings = [
       ...listings
         .filter((l) => matchMap.has(l.id))
@@ -102,7 +183,10 @@ export default async function ListingsPage({
     ];
   }
 
-  const hasMatches = isBuyer && matchMap.size > 0;
+  const filtersActive = Boolean(
+    searchTerm || regionFilter || minPrice !== null || maxPrice !== null || minRevenue !== null
+  );
+  const usingMatchSort = hasMatches && !sort;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-24">
@@ -116,21 +200,26 @@ export default async function ListingsPage({
         </p>
       </div>
 
-      {/* Filter bar */}
+      {/* Industry pills — preserve other active filters when switching */}
       <div className="flex gap-3 mb-6 flex-wrap">
         {FILTER_INDUSTRIES.map((f) => {
           const isActive =
             f === "All Industries"
               ? !industryFilter || industryFilter === "All Industries"
               : industryFilter === f;
+          const pillParams = new URLSearchParams();
+          if (searchTerm) pillParams.set("q", q ?? "");
+          if (regionFilter) pillParams.set("region", regionFilter);
+          if (minPriceRaw) pillParams.set("minPrice", minPriceRaw);
+          if (maxPriceRaw) pillParams.set("maxPrice", maxPriceRaw);
+          if (minRevenueRaw) pillParams.set("minRevenue", minRevenueRaw);
+          if (sortRaw) pillParams.set("sort", sortRaw);
+          if (f !== "All Industries") pillParams.set("industry", f);
+          const qs = pillParams.toString();
           return (
             <Link
               key={f}
-              href={
-                f === "All Industries"
-                  ? "/listings"
-                  : `/listings?industry=${encodeURIComponent(f)}`
-              }
+              href={qs ? `/listings?${qs}` : "/listings"}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-blue-900 text-white"
@@ -143,7 +232,9 @@ export default async function ListingsPage({
         })}
       </div>
 
-      {hasMatches && (
+      <ListingsFilterBar regions={regions} hasMatches={hasMatches} />
+
+      {usingMatchSort && (
         <p className="text-sm text-slate-500 mb-8 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-900 inline-block" />
           Based on your criteria — sorted by match score
@@ -159,7 +250,10 @@ export default async function ListingsPage({
               {industryFilter && industryFilter !== "All Industries"
                 ? ` in ${industryFilter}`
                 : ""}
-              . Check back soon.
+              {searchTerm ? ` matching “${q}”` : ""}
+              {filtersActive || (industryFilter && industryFilter !== "All Industries")
+                ? ". Try widening your filters."
+                : ". Check back soon."}
             </p>
           </div>
         ) : (
@@ -271,19 +365,23 @@ export default async function ListingsPage({
           })
         )}
 
-        {/* Coming soon card */}
-        <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[240px]">
-          <div className="text-3xl mb-3">🔍</div>
-          <p className="text-slate-400 text-sm max-w-[160px]">
-            More listings added weekly. Check back soon.
-          </p>
-        </div>
+        {/* Coming soon card — only when browsing unfiltered */}
+        {!filtersActive && listings.length > 0 && (
+          <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[240px]">
+            <div className="text-3xl mb-3">🔍</div>
+            <p className="text-slate-400 text-sm max-w-[160px]">
+              More listings added weekly. Check back soon.
+            </p>
+          </div>
+        )}
       </div>
 
       {listings.length > 0 && (
         <div className="text-center">
           <p className="text-slate-400 text-sm">
-            Showing {listings.length} active listing{listings.length !== 1 ? "s" : ""}
+            Showing {listings.length}
+            {filtersActive ? ` of ${allListings.length}` : ""} active listing
+            {allListings.length !== 1 ? "s" : ""}
           </p>
         </div>
       )}
