@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { impliedEarningsFromValuation, fmtMultiple } from "@/lib/financials";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -15,6 +16,8 @@ interface ValuationParams {
   valuation_low: number;
   valuation_mid: number;
   valuation_high: number;
+  primary_method: string;
+  multiple_applied: number;
   key_value_drivers: string[];
   key_risks: string[];
 }
@@ -80,6 +83,17 @@ function PreviewPanel({
       ? `${valuation.industry} Business`
       : form.business_name;
 
+  const { ebitda: previewEbitda } = impliedEarningsFromValuation({
+    valuationMid: valuation.valuation_mid,
+    multipleApplied: valuation.multiple_applied,
+    primaryMethod: valuation.primary_method,
+  });
+  const previewPrice = form.asking_price
+    ? Number(form.asking_price)
+    : valuation.valuation_mid;
+  const previewMultiple =
+    previewEbitda && previewEbitda > 0 ? previewPrice / previewEbitda : null;
+
   return (
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
       {/* Header */}
@@ -125,6 +139,22 @@ function PreviewPanel({
               {fmtCurrency(valuation.annual_profit)}
             </div>
           </div>
+          {previewEbitda != null && (
+            <div className="bg-slate-50 rounded-xl p-4">
+              <div className="text-xs text-slate-400 mb-1">EBITDA</div>
+              <div className="text-lg font-bold text-slate-900">
+                {fmtCurrency(previewEbitda)}
+              </div>
+            </div>
+          )}
+          {previewMultiple != null && (
+            <div className="bg-slate-50 rounded-xl p-4">
+              <div className="text-xs text-slate-400 mb-1">Multiple</div>
+              <div className="text-lg font-bold text-slate-900">
+                {fmtMultiple(previewMultiple)}
+              </div>
+            </div>
+          )}
           <div className="bg-slate-50 rounded-xl p-4">
             <div className="text-xs text-slate-400 mb-1">Asking Price</div>
             <div className="text-lg font-bold text-slate-900">
@@ -241,6 +271,8 @@ export default function CreateListingClient() {
         valuation_low: Number(searchParams.get("valuation_low") ?? 0),
         valuation_mid: Number(searchParams.get("valuation_mid") ?? 0),
         valuation_high: Number(searchParams.get("valuation_high") ?? 0),
+        primary_method: searchParams.get("primary_method") ?? "",
+        multiple_applied: Number(searchParams.get("multiple_applied") ?? 0),
         key_value_drivers: JSON.parse(
           searchParams.get("key_value_drivers") ?? "[]"
         ),
@@ -291,6 +323,14 @@ export default function CreateListingClient() {
     setError(null);
 
     try {
+      // Carry the valuation's implied EBITDA/SDE onto the listing so its
+      // financial header is populated without manual re-entry.
+      const { ebitda, sde } = impliedEarningsFromValuation({
+        valuationMid: valuation.valuation_mid,
+        multipleApplied: valuation.multiple_applied,
+        primaryMethod: valuation.primary_method,
+      });
+
       const payload = {
         industry: valuation.industry,
         country: valuation.country,
@@ -301,6 +341,8 @@ export default function CreateListingClient() {
         valuation_low: valuation.valuation_low,
         valuation_mid: valuation.valuation_mid,
         valuation_high: valuation.valuation_high,
+        ebitda,
+        sde,
         key_value_drivers: valuation.key_value_drivers,
         key_risks: valuation.key_risks,
         description,

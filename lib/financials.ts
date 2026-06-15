@@ -21,6 +21,31 @@ export function fmtGrowth(pct: number): string {
   return `${rounded > 0 ? "+" : "−"}${Math.abs(rounded)}%`;
 }
 
+/**
+ * Recovers the earnings figure a valuation multiple was applied to, so a
+ * listing created from a valuation can show EBITDA/SDE without re-entry.
+ *
+ * The valuation engine reports valuation_mid = multiple × earnings-base, where
+ * the base is EBITDA, SDE, or (for DCF) not multiple-derived. We invert that
+ * and attribute the base to the field named by the primary method.
+ */
+export function impliedEarningsFromValuation(input: {
+  valuationMid: number;
+  multipleApplied: number | null | undefined;
+  primaryMethod: string | null | undefined;
+}): { ebitda: number | null; sde: number | null } {
+  const { valuationMid, multipleApplied, primaryMethod } = input;
+  if (!multipleApplied || multipleApplied <= 0 || !(valuationMid > 0)) {
+    return { ebitda: null, sde: null };
+  }
+  const base = Math.round(valuationMid / multipleApplied);
+  const method = (primaryMethod ?? "").toLowerCase();
+  if (method.includes("ebitda")) return { ebitda: base, sde: null };
+  if (method.includes("sde")) return { ebitda: null, sde: base };
+  // DCF or unknown: the multiple isn't an earnings multiple, so don't attribute.
+  return { ebitda: null, sde: null };
+}
+
 export interface DerivedFinancials {
   /** asking_price when set, otherwise the mid valuation. */
   effectivePrice: number;

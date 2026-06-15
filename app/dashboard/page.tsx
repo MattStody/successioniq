@@ -126,6 +126,8 @@ export default async function DashboardPage() {
                     valuation_low: String(v.valuation_low),
                     valuation_mid: String(v.valuation_mid),
                     valuation_high: String(v.valuation_high),
+                    primary_method: v.primary_method ?? "",
+                    multiple_applied: String(v.multiple_applied ?? ""),
                     key_value_drivers: JSON.stringify(v.key_value_drivers),
                     key_risks: JSON.stringify(v.key_risks),
                   }).toString()}`;

@@ -16,6 +16,8 @@ const ListingSchema = z.object({
   valuation_low: z.number().nonnegative(),
   valuation_mid: z.number().nonnegative(),
   valuation_high: z.number().nonnegative(),
+  ebitda: z.number().nullable().optional(),
+  sde: z.number().nullable().optional(),
   description: z.string().min(1).max(5000),
   whats_included: z.string().min(1).max(2000),
   transition_period: z.string().min(1).max(200),
@@ -29,8 +31,8 @@ const PUBLIC_COLUMNS = [
   "id", "created_at", "status", "is_anonymous", "business_name",
   "industry", "country", "region", "annual_revenue", "annual_profit",
   "years_operating", "asking_price", "valuation_low", "valuation_mid",
-  "valuation_high", "description", "whats_included", "transition_period",
-  "preferred_buyer", "key_value_drivers", "key_risks",
+  "valuation_high", "ebitda", "sde", "description", "whats_included",
+  "transition_period", "preferred_buyer", "key_value_drivers", "key_risks",
 ].join(", ");
 
 async function createRouteClient() {
