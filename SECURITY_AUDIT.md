@@ -20,7 +20,7 @@ what the UI does. So permissive policies = open data.
 | 1 | Valuations world-readable by default | P0 | ✅ Fixed (mig 014) |
 | 2 | Buyer email/phone readable by any logged-in user | P0 | ✅ Fixed (mig 014) |
 | 3 | Anyone can self-promote to `broker` | P0 | ✅ Fixed (mig 014 + signup) |
-| 4 | `listings.contact_email` scrapable via PostgREST | P0 | ⚠️ **Open — needs mig 015 (see below)** |
+| 4 | `listings.contact_email` scrapable via PostgREST | P0 | ✅ Fixed (mig 015) |
 | 5 | Draft/sold listings publicly readable | P1 | ✅ Fixed (mig 014) |
 | 6 | `SECURITY DEFINER` fns lacked `search_path` | P1 | ✅ Fixed (mig 014) |
 | 7 | Bulk-upload body unvalidated / unbounded | P1 | ✅ Fixed |
@@ -66,56 +66,20 @@ what the UI does. So permissive policies = open data.
 
 ---
 
-## ⚠️ Remaining launch blocker — Issue #4 (contact_email)
+## Issue #4 (contact_email) — fixed in migration 015
 
-`listings.contact_email` is `NOT NULL` on every row and readable by `anon`, so
-a script can pull every seller's email via
-`GET /rest/v1/listings?select=contact_email` even though the UI only reveals it
-post-NDA. This is the core confidentiality promise of the marketplace.
+`listings.contact_email` was readable by `anon` via PostgREST despite the NDA
+UI. Migration `015_listing_contacts.sql` moves it into a `listing_contacts`
+table that is **not** publicly readable, gated by an NDA-aware
+`reveal_listing_contact(uuid)` SECURITY DEFINER function. App changes: the
+create-listing and bulk-upload routes write to `listing_contacts`; the NDA
+route and listing detail call `reveal_listing_contact(...)` (owner or
+NDA-signer only). The column is dropped, so `select('*')` no longer returns it.
 
-It is **not** shipped in this pass because the safe fix touches the listing
-**write path** and the email is read via `select('*')` in six places — it must
-be validated against a real database, which this environment can't do.
-
-**Recommended fix (migration 015 + ~3 code changes):** move the column out of
-`listings` into a dedicated table so `select('*')` simply stops returning it.
-
-```sql
--- 015 (draft)
-create table listing_contacts (
-  listing_id uuid primary key references listings(id) on delete cascade,
-  contact_email text not null
-);
-alter table listing_contacts enable row level security;
-
-create policy owner_rw on listing_contacts for all
-  using (listing_id in (select id from listings where user_id = auth.uid()))
-  with check (listing_id in (select id from listings where user_id = auth.uid()));
-
--- NDA-gated read for buyers
-create or replace function reveal_listing_contact(p_listing_id uuid)
-returns text language sql security definer set search_path = '' as $$
-  select c.contact_email from public.listing_contacts c
-  where c.listing_id = p_listing_id
-    and (
-      exists (select 1 from public.listings l
-              where l.id = p_listing_id and l.user_id = auth.uid())
-      or exists (select 1 from public.ndas n
-                 where n.listing_id = p_listing_id and n.buyer_id = auth.uid())
-    );
-$$;
-grant execute on function reveal_listing_contact(uuid) to authenticated;
-
--- backfill, then drop the exposed column
-insert into listing_contacts (listing_id, contact_email)
-  select id, contact_email from listings on conflict do nothing;
-alter table listings drop column contact_email;
-```
-
-Code: create-listing route inserts into `listing_contacts`; the NDA route and
-listing detail call `reveal_listing_contact(...)` instead of reading the column.
-
-I can implement this end-to-end whenever you have a staging DB to verify it.
+**Staging checklist for 015:** create a listing (contact saved), sign an NDA as
+a different user (email revealed), confirm a direct
+`GET /rest/v1/listings?select=contact_email` now fails, and run a broker bulk
+upload (contacts stored). Back up before the `drop column`.
 
 ## Also recommended before scale (not blockers)
 - **Rate limiting** on `/api/valuate` (unauthenticated Opus calls) and

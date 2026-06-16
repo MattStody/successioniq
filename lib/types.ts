@@ -23,7 +23,9 @@ export interface Listing {
   whats_included: string;
   transition_period: string;
   preferred_buyer: string;
-  contact_email: string;
+  /** Stored in the protected listing_contacts table, not on listings — see
+   *  migration 015. Revealed to buyers via reveal_listing_contact() post-NDA. */
+  contact_email?: string;
   key_value_drivers: string[];
   key_risks: string[];
   user_id: string | null;

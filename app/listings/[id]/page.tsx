@@ -77,7 +77,10 @@ export default async function ListingPage({
     buyerProfileEmail = user.email ?? undefined;
 
     if (hasSigned) {
-      ndaContactEmail = listing.contact_email;
+      const { data: revealedEmail } = await supabaseAuth.rpc("reveal_listing_contact", {
+        p_listing_id: id,
+      });
+      ndaContactEmail = revealedEmail ?? undefined;
       ndaBusinessName = listing.is_anonymous ? listing.business_name : null;
     }
   }

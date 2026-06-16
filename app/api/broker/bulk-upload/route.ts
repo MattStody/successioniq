@@ -157,7 +157,6 @@ export async function POST(req: NextRequest) {
       whats_included: String(row.whats_included),
       transition_period: String(row.transition_period),
       preferred_buyer: String(row.preferred_buyer),
-      contact_email: String(row.contact_email),
       key_value_drivers: [],
       key_risks: [],
     }));
@@ -165,9 +164,24 @@ export async function POST(req: NextRequest) {
     // Insert all listings
     const results = await Promise.allSettled(
       payloads.map((payload) =>
-        supabase.from("listings").insert([payload]).select().single()
+        supabase.from("listings").insert([payload]).select("id").single()
       )
     );
+
+    // Store contact emails in the protected table for the listings that landed.
+    const contactRows = results
+      .map((result, i) =>
+        result.status === "fulfilled" && result.value.data
+          ? { listing_id: result.value.data.id, contact_email: String(rows[i].contact_email) }
+          : null
+      )
+      .filter((r): r is { listing_id: string; contact_email: string } => r !== null);
+    if (contactRows.length > 0) {
+      const { error: contactError } = await supabase
+        .from("listing_contacts")
+        .insert(contactRows);
+      if (contactError) console.error("bulk listing_contacts insert error:", contactError);
+    }
 
     const succeeded = results.filter((r) => r.status === "fulfilled" && !r.value.error).length;
     const failed = results.length - succeeded;
