@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 const anthropic = new Anthropic();
 
@@ -85,6 +86,9 @@ What's Included: <whats_included>${whatsIncluded}</whats_included>`,
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = enforceRateLimit(req, "bulk-upload", LIMITS.bulkUpload.limit, LIMITS.bulkUpload.windowMs);
+    if (limited) return limited;
+
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

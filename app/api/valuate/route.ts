@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 const ValuateSchema = z.object({
   industry: z.string().min(1).max(100),
@@ -64,6 +65,9 @@ async function callClaude(
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = enforceRateLimit(req, "valuate", LIMITS.valuate.limit, LIMITS.valuate.windowMs);
+    if (limited) return limited;
+
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

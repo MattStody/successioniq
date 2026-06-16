@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit"
 
 const RequestSchema = z.object({
   industry: z.string().min(1).max(100),
@@ -88,6 +89,9 @@ async function createRouteClient() {
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = enforceRateLimit(req, "seller-suggestions", LIMITS.sellerSuggestions.limit, LIMITS.sellerSuggestions.windowMs)
+    if (limited) return limited
+
     const supabase = await createRouteClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

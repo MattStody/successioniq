@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 const Schema = z.object({
   email: z.string().email().max(254),
@@ -14,6 +15,9 @@ const Schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = enforceRateLimit(req, "capture-email", LIMITS.captureEmail.limit, LIMITS.captureEmail.windowMs);
+    if (limited) return limited;
+
     const body = await req.json();
     const parsed = Schema.safeParse(body);
     if (!parsed.success) {

@@ -26,7 +26,7 @@ what the UI does. So permissive policies = open data.
 | 7 | Bulk-upload body unvalidated / unbounded | P1 | ✅ Fixed |
 | 8 | Raw DB errors returned to clients | P1 | ✅ Fixed |
 | 9 | `suggestions_cache` writable by any user (poisoning) | P1 | ◻️ Accepted for launch (low impact) |
-| 10 | No rate limiting on AI / public endpoints | P1 | ◻️ Recommended (see below) |
+| 10 | No rate limiting on AI / public endpoints | P1 | ✅ Added (per-IP, in-memory) |
 | 11 | Listing detail could crash on null arrays | P1 | ✅ Fixed |
 | 12 | Dead "SaaS" industry filter | P1 | ✅ Fixed |
 | 13 | Build threw without env (module-level client) | P1 | ✅ Fixed |
@@ -81,10 +81,20 @@ a different user (email revealed), confirm a direct
 `GET /rest/v1/listings?select=contact_email` now fails, and run a broker bulk
 upload (contacts stored). Back up before the `drop column`.
 
+## Rate limiting (added)
+
+`lib/rate-limit.ts` provides a per-IP, fixed-window limiter applied to every
+expensive / abusable endpoint: `valuate` (10/h), `capture-email` (10/h),
+`generate-description` (30/h), `match-listings` (20/h), `bulk-upload` (5/h),
+and the seller AI suggestion routes (40/h). Over-limit callers get a `429` with
+`Retry-After`.
+
+**Limitation:** the store is in-memory, so limits are per serverless instance,
+not global. That's a solid first guard at launch volumes, but for hard global
+caps swap the internals for Upstash/Redis — the call sites and `LIMITS` config
+stay the same.
+
 ## Also recommended before scale (not blockers)
-- **Rate limiting** on `/api/valuate` (unauthenticated Opus calls) and
-  `/api/capture-email` (open insert) — cost/abuse protection. An edge
-  middleware or Upstash limiter keyed by IP is enough.
 - Lock `suggestions_cache` writes behind a definer function (cache poisoning).
 - The 6 ESLint `set-state-in-effect` errors are intentional mount patterns
   (one extra render, not bugs); clean up when convenient.

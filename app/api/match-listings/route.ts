@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { BuyerProfile } from "@/lib/types";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -21,7 +22,10 @@ Respond ONLY with a valid JSON array — no preamble, no markdown, no text outsi
 
 type MatchResult = { listing_id: string; score: number; reason: string };
 
-export async function POST() {
+export async function POST(req: Request) {
+  const limited = enforceRateLimit(req, "match-listings", LIMITS.matchListings.limit, LIMITS.matchListings.windowMs);
+  if (limited) return limited;
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },

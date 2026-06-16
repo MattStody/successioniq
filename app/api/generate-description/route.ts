@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 const DescriptionSchema = z.object({
   industry: z.string().min(1).max(100),
@@ -43,6 +44,9 @@ Respond ONLY with a valid JSON object, no markdown and no preamble, in exactly t
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = enforceRateLimit(req, "generate-description", LIMITS.generateDescription.limit, LIMITS.generateDescription.windowMs);
+    if (limited) return limited;
+
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
