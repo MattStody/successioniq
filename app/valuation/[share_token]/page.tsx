@@ -1,4 +1,3 @@
-import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -49,17 +48,17 @@ export default async function PublicValuationPage({
 }) {
   const { share_token } = await params;
 
-  const [{ data, error }, authClient] = await Promise.all([
-    supabase
-      .from("valuations")
-      .select(
-        "id, created_at, user_id, industry, country, region, annual_revenue, annual_profit, years_operating, valuation_low, valuation_mid, valuation_high, primary_method, multiple_applied, confidence, key_value_drivers, key_risks, summary, view_count, title"
-      )
-      .eq("share_token", share_token)
-      .eq("is_public", true)
-      .single(),
-    createSupabaseServerClient(),
-  ]);
+  // Valuations are private to their owner. Read with the request-scoped
+  // (authenticated) client so RLS returns the row only to the owner; everyone
+  // else gets nothing and sees a 404.
+  const authClient = await createSupabaseServerClient();
+  const { data, error } = await authClient
+    .from("valuations")
+    .select(
+      "id, created_at, user_id, industry, country, region, annual_revenue, annual_profit, years_operating, valuation_low, valuation_mid, valuation_high, primary_method, multiple_applied, confidence, key_value_drivers, key_risks, summary, view_count, title"
+    )
+    .eq("share_token", share_token)
+    .single();
 
   if (error || !data) notFound();
 
@@ -82,9 +81,6 @@ export default async function PublicValuationPage({
     key_value_drivers: JSON.stringify(v.key_value_drivers),
     key_risks: JSON.stringify(v.key_risks),
   }).toString()}`;
-
-  // Increment view count (fire-and-forget, non-fatal)
-  supabase.rpc("increment_valuation_view", { token: share_token }).then(() => {});
 
   const midPct =
     v.valuation_high > v.valuation_low

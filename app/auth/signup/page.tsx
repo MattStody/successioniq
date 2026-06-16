@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import type { UserRole } from "@/lib/types";
 
+// Broker is intentionally not self-selectable — that role is provisioned
+// server-side (see migration 014). Sellers and buyers self-onboard here.
 const ROLES: { value: UserRole; label: string; description: string }[] = [
   { value: "seller", label: "Seller", description: "I want to sell my business" },
   { value: "buyer", label: "Buyer", description: "I'm looking to acquire" },
-  { value: "broker", label: "Broker", description: "I represent sellers" },
 ];
 
 export default function SignUpPage() {
@@ -136,7 +137,7 @@ export default function SignUpPage() {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               I am a…
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {ROLES.map((r) => (
                 <button
                   key={r.value}
