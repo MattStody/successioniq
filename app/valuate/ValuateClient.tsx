@@ -339,10 +339,11 @@ function ResultsView({
   result: ValuationResult;
   formData: FormData;
 }) {
+  const valuationSpan = result.valuation_high - result.valuation_low;
   const midPct =
-    ((result.valuation_mid - result.valuation_low) /
-      (result.valuation_high - result.valuation_low)) *
-    100;
+    valuationSpan > 0
+      ? ((result.valuation_mid - result.valuation_low) / valuationSpan) * 100
+      : 50;
 
   const confidenceColor =
     result.confidence === "High"

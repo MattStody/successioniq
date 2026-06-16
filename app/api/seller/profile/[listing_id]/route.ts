@@ -100,7 +100,7 @@ export async function PATCH(
     const parsed = ProfileSchema.safeParse(body)
     if (!parsed.success) {
       console.error("Profile PATCH validation error:", parsed.error.flatten())
-      return NextResponse.json({ error: "Invalid request body", details: parsed.error.flatten() }, { status: 400 })
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
     }
 
     const payload = parsed.data
@@ -120,7 +120,7 @@ export async function PATCH(
 
     if (updateError) {
       console.error("Profile update error:", updateError)
-      return NextResponse.json({ error: updateError.message, code: updateError.code }, { status: 500 })
+      return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
     }
 
     return NextResponse.json({ ok: true, profile_completeness })

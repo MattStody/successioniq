@@ -311,7 +311,7 @@ export default async function ListingPage({
                   Key Value Drivers
                 </p>
                 <ul className="space-y-3">
-                  {listing.key_value_drivers.map((d, i) => (
+                  {(listing.key_value_drivers ?? []).map((d, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm">
                       <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500" />
                       <span className="text-slate-600 leading-relaxed">{d}</span>
@@ -326,7 +326,7 @@ export default async function ListingPage({
                   Key Risks
                 </p>
                 <ul className="space-y-3">
-                  {listing.key_risks.map((r, i) => (
+                  {(listing.key_risks ?? []).map((r, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm">
                       <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-red-400" />
                       <span className="text-slate-600 leading-relaxed">{r}</span>

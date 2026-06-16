@@ -82,7 +82,8 @@ export async function POST(req: NextRequest) {
       key_risks,
     } = parsed.data;
 
-    const profitMargin = ((annual_profit / annual_revenue) * 100).toFixed(1);
+    const profitMargin =
+      annual_revenue > 0 ? ((annual_profit / annual_revenue) * 100).toFixed(1) : "0.0";
     const driversText = key_value_drivers.map((d, i) => `${i + 1}. ${sanitize(d)}`).join("\n");
     const risksText = key_risks.map((r, i) => `${i + 1}. ${sanitize(r)}`).join("\n");
 

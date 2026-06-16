@@ -7,7 +7,7 @@ import Link from "next/link";
 import BookmarkButton from "@/components/BookmarkButton";
 import ListingsFilterBar, { SortOption } from "./ListingsFilterBar";
 import SortControl from "./SortControl";
-import { deriveFinancials, fmtMoney, fmtMultiple } from "@/lib/financials";
+import { deriveFinancials, fmtMoney, fmtMultiple, INDUSTRIES } from "@/lib/financials";
 
 // The price shown on a card is asking_price when set, else the mid valuation.
 function effectivePrice(l: Listing): number {
@@ -20,15 +20,12 @@ function scoreColor(score: number) {
   return "bg-slate-50 text-slate-500 border-slate-200";
 }
 
+// Drawn from the canonical INDUSTRIES taxonomy so every filter option can
+// actually match a listing (the old hand-rolled list included "SaaS", which
+// no listing is ever created with, so that filter always returned nothing).
 const FILTER_INDUSTRIES = [
   "All Industries",
-  "SaaS",
-  "Healthcare",
-  "Manufacturing",
-  "Retail",
-  "Professional Services",
-  "Technology",
-  "Construction/Trades",
+  ...INDUSTRIES.filter((i) => i !== "Other"),
 ];
 
 export default async function ListingsPage({
