@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FAF7F2;
+  --background: #F8F9FB;
   --foreground: #0F1724;
 }
 
@@ -13,14 +13,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* SuccessionIQ brand palette — deep navy, warm gold accent, cream backdrop. */
+/* SuccessionIQ palette — clean white + blue. (Brand tokens are kept so the
+   marketing pages share one source of truth; all map to the blue/white scheme.) */
 @theme {
-  --color-navy: #0B2545;
-  --color-navy-light: #163a63;
-  --color-accent: #E0A200;
-  --color-accent-dark: #C28A00;
-  --color-cream: #FAF7F2;
-  --color-cream-deep: #F2ECE0;
+  --color-navy: #1e3a8a;
+  --color-navy-light: #1e40af;
+  --color-accent: #1e3a8a;
+  --color-accent-dark: #1e40af;
+  --color-cream: #F8F9FB;
+  --color-cream-deep: #e2e8f0;
 }
 
 body {

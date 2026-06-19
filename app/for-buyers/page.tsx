@@ -98,7 +98,9 @@ export default function ForBuyersPage() {
             Browse motivated sellers with valuations you can trust.
           </p>
           <div className="mt-8">
-            <CTAButton href="/listings">Browse Current Listings →</CTAButton>
+            <CTAButton href="/listings" variant="onDark">
+              Browse Current Listings →
+            </CTAButton>
           </div>
         </div>
       </section>

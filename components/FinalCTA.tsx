@@ -16,7 +16,7 @@ export default function FinalCTA({
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-lg text-cream/70">{subtext}</p>
         <div className="mt-8">
-          <CTAButton />
+          <CTAButton variant="onDark" />
         </div>
       </div>
     </section>

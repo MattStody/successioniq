@@ -76,7 +76,7 @@ export default function HowItWorksPage() {
               key={s.n}
               className="flex flex-col gap-5 rounded-2xl border border-cream-deep bg-white p-8 sm:flex-row sm:items-start"
             >
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-navy text-xl font-bold text-accent">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-navy text-xl font-bold text-white">
                 {s.n}
               </div>
               <div>
@@ -109,7 +109,7 @@ export default function HowItWorksPage() {
               </p>
               <div className="mt-3 flex items-end justify-center gap-3">
                 <span className="text-2xl font-semibold text-cream/60">$640K</span>
-                <span className="text-5xl font-bold text-accent">$760K</span>
+                <span className="text-5xl font-bold text-white">$760K</span>
                 <span className="text-2xl font-semibold text-cream/60">$890K</span>
               </div>
               <p className="mt-3 text-sm text-cream/60">

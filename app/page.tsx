@@ -158,7 +158,7 @@ export default function Home() {
           <div className="mt-14 grid gap-8 md:grid-cols-3">
             {HOW_IT_WORKS.map((step) => (
               <div key={step.n} className="rounded-2xl border border-cream-deep bg-cream p-8">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy text-xl font-bold text-accent">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy text-xl font-bold text-white">
                   {step.n}
                 </div>
                 <h3 className="mt-5 text-xl font-semibold text-navy">{step.title}</h3>
@@ -232,7 +232,7 @@ export default function Home() {
               </p>
             </div>
             <div className="mt-8">
-              <CTAButton>Find Out Now — It&apos;s Free →</CTAButton>
+              <CTAButton variant="onDark">Find Out Now — It&apos;s Free →</CTAButton>
             </div>
           </div>
           <ImagePlaceholder
