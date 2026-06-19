@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { consumePendingListingUrl, GATE_EMAIL_KEY } from "@/lib/post-auth";
 import type { UserRole } from "@/lib/types";
 
 // Broker is intentionally not self-selectable — that role is provisioned
@@ -25,6 +26,12 @@ export default function SignUpPage() {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
+  // Carry the email entered at the valuation gate so Bob doesn't retype it.
+  useEffect(() => {
+    const gateEmail = window.localStorage.getItem(GATE_EMAIL_KEY);
+    if (gateEmail) setEmail(gateEmail);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -45,6 +52,10 @@ export default function SignUpPage() {
       password,
       options: {
         data: { role, full_name: fullName },
+        // Route the confirmation link through the callback, which restores the
+        // pending listing the user was creating.
+        emailRedirectTo:
+          typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
       },
     });
 
@@ -75,7 +86,9 @@ export default function SignUpPage() {
         .eq("id", data.user.id);
     }
 
-    router.replace(role === "broker" ? "/broker/dashboard" : "/dashboard");
+    // If they came from a valuation, drop them back into the prefilled listing.
+    const pending = consumePendingListingUrl();
+    router.replace(pending ?? (role === "broker" ? "/broker/dashboard" : "/dashboard"));
   };
 
   if (emailSent) {

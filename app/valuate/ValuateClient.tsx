@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { instantValuationRange } from "@/lib/financials";
+import { PENDING_LISTING_KEY, GATE_EMAIL_KEY } from "@/lib/post-auth";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -226,6 +227,7 @@ function EmailGateView({
       });
       if (typeof window !== "undefined") {
         localStorage.setItem("siq_email_captured", "1");
+        localStorage.setItem(GATE_EMAIL_KEY, email);
       }
       onSubmit(email);
     } catch {
@@ -335,10 +337,14 @@ function LoadingView() {
 function ResultsView({
   result,
   formData,
+  isLoggedIn,
 }: {
   result: ValuationResult;
   formData: FormData;
+  isLoggedIn: boolean;
 }) {
+  const router = useRouter();
+  const listingHref = `/create-listing?industry=${encodeURIComponent(formData.industry)}&country=${encodeURIComponent(formData.country)}&region=${encodeURIComponent(formData.region)}&annual_revenue=${encodeURIComponent(formData.revenue)}&annual_profit=${encodeURIComponent(formData.netProfit)}&years_operating=${encodeURIComponent(formData.yearsInOperation)}&valuation_low=${encodeURIComponent(result.valuation_low)}&valuation_mid=${encodeURIComponent(result.valuation_mid)}&valuation_high=${encodeURIComponent(result.valuation_high)}&primary_method=${encodeURIComponent(result.primary_method)}&multiple_applied=${encodeURIComponent(String(result.multiple_applied))}&key_value_drivers=${encodeURIComponent(JSON.stringify(result.key_value_drivers))}&key_risks=${encodeURIComponent(JSON.stringify(result.key_risks))}`;
   const valuationSpan = result.valuation_high - result.valuation_low;
   const midPct =
     valuationSpan > 0
@@ -488,12 +494,34 @@ function ResultsView({
           List your business on SuccessionIQ and connect with vetted private equity firms,
           family offices, and strategic acquirers.
         </p>
-        <Link
-          href={`/create-listing?industry=${encodeURIComponent(formData.industry)}&country=${encodeURIComponent(formData.country)}&region=${encodeURIComponent(formData.region)}&annual_revenue=${encodeURIComponent(formData.revenue)}&annual_profit=${encodeURIComponent(formData.netProfit)}&years_operating=${encodeURIComponent(formData.yearsInOperation)}&valuation_low=${encodeURIComponent(result.valuation_low)}&valuation_mid=${encodeURIComponent(result.valuation_mid)}&valuation_high=${encodeURIComponent(result.valuation_high)}&primary_method=${encodeURIComponent(result.primary_method)}&multiple_applied=${encodeURIComponent(String(result.multiple_applied))}&key_value_drivers=${encodeURIComponent(JSON.stringify(result.key_value_drivers))}&key_risks=${encodeURIComponent(JSON.stringify(result.key_risks))}`}
-          className="inline-block bg-blue-900 hover:bg-blue-800 text-white px-10 py-4 rounded-xl font-semibold transition-all shadow-md hover:-translate-y-0.5"
-        >
-          List your business for sale →
-        </Link>
+        {isLoggedIn ? (
+          <Link
+            href={listingHref}
+            className="inline-block bg-blue-900 hover:bg-blue-800 text-white px-10 py-4 rounded-xl font-semibold transition-all shadow-md hover:-translate-y-0.5"
+          >
+            List your business for sale →
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              // Stash where they were headed so we can return them here, fully
+              // prefilled, right after they create their account.
+              if (typeof window !== "undefined") {
+                localStorage.setItem(PENDING_LISTING_KEY, listingHref);
+              }
+              router.push("/auth/signup");
+            }}
+            className="inline-block bg-blue-900 hover:bg-blue-800 text-white px-10 py-4 rounded-xl font-semibold transition-all shadow-md hover:-translate-y-0.5"
+          >
+            Create your free account to list →
+          </button>
+        )}
+        {!isLoggedIn && (
+          <p className="mt-3 text-xs text-slate-400">
+            Free to create. Your valuation is saved and ready to publish.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -658,7 +686,7 @@ export default function ValuateClient({
   };
 
   if (phase === "result" && result) {
-    return <ResultsView result={result} formData={formData} />;
+    return <ResultsView result={result} formData={formData} isLoggedIn={isLoggedIn} />;
   }
 
   if (phase === "waiting") {

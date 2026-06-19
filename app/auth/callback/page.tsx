@@ -3,6 +3,7 @@
 import { useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { consumePendingListingUrl } from "@/lib/post-auth";
 
 function CallbackHandler() {
   const searchParams = useSearchParams();
@@ -45,7 +46,11 @@ function CallbackHandler() {
         .eq("id", user.id)
         .single();
 
-      router.replace(profile?.role === "broker" ? "/broker/dashboard" : "/dashboard");
+      // Return to the listing they started before confirming their email.
+      const pending = consumePendingListingUrl();
+      router.replace(
+        pending ?? (profile?.role === "broker" ? "/broker/dashboard" : "/dashboard")
+      );
     };
 
     handle();

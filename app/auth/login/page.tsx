@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { consumePendingListingUrl } from "@/lib/post-auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -48,7 +49,10 @@ export default function LoginPage() {
       .eq("id", user.id)
       .single();
 
-    router.replace(profile?.role === "broker" ? "/broker/dashboard" : "/dashboard");
+    const pending = consumePendingListingUrl();
+    router.replace(
+      pending ?? (profile?.role === "broker" ? "/broker/dashboard" : "/dashboard")
+    );
   };
 
   return (
