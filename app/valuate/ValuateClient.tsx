@@ -54,6 +54,23 @@ const INDUSTRIES = [
   "Other",
 ];
 
+const CA_PROVINCES = [
+  "Alberta", "British Columbia", "Manitoba", "New Brunswick",
+  "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia", "Nunavut",
+  "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", "Yukon",
+];
+
+const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois",
+  "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana",
+  "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York",
+  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania",
+  "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah",
+  "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
+];
+
 const REVENUE_TRENDS = [
   "Growing 20%+",
   "Growing 10-20%",
@@ -160,6 +177,97 @@ function MoneyInput({
 }
 
 // ─── Step progress ────────────────────────────────────────────────────────────
+
+// Fast country + region picker: a Canada/US/Other toggle and a province/state
+// dropdown (free text only for "Other") — far quicker than typing for Bob.
+function CountryRegionFields({
+  country,
+  region,
+  update,
+}: {
+  country: string;
+  region: string;
+  update: (fields: Partial<FormData>) => void;
+}) {
+  const isCanada = country === "Canada";
+  const isUS = country === "United States";
+  const isKnown = isCanada || isUS;
+  const regionOptions = isCanada ? CA_PROVINCES : isUS ? US_STATES : null;
+
+  const toggleCls = (active: boolean) =>
+    `rounded-xl border px-2 py-2.5 text-sm font-medium transition-all ${
+      active
+        ? "bg-blue-900 text-white border-blue-900 shadow-sm"
+        : "bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:text-slate-900"
+    }`;
+
+  return (
+    <div className="space-y-5">
+      <Field label="Country">
+        <div className="grid grid-cols-3 gap-2">
+          <button type="button" onClick={() => update({ country: "Canada", region: "" })} className={toggleCls(isCanada)}>
+            🇨🇦 Canada
+          </button>
+          <button type="button" onClick={() => update({ country: "United States", region: "" })} className={toggleCls(isUS)}>
+            🇺🇸 U.S.
+          </button>
+          <button type="button" onClick={() => update({ country: "", region: "" })} className={toggleCls(!isKnown)}>
+            Other
+          </button>
+        </div>
+        {!isKnown && (
+          <input
+            type="text"
+            placeholder="Enter your country"
+            value={country}
+            onChange={(e) => update({ country: e.target.value })}
+            className={`${inputCls} mt-2`}
+          />
+        )}
+      </Field>
+      <Field label={isUS ? "State" : "Province / Region"}>
+        {regionOptions ? (
+          <SelectInput
+            value={region}
+            onChange={(v) => update({ region: v })}
+            options={regionOptions}
+            placeholder={isUS ? "Select a state…" : "Select a province…"}
+          />
+        ) : (
+          <input
+            type="text"
+            placeholder="e.g. Ontario"
+            value={region}
+            onChange={(e) => update({ region: e.target.value })}
+            className={inputCls}
+          />
+        )}
+      </Field>
+    </div>
+  );
+}
+
+// Tap-to-select industry tiles — one tap instead of open/scroll/select.
+function IndustryChips({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      {INDUSTRIES.map((opt) => (
+        <button
+          type="button"
+          key={opt}
+          onClick={() => onChange(opt)}
+          className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
+            value === opt
+              ? "bg-blue-900 text-white border-blue-900 shadow-sm"
+              : "bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:text-slate-900"
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function StepProgress({ current }: { current: number }) {
   return (
@@ -417,7 +525,7 @@ function ResultsView({
       {/* Valuation range card */}
       <div className="bg-white border border-slate-200 rounded-2xl p-8 mb-6 shadow-sm">
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-8">
-          Estimated Value Range
+          Estimated Value Range · CAD
         </p>
 
         <div className="grid grid-cols-3 gap-4 text-center mb-6">
@@ -584,7 +692,7 @@ export default function ValuateClient({
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     industry: "",
-    country: "",
+    country: "Canada",
     region: "",
     revenue: "",
     netProfit: "",
@@ -777,7 +885,7 @@ export default function ValuateClient({
         )}
 
         <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-5">
-          <Field label="Annual Net Profit (USD)">
+          <Field label="Annual Net Profit (CAD)">
             <MoneyInput
               value={formData.netProfit}
               onChange={(v) => update({ netProfit: v })}
@@ -794,26 +902,12 @@ export default function ValuateClient({
               className={inputCls}
             />
           </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Country">
-              <input
-                type="text"
-                placeholder="e.g. United States"
-                value={formData.country}
-                onChange={(e) => update({ country: e.target.value })}
-                className={inputCls}
-              />
-            </Field>
-            <Field label="Region / State">
-              <input
-                type="text"
-                placeholder="e.g. California"
-                value={formData.region}
-                onChange={(e) => update({ region: e.target.value })}
-                className={inputCls}
-              />
-            </Field>
-          </div>
+          <CountryRegionFields
+            country={formData.country}
+            region={formData.region}
+            update={update}
+          />
+          <p className="text-xs text-slate-400">All figures in Canadian dollars (CAD).</p>
         </div>
 
         <button
@@ -870,47 +964,30 @@ export default function ValuateClient({
         {step === 0 && (
           <div className="space-y-5">
             <Field label="Business Industry">
-              <SelectInput
+              <IndustryChips
                 value={formData.industry}
                 onChange={(v) => update({ industry: v })}
-                options={INDUSTRIES}
-                placeholder="Select an industry…"
               />
             </Field>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Country">
-                <input
-                  type="text"
-                  placeholder="e.g. United States"
-                  value={formData.country}
-                  onChange={(e) => update({ country: e.target.value })}
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Region / State">
-                <input
-                  type="text"
-                  placeholder="e.g. California"
-                  value={formData.region}
-                  onChange={(e) => update({ region: e.target.value })}
-                  className={inputCls}
-                />
-              </Field>
-            </div>
+            <CountryRegionFields
+              country={formData.country}
+              region={formData.region}
+              update={update}
+            />
           </div>
         )}
 
         {/* ── Step 1: Financials ── */}
         {step === 1 && (
           <div className="space-y-5">
-            <Field label="Annual Revenue (USD)">
+            <Field label="Annual Revenue (CAD)">
               <MoneyInput
                 value={formData.revenue}
                 onChange={(v) => update({ revenue: v })}
                 placeholder="500000"
               />
             </Field>
-            <Field label="Annual Net Profit (USD)">
+            <Field label="Annual Net Profit (CAD)">
               <MoneyInput
                 value={formData.netProfit}
                 onChange={(v) => update({ netProfit: v })}
@@ -927,6 +1004,7 @@ export default function ValuateClient({
                 className={inputCls}
               />
             </Field>
+            <p className="text-xs text-slate-400">All figures in Canadian dollars (CAD).</p>
           </div>
         )}
 

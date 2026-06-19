@@ -112,6 +112,7 @@ export async function POST(req: NextRequest) {
 
     const userContent = `Provide a business valuation for the following:
 
+Currency: All monetary figures below — and every figure in your response — are in Canadian dollars (CAD). Apply Canadian (and where relevant comparable North American) SMB transaction multiples and benchmarks.
 Industry: <industry>${sanitize(industry)}</industry>
 Location: <location>${sanitize(region)}, ${sanitize(country)}</location>
 Annual Revenue: $${Number(revenue).toLocaleString()}

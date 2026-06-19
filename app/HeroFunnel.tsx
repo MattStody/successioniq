@@ -31,7 +31,7 @@ export default function HeroFunnel() {
         {!range ? (
           <>
             <h2 className="text-lg font-semibold text-slate-900 mb-1">
-              What&apos;s your annual revenue?
+              What&apos;s your annual revenue? <span className="text-slate-400 font-normal">(CAD)</span>
             </h2>
             <p className="text-sm text-slate-500 mb-6">
               Get an instant value range — no account needed yet.
@@ -97,11 +97,12 @@ export default function HeroFunnel() {
               typically worth
             </p>
             <div className="text-4xl sm:text-5xl font-bold text-slate-900 mb-2 tracking-tight">
-              {fmtMoney(range.low)} – {fmtMoney(range.high)}
+              {fmtMoney(range.low)} – {fmtMoney(range.high)}{" "}
+              <span className="text-lg font-semibold text-slate-400">CAD</span>
             </div>
             <p className="text-xs text-slate-400 mb-6">
-              Based on revenue multiples for your industry. Add a few details to reveal
-              your exact, AI-backed figure.
+              Based on revenue multiples for your industry, in Canadian dollars. Add a few
+              details to reveal your exact, AI-backed figure.
             </p>
 
             <Link
