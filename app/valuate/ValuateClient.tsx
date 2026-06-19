@@ -334,6 +334,49 @@ function LoadingView() {
 
 // ─── Results view ─────────────────────────────────────────────────────────────
 
+function ListYourBusinessCTA({
+  isLoggedIn,
+  listingHref,
+  tone = "light",
+}: {
+  isLoggedIn: boolean;
+  listingHref: string;
+  tone?: "light" | "onDark";
+}) {
+  const router = useRouter();
+  const base =
+    "inline-block px-10 py-4 rounded-xl text-lg font-semibold transition-all shadow-md hover:-translate-y-0.5";
+  const cls =
+    tone === "onDark"
+      ? "bg-white text-blue-900 hover:bg-blue-50"
+      : "bg-blue-900 text-white hover:bg-blue-800";
+  const label = isLoggedIn
+    ? "List your business for sale →"
+    : "Create your free account to list →";
+
+  if (isLoggedIn) {
+    return (
+      <Link href={listingHref} className={`${base} ${cls}`}>
+        {label}
+      </Link>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (typeof window !== "undefined") {
+          localStorage.setItem(PENDING_LISTING_KEY, listingHref);
+        }
+        router.push("/auth/signup");
+      }}
+      className={`${base} ${cls}`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function ResultsView({
   result,
   formData,
@@ -343,7 +386,6 @@ function ResultsView({
   formData: FormData;
   isLoggedIn: boolean;
 }) {
-  const router = useRouter();
   const listingHref = `/create-listing?industry=${encodeURIComponent(formData.industry)}&country=${encodeURIComponent(formData.country)}&region=${encodeURIComponent(formData.region)}&annual_revenue=${encodeURIComponent(formData.revenue)}&annual_profit=${encodeURIComponent(formData.netProfit)}&years_operating=${encodeURIComponent(formData.yearsInOperation)}&valuation_low=${encodeURIComponent(result.valuation_low)}&valuation_mid=${encodeURIComponent(result.valuation_mid)}&valuation_high=${encodeURIComponent(result.valuation_high)}&primary_method=${encodeURIComponent(result.primary_method)}&multiple_applied=${encodeURIComponent(String(result.multiple_applied))}&key_value_drivers=${encodeURIComponent(JSON.stringify(result.key_value_drivers))}&key_risks=${encodeURIComponent(JSON.stringify(result.key_risks))}`;
   const valuationSpan = result.valuation_high - result.valuation_low;
   const midPct =
@@ -440,6 +482,24 @@ function ResultsView({
         </div>
       </div>
 
+      {/* Prominent list CTA — placed at the moment of peak interest, right
+          under the number, so it isn't buried below the analysis. */}
+      <div className="bg-blue-900 rounded-2xl p-8 mb-6 shadow-md text-center">
+        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white mb-2">
+          Ready to find the right buyer?
+        </h2>
+        <p className="text-blue-200 text-sm mb-6 max-w-md mx-auto leading-relaxed">
+          Turn this valuation into a confidential listing in one click. We&apos;ll write
+          the description for you and put it in front of qualified buyers.
+        </p>
+        <ListYourBusinessCTA isLoggedIn={isLoggedIn} listingHref={listingHref} tone="onDark" />
+        {!isLoggedIn && (
+          <p className="mt-3 text-xs text-blue-300">
+            Free to create. Your valuation is saved and ready to publish.
+          </p>
+        )}
+      </div>
+
       {/* Drivers & Risks */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -494,29 +554,7 @@ function ResultsView({
           List your business on SuccessionIQ and connect with vetted private equity firms,
           family offices, and strategic acquirers.
         </p>
-        {isLoggedIn ? (
-          <Link
-            href={listingHref}
-            className="inline-block bg-blue-900 hover:bg-blue-800 text-white px-10 py-4 rounded-xl font-semibold transition-all shadow-md hover:-translate-y-0.5"
-          >
-            List your business for sale →
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              // Stash where they were headed so we can return them here, fully
-              // prefilled, right after they create their account.
-              if (typeof window !== "undefined") {
-                localStorage.setItem(PENDING_LISTING_KEY, listingHref);
-              }
-              router.push("/auth/signup");
-            }}
-            className="inline-block bg-blue-900 hover:bg-blue-800 text-white px-10 py-4 rounded-xl font-semibold transition-all shadow-md hover:-translate-y-0.5"
-          >
-            Create your free account to list →
-          </button>
-        )}
+        <ListYourBusinessCTA isLoggedIn={isLoggedIn} listingHref={listingHref} tone="light" />
         {!isLoggedIn && (
           <p className="mt-3 text-xs text-slate-400">
             Free to create. Your valuation is saved and ready to publish.
