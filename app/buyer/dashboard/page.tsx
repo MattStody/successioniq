@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Listing, BuyerProfile } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
 import BookmarkButton from "@/components/BookmarkButton";
+import SignOutButton from "@/components/SignOutButton";
 import GenerateMatchesButton from "./GenerateMatchesButton";
 
 function fmtCurrency(n: number): string {
@@ -105,9 +106,12 @@ export default async function BuyerDashboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-16">
       {/* Header */}
-      <div className="mb-12">
-        <p className="text-sm text-slate-400 mb-1">Welcome back</p>
-        <h1 className="font-serif text-4xl font-bold text-slate-900">{firstName}</h1>
+      <div className="mb-12 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm text-slate-400 mb-1">Welcome back</p>
+          <h1 className="font-serif text-4xl font-bold text-slate-900">{firstName}</h1>
+        </div>
+        <SignOutButton />
       </div>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-10 items-start">

@@ -269,6 +269,37 @@ function IndustryChips({ value, onChange }: { value: string; onChange: (v: strin
   );
 }
 
+// Full-width tap-to-select buttons (handles long option text like the
+// customer-concentration descriptions). Replaces dropdowns for faster input.
+function ChoiceButtons({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
+  return (
+    <div className="space-y-2">
+      {options.map((opt) => (
+        <button
+          type="button"
+          key={opt}
+          onClick={() => onChange(opt)}
+          className={`w-full text-left rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+            value === opt
+              ? "bg-blue-900 text-white border-blue-900 shadow-sm"
+              : "bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:text-slate-900"
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function StepProgress({ current }: { current: number }) {
   return (
     <div className="flex items-start gap-0 mb-10">
@@ -458,9 +489,7 @@ function ListYourBusinessCTA({
     tone === "onDark"
       ? "bg-white text-blue-900 hover:bg-blue-50"
       : "bg-blue-900 text-white hover:bg-blue-800";
-  const label = isLoggedIn
-    ? "List your business for sale →"
-    : "Create your free account to list →";
+  const label = "List your business →";
 
   if (isLoggedIn) {
     return (
@@ -1012,11 +1041,10 @@ export default function ValuateClient({
         {step === 2 && (
           <div className="space-y-6">
             <Field label="Revenue Trend (Last 3 Years)">
-              <SelectInput
+              <ChoiceButtons
                 value={formData.revenueTrend}
                 onChange={(v) => update({ revenueTrend: v })}
                 options={REVENUE_TRENDS}
-                placeholder="Select trend…"
               />
             </Field>
 
@@ -1040,11 +1068,10 @@ export default function ValuateClient({
             </Field>
 
             <Field label="Customer Concentration">
-              <SelectInput
+              <ChoiceButtons
                 value={formData.customerConcentration}
                 onChange={(v) => update({ customerConcentration: v })}
                 options={CUSTOMER_CONCENTRATIONS}
-                placeholder="Select concentration…"
               />
             </Field>
           </div>

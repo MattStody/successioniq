@@ -6,8 +6,8 @@ import CTAButton from "./CTAButton";
 
 const NAV_LINKS = [
   { href: "/how-it-works", label: "How It Works" },
-  { href: "/for-sellers", label: "For Sellers" },
-  { href: "/for-buyers", label: "For Buyers" },
+  { href: "/for-sellers", label: "Sell" },
+  { href: "/for-buyers", label: "Buy" },
   { href: "/about", label: "About" },
 ];
 

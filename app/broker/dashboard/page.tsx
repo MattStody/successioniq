@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Listing, ListingStatus } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
 import DeleteListingButton from "@/app/listings/[id]/DeleteListingButton";
+import SignOutButton from "@/components/SignOutButton";
 
 function fmtCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -85,7 +86,8 @@ export default async function BrokerDashboardPage() {
         </div>
 
         {/* CTAs */}
-        <div className="flex gap-3 flex-shrink-0">
+        <div className="flex gap-3 flex-shrink-0 items-center">
+          <SignOutButton />
           <Link
             href="/valuate"
             className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 text-sm font-medium transition-colors bg-white"

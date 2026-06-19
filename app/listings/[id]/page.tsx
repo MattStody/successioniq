@@ -195,6 +195,42 @@ export default async function ListingPage({
             </div>
           </div>
 
+          {/* Owner: encourage completing the profile */}
+          {isOwner && (listing.profile_completeness ?? 0) < 100 && (
+            <div className="bg-blue-900 rounded-2xl p-6 mb-6 shadow-sm">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="max-w-md">
+                  <h3 className="text-lg font-semibold text-white mb-1">
+                    Make your listing stand out
+                  </h3>
+                  <p className="text-sm text-blue-200 leading-relaxed">
+                    Listings with a complete profile get far more serious buyer interest.
+                    Add your operations, assets, and deal terms — it only takes a few minutes.
+                  </p>
+                </div>
+                <Link
+                  href={`/seller/profile/${listing.id}`}
+                  className="flex-shrink-0 bg-white text-blue-900 hover:bg-blue-50 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+                >
+                  Complete your profile →
+                </Link>
+              </div>
+              {listing.profile_completeness != null && (
+                <div className="mt-4">
+                  <div className="flex justify-between text-xs text-blue-200 mb-1.5">
+                    <span>Profile {listing.profile_completeness}% complete</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-blue-800 overflow-hidden">
+                    <div
+                      className="h-full bg-white rounded-full transition-all"
+                      style={{ width: `${listing.profile_completeness}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Financials */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-5">

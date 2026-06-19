@@ -76,7 +76,25 @@ export default function ListingTabs({
 
   const [activeTab, setActiveTab] = useState("overview")
 
-  if (tabs.length === 1) return null
+  // Overview content (description, what's included, drivers, risks) generated at
+  // listing time. Always render it — even when there are no extra tabs yet, so a
+  // freshly-published listing still shows everything.
+  const overview = (
+    <div className="space-y-6">
+      {descriptionContent}
+      {whatsIncludedContent}
+      <div className="grid sm:grid-cols-2 gap-6">
+        {transitionContent}
+        {preferredBuyerContent}
+      </div>
+      <div className="grid sm:grid-cols-2 gap-6">
+        {valueDriversContent}
+        {risksContent}
+      </div>
+    </div>
+  )
+
+  if (tabs.length === 1) return overview
 
   return (
     <div>
@@ -99,20 +117,7 @@ export default function ListingTabs({
       </div>
 
       {/* Overview tab */}
-      {activeTab === "overview" && (
-        <div className="space-y-6">
-          {descriptionContent}
-          {whatsIncludedContent}
-          <div className="grid sm:grid-cols-2 gap-6">
-            {transitionContent}
-            {preferredBuyerContent}
-          </div>
-          <div className="grid sm:grid-cols-2 gap-6">
-            {valueDriversContent}
-            {risksContent}
-          </div>
-        </div>
-      )}
+      {activeTab === "overview" && overview}
 
       {/* Operations tab */}
       {activeTab === "operations" && (
