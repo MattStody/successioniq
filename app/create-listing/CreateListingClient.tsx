@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { impliedEarningsFromValuation, fmtMultiple } from "@/lib/financials";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -15,6 +17,8 @@ interface ValuationParams {
   valuation_low: number;
   valuation_mid: number;
   valuation_high: number;
+  primary_method: string;
+  multiple_applied: number;
   key_value_drivers: string[];
   key_risks: string[];
 }
@@ -80,6 +84,17 @@ function PreviewPanel({
       ? `${valuation.industry} Business`
       : form.business_name;
 
+  const { ebitda: previewEbitda } = impliedEarningsFromValuation({
+    valuationMid: valuation.valuation_mid,
+    multipleApplied: valuation.multiple_applied,
+    primaryMethod: valuation.primary_method,
+  });
+  const previewPrice = form.asking_price
+    ? Number(form.asking_price)
+    : valuation.valuation_mid;
+  const previewMultiple =
+    previewEbitda && previewEbitda > 0 ? previewPrice / previewEbitda : null;
+
   return (
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
       {/* Header */}
@@ -125,6 +140,22 @@ function PreviewPanel({
               {fmtCurrency(valuation.annual_profit)}
             </div>
           </div>
+          {previewEbitda != null && (
+            <div className="bg-slate-50 rounded-xl p-4">
+              <div className="text-xs text-slate-400 mb-1">EBITDA</div>
+              <div className="text-lg font-bold text-slate-900">
+                {fmtCurrency(previewEbitda)}
+              </div>
+            </div>
+          )}
+          {previewMultiple != null && (
+            <div className="bg-slate-50 rounded-xl p-4">
+              <div className="text-xs text-slate-400 mb-1">Multiple</div>
+              <div className="text-lg font-bold text-slate-900">
+                {fmtMultiple(previewMultiple)}
+              </div>
+            </div>
+          )}
           <div className="bg-slate-50 rounded-xl p-4">
             <div className="text-xs text-slate-400 mb-1">Asking Price</div>
             <div className="text-lg font-bold text-slate-900">
@@ -241,6 +272,8 @@ export default function CreateListingClient() {
         valuation_low: Number(searchParams.get("valuation_low") ?? 0),
         valuation_mid: Number(searchParams.get("valuation_mid") ?? 0),
         valuation_high: Number(searchParams.get("valuation_high") ?? 0),
+        primary_method: searchParams.get("primary_method") ?? "",
+        multiple_applied: Number(searchParams.get("multiple_applied") ?? 0),
         key_value_drivers: JSON.parse(
           searchParams.get("key_value_drivers") ?? "[]"
         ),
@@ -251,6 +284,18 @@ export default function CreateListingClient() {
       // Missing or malformed params — user came directly to page
     }
   }, [searchParams]);
+
+  // Pre-fill the contact email with the signed-in user's address — they're
+  // already authenticated to publish, so retyping it is pure friction.
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const email = data.user?.email;
+      if (email) {
+        setForm((prev) => (prev.contact_email ? prev : { ...prev, contact_email: email }));
+      }
+    });
+  }, []);
 
   const generateDescription = useCallback(async () => {
     if (!valuation) return;
@@ -263,6 +308,14 @@ export default function CreateListingClient() {
       });
       const data = await res.json();
       if (data.description) setDescription(data.description);
+      // Seed the supporting fields with first drafts, but never overwrite
+      // anything the seller has already typed.
+      setForm((prev) => ({
+        ...prev,
+        whats_included: prev.whats_included || data.whats_included || "",
+        transition_period: prev.transition_period || data.transition_period || "",
+        preferred_buyer: prev.preferred_buyer || data.preferred_buyer || "",
+      }));
     } catch {
       // silently fail — user can regenerate
     } finally {
@@ -277,13 +330,9 @@ export default function CreateListingClient() {
     }
   }, [valuation, description, descLoading, generateDescription]);
 
-  const canPublish =
-    description &&
-    form.whats_included &&
-    form.transition_period &&
-    form.preferred_buyer &&
-    form.contact_email &&
-    valuation;
+  // Only a description and a contact email gate publishing — everything else
+  // is AI-prefilled and refinable later via the seller profile builder.
+  const canPublish = description && form.contact_email && valuation;
 
   const handlePublish = async () => {
     if (!canPublish || !valuation) return;
@@ -291,6 +340,14 @@ export default function CreateListingClient() {
     setError(null);
 
     try {
+      // Carry the valuation's implied EBITDA/SDE onto the listing so its
+      // financial header is populated without manual re-entry.
+      const { ebitda, sde } = impliedEarningsFromValuation({
+        valuationMid: valuation.valuation_mid,
+        multipleApplied: valuation.multiple_applied,
+        primaryMethod: valuation.primary_method,
+      });
+
       const payload = {
         industry: valuation.industry,
         country: valuation.country,
@@ -301,14 +358,23 @@ export default function CreateListingClient() {
         valuation_low: valuation.valuation_low,
         valuation_mid: valuation.valuation_mid,
         valuation_high: valuation.valuation_high,
+        ebitda,
+        sde,
         key_value_drivers: valuation.key_value_drivers,
         key_risks: valuation.key_risks,
         description,
         is_anonymous: form.is_anonymous,
         business_name: form.is_anonymous ? null : form.business_name || null,
-        whats_included: form.whats_included,
-        transition_period: form.transition_period,
-        preferred_buyer: form.preferred_buyer,
+        // These columns are NOT NULL; fall back to sensible defaults so a
+        // seller can publish fast and refine later.
+        whats_included:
+          form.whats_included || "Full details provided to qualified buyers upon NDA.",
+        transition_period:
+          form.transition_period ||
+          "Reasonable transition and handover available; terms negotiable.",
+        preferred_buyer:
+          form.preferred_buyer ||
+          "Open to qualified individual, strategic, and financial buyers.",
         contact_email: form.contact_email,
         asking_price: form.asking_price ? Number(form.asking_price) : null,
         status: "active",
@@ -492,9 +558,13 @@ export default function CreateListingClient() {
 
           {/* Listing Details */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-slate-900 mb-5 pb-4 border-b border-slate-200">
-              Listing Details
-            </h2>
+            <div className="mb-5 pb-4 border-b border-slate-200">
+              <h2 className="text-base font-semibold text-slate-900">Listing Details</h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                AI-drafted from your valuation — optional, edit or leave as-is. You can
+                refine everything later from your listing.
+              </p>
+            </div>
             <div className="space-y-5">
               <Field
                 label="What's Included in the Sale"

@@ -5,8 +5,8 @@ import { z } from "zod";
 const BuyerProfileSchema = z.object({
   full_name: z.string().min(1).max(200),
   phone: z.string().max(30).nullable().optional(),
-  capital_min: z.number().min(0),
-  capital_max: z.number().min(0),
+  capital_min: z.number().min(0).max(1_000_000_000_000),
+  capital_max: z.number().min(0).max(1_000_000_000_000),
   preferred_industries: z.array(z.string().max(100)).min(1),
   preferred_countries: z.array(z.string().max(100)).min(1),
   preferred_regions: z.array(z.string().max(100)).nullable().optional(),
@@ -19,6 +19,9 @@ const BuyerProfileSchema = z.object({
     price_changes: z.boolean(),
     weekly_digest: z.boolean(),
   }),
+}).refine((d) => d.capital_max >= d.capital_min, {
+  message: "capital_max must be greater than or equal to capital_min",
+  path: ["capital_max"],
 });
 
 export async function GET() {
@@ -69,7 +72,7 @@ export async function POST(request: Request) {
 
   const parsed = BuyerProfileSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   const payload = {

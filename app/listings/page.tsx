@@ -5,11 +5,13 @@ import { getIndustryImage } from "@/lib/industry-image";
 import { calculateCompleteness, completenessLabel } from "@/lib/profile-completeness";
 import Link from "next/link";
 import BookmarkButton from "@/components/BookmarkButton";
+import ListingsFilterBar, { SortOption } from "./ListingsFilterBar";
+import SortControl from "./SortControl";
+import { deriveFinancials, fmtMoney, fmtMultiple, INDUSTRIES } from "@/lib/financials";
 
-function fmtCurrency(n: number): string {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
-  return `$${n.toLocaleString()}`;
+// The price shown on a card is asking_price when set, else the mid valuation.
+function effectivePrice(l: Listing): number {
+  return l.asking_price ?? l.valuation_mid;
 }
 
 function scoreColor(score: number) {
@@ -18,23 +20,41 @@ function scoreColor(score: number) {
   return "bg-slate-50 text-slate-500 border-slate-200";
 }
 
+// Drawn from the canonical INDUSTRIES taxonomy so every filter option can
+// actually match a listing (the old hand-rolled list included "SaaS", which
+// no listing is ever created with, so that filter always returned nothing).
 const FILTER_INDUSTRIES = [
   "All Industries",
-  "SaaS",
-  "Healthcare",
-  "Manufacturing",
-  "Retail",
-  "Professional Services",
-  "Technology",
-  "Construction/Trades",
+  ...INDUSTRIES.filter((i) => i !== "Other"),
 ];
 
 export default async function ListingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ industry?: string }>;
+  searchParams: Promise<{
+    industry?: string;
+    q?: string;
+    region?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    minRevenue?: string;
+    sort?: string;
+  }>;
 }) {
-  const { industry: industryFilter } = await searchParams;
+  const {
+    industry: industryFilter,
+    q,
+    region: regionFilter,
+    minPrice: minPriceRaw,
+    maxPrice: maxPriceRaw,
+    minRevenue: minRevenueRaw,
+    sort: sortRaw,
+  } = await searchParams;
+
+  const searchTerm = (q ?? "").trim().toLowerCase();
+  const minPrice = minPriceRaw ? Number(minPriceRaw) : null;
+  const maxPrice = maxPriceRaw ? Number(maxPriceRaw) : null;
+  const minRevenue = minRevenueRaw ? Number(minRevenueRaw) : null;
 
   const supabase = await createSupabaseServerClient();
 
@@ -88,10 +108,67 @@ export default async function ListingsPage({
   }
 
   const { data, error } = await query;
-  let listings: Listing[] = error ? [] : (data as Listing[]);
+  const allListings: Listing[] = error ? [] : (data as Listing[]);
 
-  // Sort by match score for buyers; unmatched listings fall to the end
-  if (isBuyer && matchMap.size > 0) {
+  const hasMatches = isBuyer && matchMap.size > 0;
+
+  // Region options reflect what's available within the current industry filter.
+  const regions = Array.from(
+    new Set(allListings.map((l) => l.region).filter(Boolean))
+  ).sort();
+
+  // Apply the in-memory filters (search / region / price / revenue) against the
+  // values shown on the cards, including the anonymized display name.
+  let listings = allListings.filter((l) => {
+    if (regionFilter && l.region !== regionFilter) return false;
+
+    if (minRevenue !== null && l.annual_revenue < minRevenue) return false;
+
+    const price = effectivePrice(l);
+    if (minPrice !== null && price < minPrice) return false;
+    if (maxPrice !== null && price > maxPrice) return false;
+
+    if (searchTerm) {
+      const haystack = [
+        getListingDisplayName(l),
+        l.industry,
+        l.region,
+        l.country,
+        l.tagline ?? "",
+        l.description,
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(searchTerm)) return false;
+    }
+
+    return true;
+  });
+
+  const margin = (l: Listing) =>
+    l.annual_revenue > 0 ? l.annual_profit / l.annual_revenue : 0;
+
+  // Sort: explicit sort param wins; otherwise buyers see best-match ordering.
+  const sort = (sortRaw as SortOption | undefined) ?? "";
+  if (sort === "newest" || (!sort && !hasMatches)) {
+    listings.sort((a, b) => b.created_at.localeCompare(a.created_at));
+  } else if (sort === "oldest") {
+    listings.sort((a, b) => a.created_at.localeCompare(b.created_at));
+  } else if (sort === "price_asc") {
+    listings.sort((a, b) => effectivePrice(a) - effectivePrice(b));
+  } else if (sort === "price_desc") {
+    listings.sort((a, b) => effectivePrice(b) - effectivePrice(a));
+  } else if (sort === "revenue_desc") {
+    listings.sort((a, b) => b.annual_revenue - a.annual_revenue);
+  } else if (sort === "profit_desc") {
+    listings.sort((a, b) => b.annual_profit - a.annual_profit);
+  } else if (sort === "margin_desc") {
+    listings.sort((a, b) => margin(b) - margin(a));
+  } else if (sort === "ebitda_desc") {
+    // Listings without a reported EBITDA sort to the end.
+    listings.sort((a, b) => (b.ebitda ?? -Infinity) - (a.ebitda ?? -Infinity));
+  } else if (hasMatches) {
+    // Default for buyers with matches: match score, unmatched listings last.
     listings = [
       ...listings
         .filter((l) => matchMap.has(l.id))
@@ -102,11 +179,14 @@ export default async function ListingsPage({
     ];
   }
 
-  const hasMatches = isBuyer && matchMap.size > 0;
+  const filtersActive = Boolean(
+    searchTerm || regionFilter || minPrice !== null || maxPrice !== null || minRevenue !== null
+  );
+  const usingMatchSort = hasMatches && !sort;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-24">
-      <div className="mb-12">
+      <div className="mb-10">
         <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 text-slate-900">
           Business Listings
         </h1>
@@ -116,57 +196,91 @@ export default async function ListingsPage({
         </p>
       </div>
 
-      {/* Filter bar */}
-      <div className="flex gap-3 mb-6 flex-wrap">
-        {FILTER_INDUSTRIES.map((f) => {
-          const isActive =
-            f === "All Industries"
-              ? !industryFilter || industryFilter === "All Industries"
-              : industryFilter === f;
-          return (
-            <Link
-              key={f}
-              href={
-                f === "All Industries"
-                  ? "/listings"
-                  : `/listings?industry=${encodeURIComponent(f)}`
-              }
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-blue-900 text-white"
-                  : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900"
-              }`}
-            >
-              {f}
-            </Link>
-          );
-        })}
-      </div>
+      <div className="grid lg:grid-cols-[260px_1fr] gap-8 items-start">
+        {/* ── Left: filter rail ── */}
+        <aside className="lg:sticky lg:top-24 space-y-4">
+          {/* Industry — vertical list, preserves other active filters */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
+              Industry
+            </p>
+            <div className="space-y-1">
+              {FILTER_INDUSTRIES.map((f) => {
+                const isActive =
+                  f === "All Industries"
+                    ? !industryFilter || industryFilter === "All Industries"
+                    : industryFilter === f;
+                const pillParams = new URLSearchParams();
+                if (searchTerm) pillParams.set("q", q ?? "");
+                if (regionFilter) pillParams.set("region", regionFilter);
+                if (minPriceRaw) pillParams.set("minPrice", minPriceRaw);
+                if (maxPriceRaw) pillParams.set("maxPrice", maxPriceRaw);
+                if (minRevenueRaw) pillParams.set("minRevenue", minRevenueRaw);
+                if (sortRaw) pillParams.set("sort", sortRaw);
+                if (f !== "All Industries") pillParams.set("industry", f);
+                const qs = pillParams.toString();
+                return (
+                  <Link
+                    key={f}
+                    href={qs ? `/listings?${qs}` : "/listings"}
+                    className={`block rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-blue-900 text-white"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    }`}
+                  >
+                    {f}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
 
-      {hasMatches && (
-        <p className="text-sm text-slate-500 mb-8 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-900 inline-block" />
-          Based on your criteria — sorted by match score
-        </p>
-      )}
+          <ListingsFilterBar regions={regions} />
+        </aside>
 
-      {/* Listing cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {/* ── Right: results ── */}
+        <div>
+          {/* Top bar: result count / match note + sort */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-slate-500 flex items-center gap-1.5">
+              {usingMatchSort ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-900 inline-block" />
+                  Based on your criteria — sorted by match score
+                </>
+              ) : (
+                <>
+                  {listings.length}
+                  {filtersActive ? ` of ${allListings.length}` : ""} active listing
+                  {allListings.length !== 1 ? "s" : ""}
+                </>
+              )}
+            </p>
+            <SortControl hasMatches={hasMatches} />
+          </div>
+
+          {/* Listing cards */}
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
         {listings.length === 0 && !error ? (
-          <div className="col-span-3 py-24 text-center">
+          <div className="col-span-full py-24 text-center">
             <p className="text-slate-400 text-sm">
               No listings found
               {industryFilter && industryFilter !== "All Industries"
                 ? ` in ${industryFilter}`
                 : ""}
-              . Check back soon.
+              {searchTerm ? ` matching “${q}”` : ""}
+              {filtersActive || (industryFilter && industryFilter !== "All Industries")
+                ? ". Try widening your filters."
+                : ". Check back soon."}
             </p>
           </div>
         ) : (
           listings.map((l) => {
             const displayName = getListingDisplayName(l);
-            const askingPrice = l.asking_price ?? l.valuation_mid;
-            const profitMargin = ((l.annual_profit / l.annual_revenue) * 100).toFixed(1);
+            const fin = deriveFinancials(l);
+            const askingPrice = fin.effectivePrice;
+            const profitMargin = (fin.profitMargin ?? 0).toFixed(1);
             const match = matchMap.get(l.id);
 
             return (
@@ -232,23 +346,41 @@ export default async function ListingsPage({
                   <div>
                     <div className="text-xs text-slate-400 mb-1">Revenue</div>
                     <div className="text-lg font-semibold text-slate-900">
-                      {fmtCurrency(l.annual_revenue)}
+                      {fmtMoney(l.annual_revenue)}
                     </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-slate-400 mb-1">Profit</div>
-                    <div className="text-lg font-semibold text-slate-900">
-                      {fmtCurrency(l.annual_profit)}
+                  {fin.ebitda != null ? (
+                    <div>
+                      <div className="text-xs text-slate-400 mb-1">EBITDA</div>
+                      <div className="text-lg font-semibold text-slate-900">
+                        {fmtMoney(fin.ebitda)}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400 mb-1">Margin</div>
-                    <div className="text-lg font-semibold text-slate-900">{profitMargin}%</div>
-                  </div>
+                  ) : (
+                    <div>
+                      <div className="text-xs text-slate-400 mb-1">Profit</div>
+                      <div className="text-lg font-semibold text-slate-900">
+                        {fmtMoney(l.annual_profit)}
+                      </div>
+                    </div>
+                  )}
+                  {fin.multiple != null ? (
+                    <div>
+                      <div className="text-xs text-slate-400 mb-1">Multiple</div>
+                      <div className="text-lg font-semibold text-slate-900">
+                        {fmtMultiple(fin.multiple)}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="text-xs text-slate-400 mb-1">Margin</div>
+                      <div className="text-lg font-semibold text-slate-900">{profitMargin}%</div>
+                    </div>
+                  )}
                   <div>
                     <div className="text-xs text-slate-400 mb-1">Asking Price</div>
                     <div className="text-lg font-semibold text-slate-900">
-                      {fmtCurrency(askingPrice)}
+                      {fmtMoney(askingPrice)}
                     </div>
                   </div>
                 </div>
@@ -271,22 +403,28 @@ export default async function ListingsPage({
           })
         )}
 
-        {/* Coming soon card */}
-        <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[240px]">
-          <div className="text-3xl mb-3">🔍</div>
-          <p className="text-slate-400 text-sm max-w-[160px]">
-            More listings added weekly. Check back soon.
-          </p>
-        </div>
+        {/* Coming soon card — only when browsing unfiltered */}
+        {!filtersActive && listings.length > 0 && (
+          <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[240px]">
+            <div className="text-3xl mb-3">🔍</div>
+            <p className="text-slate-400 text-sm max-w-[160px]">
+              More listings added weekly. Check back soon.
+            </p>
+          </div>
+        )}
       </div>
 
-      {listings.length > 0 && (
-        <div className="text-center">
-          <p className="text-slate-400 text-sm">
-            Showing {listings.length} active listing{listings.length !== 1 ? "s" : ""}
-          </p>
+          {listings.length > 0 && (
+            <div className="text-center">
+              <p className="text-slate-400 text-sm">
+                Showing {listings.length}
+                {filtersActive ? ` of ${allListings.length}` : ""} active listing
+                {allListings.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

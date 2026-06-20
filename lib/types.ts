@@ -23,7 +23,9 @@ export interface Listing {
   whats_included: string;
   transition_period: string;
   preferred_buyer: string;
-  contact_email: string;
+  /** Stored in the protected listing_contacts table, not on listings — see
+   *  migration 015. Revealed to buyers via reveal_listing_contact() post-NDA. */
+  contact_email?: string;
   key_value_drivers: string[];
   key_risks: string[];
   user_id: string | null;
@@ -66,6 +68,16 @@ export interface Listing {
   non_compete_willing?: boolean | null;
   reason_for_sale_detail?: string | null;
   profile_completeness?: number | null;
+  // Snapshot financials (migration 013). Margin / multiple / growth are derived.
+  ebitda?: number | null;
+  adjusted_ebitda?: number | null;
+  sde?: number | null;
+  gross_profit?: number | null;
+  revenue_prior_year?: number | null;
+  ebitda_prior_year?: number | null;
+  mrr?: number | null;
+  arr?: number | null;
+  customer_concentration_percent?: number | null;
 }
 
 export interface Valuation {

@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 const DescriptionSchema = z.object({
   industry: z.string().min(1).max(100),
@@ -24,17 +25,28 @@ const client = new Anthropic();
 
 const SYSTEM_PROMPT = `You are an expert business broker who writes compelling, confidential listing descriptions for businesses for sale. Your descriptions are professional, factual, and highlight genuine strengths without being hyperbolic. You write for sophisticated buyers including private equity firms, family offices, and strategic acquirers.
 
-Write descriptions that:
-- Lead with the strongest value proposition
-- Include concrete financial performance details
-- Highlight operational strengths and market position
-- Mention growth opportunities naturally
-- Remain confidential (no specific company names or identifying details)
-- Are structured in exactly 3 paragraphs
-- Total length: 180-220 words`;
+Write a "description" that:
+- Leads with the strongest value proposition
+- Includes concrete financial performance details
+- Highlights operational strengths and market position
+- Mentions growth opportunities naturally
+- Remains confidential (no specific company names or identifying details)
+- Is structured in exactly 3 paragraphs, separated by blank lines
+- Total length: 180-220 words
+
+You also draft three short supporting fields, inferred reasonably from the business type and financials:
+- "whats_included": 1-2 sentences on what typically conveys in a sale like this (assets, staff, customer contracts, IP, systems).
+- "transition_period": one short sentence offering a sensible owner transition / handover.
+- "preferred_buyer": one short sentence describing the ideal acquirer for this business.
+
+Respond ONLY with a valid JSON object, no markdown and no preamble, in exactly this shape:
+{"description": "<3 paragraphs separated by \\n\\n>", "whats_included": "<text>", "transition_period": "<text>", "preferred_buyer": "<text>"}`;
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = enforceRateLimit(req, "generate-description", LIMITS.generateDescription.limit, LIMITS.generateDescription.windowMs);
+    if (limited) return limited;
+
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -74,7 +86,8 @@ export async function POST(req: NextRequest) {
       key_risks,
     } = parsed.data;
 
-    const profitMargin = ((annual_profit / annual_revenue) * 100).toFixed(1);
+    const profitMargin =
+      annual_revenue > 0 ? ((annual_profit / annual_revenue) * 100).toFixed(1) : "0.0";
     const driversText = key_value_drivers.map((d, i) => `${i + 1}. ${sanitize(d)}`).join("\n");
     const risksText = key_risks.map((r, i) => `${i + 1}. ${sanitize(r)}`).join("\n");
 
@@ -93,11 +106,11 @@ ${driversText}
 Key Risks (acknowledge briefly, frame constructively):
 ${risksText}
 
-Write exactly 3 paragraphs. Do not include a heading or title. Do not mention the business by name.`;
+Return the JSON object described in the system prompt. The description must be exactly 3 paragraphs, no heading or title, and must not mention the business by name.`;
 
     const response = await client.messages.create({
       model: "claude-opus-4-7",
-      max_tokens: 600,
+      max_tokens: 900,
       system: [
         {
           type: "text",
@@ -108,10 +121,31 @@ Write exactly 3 paragraphs. Do not include a heading or title. Do not mention th
       messages: [{ role: "user", content: userPrompt }],
     });
 
-    const description =
+    const raw =
       response.content[0].type === "text" ? response.content[0].text : "";
 
-    return NextResponse.json({ description });
+    // Prefer the structured JSON; fall back to treating the text as the
+    // description alone so the flow never hard-fails on a malformed response.
+    let out = {
+      description: raw,
+      whats_included: "",
+      transition_period: "",
+      preferred_buyer: "",
+    };
+    try {
+      const j = JSON.parse(raw);
+      out = {
+        description: typeof j.description === "string" ? j.description : "",
+        whats_included: typeof j.whats_included === "string" ? j.whats_included : "",
+        transition_period:
+          typeof j.transition_period === "string" ? j.transition_period : "",
+        preferred_buyer: typeof j.preferred_buyer === "string" ? j.preferred_buyer : "",
+      };
+    } catch {
+      // keep fallback (raw as description)
+    }
+
+    return NextResponse.json(out);
   } catch (err) {
     console.error("generate-description error:", err);
     return NextResponse.json(

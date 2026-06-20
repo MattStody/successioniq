@@ -7,11 +7,31 @@ export const metadata = {
     "Get an AI-powered business valuation in under 3 minutes. Free, no strings attached.",
 };
 
-export default async function ValuatePage() {
+export default async function ValuatePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ quick?: string; revenue?: string; industry?: string }>;
+}) {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return <ValuateClient isLoggedIn={!!user} />;
+  const { quick, revenue, industry } = await searchParams;
+  const quickMode = quick === "1";
+
+  return (
+    <ValuateClient
+      isLoggedIn={!!user}
+      quickMode={quickMode}
+      initialData={
+        quickMode
+          ? {
+              ...(revenue ? { revenue } : {}),
+              ...(industry ? { industry } : {}),
+            }
+          : undefined
+      }
+    />
+  );
 }

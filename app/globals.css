@@ -13,6 +13,17 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* SuccessionIQ palette — clean white + blue. (Brand tokens are kept so the
+   marketing pages share one source of truth; all map to the blue/white scheme.) */
+@theme {
+  --color-navy: #1e3a8a;
+  --color-navy-light: #1e40af;
+  --color-accent: #1e3a8a;
+  --color-accent-dark: #1e40af;
+  --color-cream: #F8F9FB;
+  --color-cream-deep: #e2e8f0;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

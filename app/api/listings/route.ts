@@ -16,6 +16,8 @@ const ListingSchema = z.object({
   valuation_low: z.number().nonnegative(),
   valuation_mid: z.number().nonnegative(),
   valuation_high: z.number().nonnegative(),
+  ebitda: z.number().nullable().optional(),
+  sde: z.number().nullable().optional(),
   description: z.string().min(1).max(5000),
   whats_included: z.string().min(1).max(2000),
   transition_period: z.string().min(1).max(200),
@@ -29,8 +31,8 @@ const PUBLIC_COLUMNS = [
   "id", "created_at", "status", "is_anonymous", "business_name",
   "industry", "country", "region", "annual_revenue", "annual_profit",
   "years_operating", "asking_price", "valuation_low", "valuation_mid",
-  "valuation_high", "description", "whats_included", "transition_period",
-  "preferred_buyer", "key_value_drivers", "key_risks",
+  "valuation_high", "ebitda", "sde", "description", "whats_included",
+  "transition_period", "preferred_buyer", "key_value_drivers", "key_risks",
 ].join(", ");
 
 async function createRouteClient() {
@@ -83,17 +85,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const payload = { ...parsed.data, user_id: user.id };
+    // contact_email lives in the protected listing_contacts table, not on the
+    // public listings row (see migration 015).
+    const { contact_email, ...listingFields } = parsed.data;
+    const payload = { ...listingFields, user_id: user.id };
 
     const { data, error } = await supabase
       .from("listings")
       .insert([payload])
-      .select()
+      .select("id")
       .single();
 
-    if (error) {
+    if (error || !data) {
       console.error("listings POST error:", error);
       return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+
+    const { error: contactError } = await supabase
+      .from("listing_contacts")
+      .insert([{ listing_id: data.id, contact_email }]);
+    if (contactError) {
+      // Listing exists; the seller can re-save contact details from the editor.
+      console.error("listing_contacts insert error:", contactError);
     }
 
     return NextResponse.json(data, { status: 201 });

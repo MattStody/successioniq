@@ -42,7 +42,7 @@ export default async function BuyerPublicProfilePage({
   if (!user) redirect("/auth/login");
 
   const { data, error } = await supabase
-    .from("buyer_profiles")
+    .from("buyer_public_profiles")
     .select(
       "full_name, buyer_type, acquisition_type, capital_min, capital_max, preferred_industries, preferred_countries, experience_years, background_summary, is_verified, created_at"
     )

@@ -2,8 +2,36 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { z } from "zod";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 const anthropic = new Anthropic();
+
+// Cap per-request work: each row fans out into a Claude call + an insert.
+const MAX_ROWS = 100;
+
+const BulkRowSchema = z
+  .object({
+    is_anonymous: z.union([z.boolean(), z.string()]).optional(),
+    business_name: z.string().max(200).nullable().optional(),
+    industry: z.string().min(1).max(100),
+    country: z.string().min(1).max(100),
+    region: z.string().min(1).max(100),
+    annual_revenue: z.coerce.number().nonnegative(),
+    annual_profit: z.coerce.number(),
+    years_operating: z.coerce.number().int().nonnegative(),
+    asking_price: z.coerce.number().nonnegative().nullable().optional(),
+    revenue_trend: z.string().max(100).optional(),
+    whats_included: z.string().min(1).max(2000),
+    transition_period: z.string().min(1).max(2000),
+    preferred_buyer: z.string().min(1).max(2000),
+    contact_email: z.string().email().max(254),
+  })
+  .passthrough();
+
+const BulkSchema = z.object({
+  rows: z.array(BulkRowSchema).min(1).max(MAX_ROWS),
+});
 
 const SYSTEM_PROMPT = `You are an expert business broker who writes compelling, confidential listing descriptions. Write exactly 2 professional paragraphs (total 120–160 words) for each business. Lead with the strongest value proposition. Include concrete financials and operational strengths. Do not use the business name or identifying details. No headings, no bullet points — flowing prose only.`;
 
@@ -58,6 +86,9 @@ What's Included: <whats_included>${whatsIncluded}</whats_included>`,
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = enforceRateLimit(req, "bulk-upload", LIMITS.bulkUpload.limit, LIMITS.bulkUpload.windowMs);
+    if (limited) return limited;
+
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -91,11 +122,21 @@ export async function POST(req: NextRequest) {
     }
 
 
-    const { rows } = await req.json() as { rows: Record<string, unknown>[] };
-
-    if (!rows || rows.length === 0) {
-      return NextResponse.json({ error: "No rows provided" }, { status: 400 });
+    let bodyJson: unknown;
+    try {
+      bodyJson = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
+
+    const parsedBody = BulkSchema.safeParse(bodyJson);
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        { error: `Invalid upload — check required fields and limit of ${MAX_ROWS} rows.` },
+        { status: 400 }
+      );
+    }
+    const rows = parsedBody.data.rows;
 
     // Generate descriptions for all rows in parallel
     const descriptions = await Promise.all(rows.map(generateDescription));
@@ -120,7 +161,6 @@ export async function POST(req: NextRequest) {
       whats_included: String(row.whats_included),
       transition_period: String(row.transition_period),
       preferred_buyer: String(row.preferred_buyer),
-      contact_email: String(row.contact_email),
       key_value_drivers: [],
       key_risks: [],
     }));
@@ -128,9 +168,24 @@ export async function POST(req: NextRequest) {
     // Insert all listings
     const results = await Promise.allSettled(
       payloads.map((payload) =>
-        supabase.from("listings").insert([payload]).select().single()
+        supabase.from("listings").insert([payload]).select("id").single()
       )
     );
+
+    // Store contact emails in the protected table for the listings that landed.
+    const contactRows = results
+      .map((result, i) =>
+        result.status === "fulfilled" && result.value.data
+          ? { listing_id: result.value.data.id, contact_email: String(rows[i].contact_email) }
+          : null
+      )
+      .filter((r): r is { listing_id: string; contact_email: string } => r !== null);
+    if (contactRows.length > 0) {
+      const { error: contactError } = await supabase
+        .from("listing_contacts")
+        .insert(contactRows);
+      if (contactError) console.error("bulk listing_contacts insert error:", contactError);
+    }
 
     const succeeded = results.filter((r) => r.status === "fulfilled" && !r.value.error).length;
     const failed = results.length - succeeded;

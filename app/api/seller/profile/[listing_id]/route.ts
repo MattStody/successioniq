@@ -12,6 +12,15 @@ const ProfileSchema = z.object({
   recurring_revenue_percent: z.number().int().min(0).max(100).optional().nullable(),
   competitive_advantages: z.string().max(2000).optional().nullable(),
   growth_opportunities: z.string().max(2000).optional().nullable(),
+  ebitda: z.number().optional().nullable(),
+  adjusted_ebitda: z.number().optional().nullable(),
+  sde: z.number().optional().nullable(),
+  gross_profit: z.number().optional().nullable(),
+  revenue_prior_year: z.number().min(0).optional().nullable(),
+  ebitda_prior_year: z.number().optional().nullable(),
+  mrr: z.number().min(0).optional().nullable(),
+  arr: z.number().min(0).optional().nullable(),
+  customer_concentration_percent: z.number().int().min(0).max(100).optional().nullable(),
   employee_count: z.number().int().min(0).optional().nullable(),
   full_time_employees: z.number().int().min(0).optional().nullable(),
   part_time_employees: z.number().int().min(0).optional().nullable(),
@@ -91,7 +100,7 @@ export async function PATCH(
     const parsed = ProfileSchema.safeParse(body)
     if (!parsed.success) {
       console.error("Profile PATCH validation error:", parsed.error.flatten())
-      return NextResponse.json({ error: "Invalid request body", details: parsed.error.flatten() }, { status: 400 })
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
     }
 
     const payload = parsed.data
@@ -111,7 +120,7 @@ export async function PATCH(
 
     if (updateError) {
       console.error("Profile update error:", updateError)
-      return NextResponse.json({ error: updateError.message, code: updateError.code }, { status: 500 })
+      return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
     }
 
     return NextResponse.json({ ok: true, profile_completeness })

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     // Fetch the listing to verify it exists and get contact details
     const { data: listing, error: listingError } = await supabase
       .from("listings")
-      .select("id, contact_email, business_name, is_anonymous, user_id")
+      .select("id, business_name, is_anonymous, user_id")
       .eq("id", listing_id)
       .single();
 
@@ -65,9 +65,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to record NDA" }, { status: 500 });
     }
 
+    // The NDA now exists, so the gated function returns the email to this buyer.
+    const { data: revealedEmail } = await supabase.rpc("reveal_listing_contact", {
+      p_listing_id: listing_id,
+    });
+
     return NextResponse.json({
       ok: true,
-      contact_email: listing.contact_email,
+      contact_email: revealedEmail ?? null,
       business_name: listing.is_anonymous ? listing.business_name : null,
     });
   } catch {

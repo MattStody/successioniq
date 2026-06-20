@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { z } from "zod"
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit"
 
 const AiSuggestSchema = z.object({
   section: z.string().min(1).max(100),
@@ -19,6 +20,9 @@ export async function POST(
   { params }: { params: Promise<{ listing_id: string }> }
 ) {
   try {
+    const limited = enforceRateLimit(req, "ai-suggest", LIMITS.sellerSuggestions.limit, LIMITS.sellerSuggestions.windowMs)
+    if (limited) return limited
+
     const { listing_id } = await params
 
     const cookieStore = await cookies()

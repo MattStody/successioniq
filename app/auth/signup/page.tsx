@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { consumePendingListingUrl, GATE_EMAIL_KEY } from "@/lib/post-auth";
 import type { UserRole } from "@/lib/types";
 
+// Broker is intentionally not self-selectable — that role is provisioned
+// server-side (see migration 014). Sellers and buyers self-onboard here.
 const ROLES: { value: UserRole; label: string; description: string }[] = [
   { value: "seller", label: "Seller", description: "I want to sell my business" },
   { value: "buyer", label: "Buyer", description: "I'm looking to acquire" },
-  { value: "broker", label: "Broker", description: "I represent sellers" },
 ];
 
 export default function SignUpPage() {
@@ -23,6 +25,12 @@ export default function SignUpPage() {
   const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+
+  // Carry the email entered at the valuation gate so Bob doesn't retype it.
+  useEffect(() => {
+    const gateEmail = window.localStorage.getItem(GATE_EMAIL_KEY);
+    if (gateEmail) setEmail(gateEmail);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +52,10 @@ export default function SignUpPage() {
       password,
       options: {
         data: { role, full_name: fullName },
+        // Route the confirmation link through the callback, which restores the
+        // pending listing the user was creating.
+        emailRedirectTo:
+          typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
       },
     });
 
@@ -74,7 +86,9 @@ export default function SignUpPage() {
         .eq("id", data.user.id);
     }
 
-    router.replace(role === "broker" ? "/broker/dashboard" : "/dashboard");
+    // If they came from a valuation, drop them back into the prefilled listing.
+    const pending = consumePendingListingUrl();
+    router.replace(pending ?? (role === "broker" ? "/broker/dashboard" : "/dashboard"));
   };
 
   if (emailSent) {
@@ -136,7 +150,7 @@ export default function SignUpPage() {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               I am a…
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {ROLES.map((r) => (
                 <button
                   key={r.value}

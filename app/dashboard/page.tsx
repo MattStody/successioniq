@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import ProfileForm from "./ProfileForm";
+import SignOutButton from "@/components/SignOutButton";
 import type { Listing, ListingStatus, Valuation } from "@/lib/types";
 import { getListingDisplayName } from "@/lib/listing-display";
 import { completenessLabel } from "@/lib/profile-completeness";
@@ -79,11 +80,14 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-16">
       {/* Welcome header */}
-      <div className="mb-12">
-        <p className="text-sm text-slate-400 mb-1">Welcome back</p>
-        <h1 className="font-serif text-4xl font-bold text-slate-900">
-          {displayName}
-        </h1>
+      <div className="mb-12 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm text-slate-400 mb-1">Welcome back</p>
+          <h1 className="font-serif text-4xl font-bold text-slate-900">
+            {displayName}
+          </h1>
+        </div>
+        <SignOutButton />
       </div>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-10 items-start">
@@ -126,6 +130,8 @@ export default async function DashboardPage() {
                     valuation_low: String(v.valuation_low),
                     valuation_mid: String(v.valuation_mid),
                     valuation_high: String(v.valuation_high),
+                    primary_method: v.primary_method ?? "",
+                    multiple_applied: String(v.multiple_applied ?? ""),
                     key_value_drivers: JSON.stringify(v.key_value_drivers),
                     key_risks: JSON.stringify(v.key_risks),
                   }).toString()}`;

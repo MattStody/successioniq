@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { instantValuationRange } from "@/lib/financials";
+import { PENDING_LISTING_KEY, GATE_EMAIL_KEY } from "@/lib/post-auth";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -50,6 +52,23 @@ const INDUSTRIES = [
   "Technology",
   "Real Estate",
   "Other",
+];
+
+const CA_PROVINCES = [
+  "Alberta", "British Columbia", "Manitoba", "New Brunswick",
+  "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia", "Nunavut",
+  "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", "Yukon",
+];
+
+const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois",
+  "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana",
+  "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York",
+  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania",
+  "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah",
+  "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
 ];
 
 const REVENUE_TRENDS = [
@@ -159,6 +178,128 @@ function MoneyInput({
 
 // ─── Step progress ────────────────────────────────────────────────────────────
 
+// Fast country + region picker: a Canada/US/Other toggle and a province/state
+// dropdown (free text only for "Other") — far quicker than typing for Bob.
+function CountryRegionFields({
+  country,
+  region,
+  update,
+}: {
+  country: string;
+  region: string;
+  update: (fields: Partial<FormData>) => void;
+}) {
+  const isCanada = country === "Canada";
+  const isUS = country === "United States";
+  const isKnown = isCanada || isUS;
+  const regionOptions = isCanada ? CA_PROVINCES : isUS ? US_STATES : null;
+
+  const toggleCls = (active: boolean) =>
+    `rounded-xl border px-2 py-2.5 text-sm font-medium transition-all ${
+      active
+        ? "bg-blue-900 text-white border-blue-900 shadow-sm"
+        : "bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:text-slate-900"
+    }`;
+
+  return (
+    <div className="space-y-5">
+      <Field label="Country">
+        <div className="grid grid-cols-3 gap-2">
+          <button type="button" onClick={() => update({ country: "Canada", region: "" })} className={toggleCls(isCanada)}>
+            🇨🇦 Canada
+          </button>
+          <button type="button" onClick={() => update({ country: "United States", region: "" })} className={toggleCls(isUS)}>
+            🇺🇸 U.S.
+          </button>
+          <button type="button" onClick={() => update({ country: "", region: "" })} className={toggleCls(!isKnown)}>
+            Other
+          </button>
+        </div>
+        {!isKnown && (
+          <input
+            type="text"
+            placeholder="Enter your country"
+            value={country}
+            onChange={(e) => update({ country: e.target.value })}
+            className={`${inputCls} mt-2`}
+          />
+        )}
+      </Field>
+      <Field label={isUS ? "State" : "Province / Region"}>
+        {regionOptions ? (
+          <SelectInput
+            value={region}
+            onChange={(v) => update({ region: v })}
+            options={regionOptions}
+            placeholder={isUS ? "Select a state…" : "Select a province…"}
+          />
+        ) : (
+          <input
+            type="text"
+            placeholder="e.g. Ontario"
+            value={region}
+            onChange={(e) => update({ region: e.target.value })}
+            className={inputCls}
+          />
+        )}
+      </Field>
+    </div>
+  );
+}
+
+// Tap-to-select industry tiles — one tap instead of open/scroll/select.
+function IndustryChips({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      {INDUSTRIES.map((opt) => (
+        <button
+          type="button"
+          key={opt}
+          onClick={() => onChange(opt)}
+          className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
+            value === opt
+              ? "bg-blue-900 text-white border-blue-900 shadow-sm"
+              : "bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:text-slate-900"
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Full-width tap-to-select buttons (handles long option text like the
+// customer-concentration descriptions). Replaces dropdowns for faster input.
+function ChoiceButtons({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
+  return (
+    <div className="space-y-2">
+      {options.map((opt) => (
+        <button
+          type="button"
+          key={opt}
+          onClick={() => onChange(opt)}
+          className={`w-full text-left rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+            value === opt
+              ? "bg-blue-900 text-white border-blue-900 shadow-sm"
+              : "bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:text-slate-900"
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function StepProgress({ current }: { current: number }) {
   return (
     <div className="flex items-start gap-0 mb-10">
@@ -225,6 +366,7 @@ function EmailGateView({
       });
       if (typeof window !== "undefined") {
         localStorage.setItem("siq_email_captured", "1");
+        localStorage.setItem(GATE_EMAIL_KEY, email);
       }
       onSubmit(email);
     } catch {
@@ -329,184 +471,64 @@ function LoadingView() {
   );
 }
 
-// ─── Share section ────────────────────────────────────────────────────────────
+// ─── Results view ─────────────────────────────────────────────────────────────
 
-function ShareSection({
-  shareToken,
-  valuation_id,
-  saved,
+function ListYourBusinessCTA({
+  isLoggedIn,
+  listingHref,
+  tone = "light",
 }: {
-  shareToken: string | null | undefined;
-  valuation_id: string | null | undefined;
-  saved: boolean | undefined;
+  isLoggedIn: boolean;
+  listingHref: string;
+  tone?: "light" | "onDark";
 }) {
-  const [shareUrl, setShareUrl] = useState(
-    shareToken ? `https://successioniq.vercel.app/valuation/${shareToken}` : ""
-  );
-  const [copied, setCopied] = useState(false);
-  const [isPublic, setIsPublic] = useState(true);
-  const [toggling, setToggling] = useState(false);
+  const router = useRouter();
+  const base =
+    "inline-block px-10 py-4 rounded-xl text-lg font-semibold transition-all shadow-md hover:-translate-y-0.5";
+  const cls =
+    tone === "onDark"
+      ? "bg-white text-blue-900 hover:bg-blue-50"
+      : "bg-blue-900 text-white hover:bg-blue-800";
+  const label = "List your business →";
 
-  useEffect(() => {
-    if (shareToken) {
-      setShareUrl(`${window.location.origin}/valuation/${shareToken}`);
-    }
-  }, [shareToken]);
-
-  async function copyLink() {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard API not available — fail silently
-    }
+  if (isLoggedIn) {
+    return (
+      <Link href={listingHref} className={`${base} ${cls}`}>
+        {label}
+      </Link>
+    );
   }
-
-  async function togglePrivacy() {
-    if (!valuation_id || toggling) return;
-    setToggling(true);
-    const newValue = !isPublic;
-    try {
-      const res = await fetch(`/api/valuations/${valuation_id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_public: newValue }),
-      });
-      if (res.ok) setIsPublic(newValue);
-    } finally {
-      setToggling(false);
-    }
-  }
-
-  const emailSubject = encodeURIComponent("My Business Valuation Report");
-  const emailBody = encodeURIComponent(
-    `I used SuccessionIQ to get a free AI-powered valuation of my business. Here's the report: ${shareUrl}`
-  );
-  const whatsAppText = encodeURIComponent(
-    `Check out my business valuation report: ${shareUrl}`
-  );
-
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
-      <h3 className="text-base font-semibold text-slate-900 mb-5 pb-4 border-b border-slate-100">
-        Save &amp; Share Your Report
-      </h3>
-
-      {isPublic && shareToken ? (
-        <div className="mb-5">
-          <div className="text-xs text-slate-400 uppercase tracking-widest mb-2">
-            Shareable link
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 font-mono truncate">
-              {shareUrl}
-            </div>
-            <button
-              onClick={copyLink}
-              className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                copied
-                  ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
-                  : "bg-blue-900 hover:bg-blue-800 text-white"
-              }`}
-            >
-              {copied ? "Copied!" : "Copy link"}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="mb-5 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
-          <span className="text-slate-400">🔒</span>
-          <span className="text-sm text-slate-500">
-            This report is private — sharing is disabled.
-          </span>
-        </div>
-      )}
-
-      {isPublic && shareToken && (
-        <div className="flex items-center gap-3 mb-5 flex-wrap">
-          <span className="text-xs text-slate-400">Share via:</span>
-          <a
-            href={`mailto:?subject=${emailSubject}&body=${emailBody}`}
-            className="flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-lg transition-colors"
-          >
-            📧 Email
-          </a>
-          <a
-            href={`https://wa.me/?text=${whatsAppText}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-lg transition-colors"
-          >
-            📱 WhatsApp
-          </a>
-        </div>
-      )}
-
-      {saved ? (
-        <div className="flex items-center gap-2 text-sm text-emerald-700 mb-4">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-xs flex-shrink-0">
-            ✓
-          </span>
-          Saved to your account ·{" "}
-          <Link href="/dashboard" className="underline hover:text-emerald-900 transition-colors">
-            View in dashboard →
-          </Link>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between gap-4 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 mb-4">
-          <p className="text-sm text-slate-600">
-            Sign in to save this valuation to your account.
-          </p>
-          <Link
-            href="/auth"
-            className="flex-shrink-0 text-sm font-medium bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Sign in →
-          </Link>
-        </div>
-      )}
-
-      {saved && valuation_id && (
-        <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-          <button
-            type="button"
-            onClick={togglePrivacy}
-            disabled={toggling}
-            className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${
-              !isPublic ? "bg-blue-900" : "bg-slate-200"
-            }`}
-            aria-label="Toggle report privacy"
-          >
-            <span
-              className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-150 ${
-                !isPublic ? "translate-x-6" : "translate-x-1"
-              }`}
-            />
-          </button>
-          <div>
-            <div className="text-sm font-medium text-slate-900">Make this report private</div>
-            <div className="text-xs text-slate-400">Disables the shareable link</div>
-          </div>
-        </div>
-      )}
-    </div>
+    <button
+      type="button"
+      onClick={() => {
+        if (typeof window !== "undefined") {
+          localStorage.setItem(PENDING_LISTING_KEY, listingHref);
+        }
+        router.push("/auth/signup");
+      }}
+      className={`${base} ${cls}`}
+    >
+      {label}
+    </button>
   );
 }
-
-// ─── Results view ─────────────────────────────────────────────────────────────
 
 function ResultsView({
   result,
   formData,
+  isLoggedIn,
 }: {
   result: ValuationResult;
   formData: FormData;
+  isLoggedIn: boolean;
 }) {
+  const listingHref = `/create-listing?industry=${encodeURIComponent(formData.industry)}&country=${encodeURIComponent(formData.country)}&region=${encodeURIComponent(formData.region)}&annual_revenue=${encodeURIComponent(formData.revenue)}&annual_profit=${encodeURIComponent(formData.netProfit)}&years_operating=${encodeURIComponent(formData.yearsInOperation)}&valuation_low=${encodeURIComponent(result.valuation_low)}&valuation_mid=${encodeURIComponent(result.valuation_mid)}&valuation_high=${encodeURIComponent(result.valuation_high)}&primary_method=${encodeURIComponent(result.primary_method)}&multiple_applied=${encodeURIComponent(String(result.multiple_applied))}&key_value_drivers=${encodeURIComponent(JSON.stringify(result.key_value_drivers))}&key_risks=${encodeURIComponent(JSON.stringify(result.key_risks))}`;
+  const valuationSpan = result.valuation_high - result.valuation_low;
   const midPct =
-    ((result.valuation_mid - result.valuation_low) /
-      (result.valuation_high - result.valuation_low)) *
-    100;
+    valuationSpan > 0
+      ? ((result.valuation_mid - result.valuation_low) / valuationSpan) * 100
+      : 50;
 
   const confidenceColor =
     result.confidence === "High"
@@ -532,7 +554,7 @@ function ResultsView({
       {/* Valuation range card */}
       <div className="bg-white border border-slate-200 rounded-2xl p-8 mb-6 shadow-sm">
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-8">
-          Estimated Value Range
+          Estimated Value Range · CAD
         </p>
 
         <div className="grid grid-cols-3 gap-4 text-center mb-6">
@@ -597,6 +619,24 @@ function ResultsView({
         </div>
       </div>
 
+      {/* Prominent list CTA — placed at the moment of peak interest, right
+          under the number, so it isn't buried below the analysis. */}
+      <div className="bg-blue-900 rounded-2xl p-8 mb-6 shadow-md text-center">
+        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white mb-2">
+          Ready to find the right buyer?
+        </h2>
+        <p className="text-blue-200 text-sm mb-6 max-w-md mx-auto leading-relaxed">
+          Turn this valuation into a confidential listing in one click. We&apos;ll write
+          the description for you and put it in front of qualified buyers.
+        </p>
+        <ListYourBusinessCTA isLoggedIn={isLoggedIn} listingHref={listingHref} tone="onDark" />
+        {!isLoggedIn && (
+          <p className="mt-3 text-xs text-blue-300">
+            Free to create. Your valuation is saved and ready to publish.
+          </p>
+        )}
+      </div>
+
       {/* Drivers & Risks */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -642,12 +682,6 @@ function ResultsView({
         <p className="text-slate-600 leading-relaxed">{result.summary}</p>
       </div>
 
-      <ShareSection
-        shareToken={result.share_token}
-        valuation_id={result.valuation_id}
-        saved={result.saved}
-      />
-
       {/* List your business CTA */}
       <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
         <h3 className="font-serif text-2xl font-bold text-slate-900 mb-2">
@@ -657,12 +691,12 @@ function ResultsView({
           List your business on SuccessionIQ and connect with vetted private equity firms,
           family offices, and strategic acquirers.
         </p>
-        <Link
-          href={`/create-listing?industry=${encodeURIComponent(formData.industry)}&country=${encodeURIComponent(formData.country)}&region=${encodeURIComponent(formData.region)}&annual_revenue=${encodeURIComponent(formData.revenue)}&annual_profit=${encodeURIComponent(formData.netProfit)}&years_operating=${encodeURIComponent(formData.yearsInOperation)}&valuation_low=${encodeURIComponent(result.valuation_low)}&valuation_mid=${encodeURIComponent(result.valuation_mid)}&valuation_high=${encodeURIComponent(result.valuation_high)}&key_value_drivers=${encodeURIComponent(JSON.stringify(result.key_value_drivers))}&key_risks=${encodeURIComponent(JSON.stringify(result.key_risks))}`}
-          className="inline-block bg-blue-900 hover:bg-blue-800 text-white px-10 py-4 rounded-xl font-semibold transition-all shadow-md hover:-translate-y-0.5"
-        >
-          List your business for sale →
-        </Link>
+        <ListYourBusinessCTA isLoggedIn={isLoggedIn} listingHref={listingHref} tone="light" />
+        {!isLoggedIn && (
+          <p className="mt-3 text-xs text-slate-400">
+            Free to create. Your valuation is saved and ready to publish.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -675,17 +709,19 @@ export default function ValuateClient({
   initialData,
   editMode,
   editValuationId,
+  quickMode = false,
 }: {
   isLoggedIn: boolean;
   initialData?: Partial<FormData>;
   editMode?: boolean;
   editValuationId?: string;
+  quickMode?: boolean;
 }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     industry: "",
-    country: "",
+    country: "Canada",
     region: "",
     revenue: "",
     netProfit: "",
@@ -713,6 +749,19 @@ export default function ValuateClient({
   const update = (fields: Partial<FormData>) =>
     setFormData((prev) => ({ ...prev, ...fields }));
 
+  // In quick mode the funnel is a single condensed step — industry and revenue
+  // arrive from the homepage hero, so we only validate the remaining inputs.
+  const canSubmitQuick = !!(
+    formData.industry &&
+    formData.revenue &&
+    Number(formData.revenue) > 0 &&
+    formData.netProfit !== "" &&
+    formData.yearsInOperation &&
+    Number(formData.yearsInOperation) > 0 &&
+    formData.country &&
+    formData.region
+  );
+
   const canProceed = () => {
     switch (step) {
       case 0:
@@ -734,18 +783,29 @@ export default function ValuateClient({
     }
   };
 
-  const runValuation = () =>
-    fetch("/api/valuate", {
+  const runValuation = () => {
+    // Build the payload explicitly so optional inputs left blank in quick mode
+    // are omitted entirely (an empty string would fail the API's enum checks).
+    const payload: Record<string, unknown> = {
+      industry: formData.industry,
+      country: formData.country,
+      region: formData.region,
+      revenue: Number(formData.revenue),
+      yearsInOperation: Number(formData.yearsInOperation),
+      ownerDependency: formData.ownerDependency,
+      askingPrice: formData.askingPrice ? Number(formData.askingPrice) : null,
+    };
+    if (formData.netProfit !== "") payload.netProfit = Number(formData.netProfit);
+    if (formData.revenueTrend) payload.revenueTrend = formData.revenueTrend;
+    if (formData.customerConcentration)
+      payload.customerConcentration = formData.customerConcentration;
+    if (formData.reasonForSelling) payload.reasonForSelling = formData.reasonForSelling;
+    if (editMode && editValuationId) payload.updateId = editValuationId;
+
+    return fetch("/api/valuate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...formData,
-        revenue: Number(formData.revenue),
-        netProfit: Number(formData.netProfit),
-        yearsInOperation: Number(formData.yearsInOperation),
-        askingPrice: formData.askingPrice ? Number(formData.askingPrice) : null,
-        ...(editMode && editValuationId ? { updateId: editValuationId } : {}),
-      }),
+      body: JSON.stringify(payload),
     })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -755,6 +815,7 @@ export default function ValuateClient({
         if (data.error) throw new Error(data.error);
         return data as ValuationResult;
       });
+  };
 
   const handleSubmit = () => {
     setError(null);
@@ -800,7 +861,7 @@ export default function ValuateClient({
   };
 
   if (phase === "result" && result) {
-    return <ResultsView result={result} formData={formData} />;
+    return <ResultsView result={result} formData={formData} isLoggedIn={isLoggedIn} />;
   }
 
   if (phase === "waiting") {
@@ -814,6 +875,91 @@ export default function ValuateClient({
         isAiReady={!!pendingResult}
         onSubmit={handleGateSubmit}
       />
+    );
+  }
+
+  // ── Quick form (step 3 of the homepage funnel) ──
+  if (quickMode) {
+    const quickRange = instantValuationRange(
+      Number(formData.revenue),
+      formData.industry
+    );
+    return (
+      <div className="max-w-xl mx-auto px-6 py-16">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full mb-5 font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-700" />
+            Almost there
+          </div>
+          <h1 className="font-serif text-4xl font-bold mb-3 text-slate-900">
+            Unlock your full valuation
+          </h1>
+          <p className="text-slate-500 text-sm">
+            Three quick details and our AI gives you an exact, defensible figure.
+          </p>
+        </div>
+
+        {quickRange && (
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-6 text-center">
+            <div className="text-xs text-blue-700 uppercase tracking-widest mb-1">
+              Your instant range
+            </div>
+            <div className="text-2xl font-bold text-slate-900">
+              {fmtCurrency(quickRange.low)} – {fmtCurrency(quickRange.high)}
+            </div>
+            <div className="text-xs text-slate-500 mt-1">
+              {formData.industry} · {fmtCurrency(Number(formData.revenue))} revenue
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-5">
+          <Field label="Annual Net Profit (CAD)">
+            <MoneyInput
+              value={formData.netProfit}
+              onChange={(v) => update({ netProfit: v })}
+              placeholder="120000"
+            />
+          </Field>
+          <Field label="Years in Operation">
+            <input
+              type="number"
+              min="1"
+              placeholder="e.g. 8"
+              value={formData.yearsInOperation}
+              onChange={(e) => update({ yearsInOperation: e.target.value })}
+              className={inputCls}
+            />
+          </Field>
+          <CountryRegionFields
+            country={formData.country}
+            region={formData.region}
+            update={update}
+          />
+          <p className="text-xs text-slate-400">All figures in Canadian dollars (CAD).</p>
+        </div>
+
+        <button
+          onClick={handleSubmit}
+          disabled={!canSubmitQuick}
+          className="w-full mt-6 bg-blue-900 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-xl font-semibold transition-all"
+        >
+          Reveal my valuation →
+        </button>
+
+        {error && (
+          <p className="text-red-600 text-sm mt-4 text-center bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+            {error}
+          </p>
+        )}
+
+        <p className="text-center text-xs text-slate-400 mt-6">
+          Want a more thorough analysis?{" "}
+          <Link href="/valuate" className="text-blue-700 hover:underline">
+            Use the detailed valuation →
+          </Link>
+        </p>
+      </div>
     );
   }
 
@@ -847,47 +993,30 @@ export default function ValuateClient({
         {step === 0 && (
           <div className="space-y-5">
             <Field label="Business Industry">
-              <SelectInput
+              <IndustryChips
                 value={formData.industry}
                 onChange={(v) => update({ industry: v })}
-                options={INDUSTRIES}
-                placeholder="Select an industry…"
               />
             </Field>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Country">
-                <input
-                  type="text"
-                  placeholder="e.g. United States"
-                  value={formData.country}
-                  onChange={(e) => update({ country: e.target.value })}
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Region / State">
-                <input
-                  type="text"
-                  placeholder="e.g. California"
-                  value={formData.region}
-                  onChange={(e) => update({ region: e.target.value })}
-                  className={inputCls}
-                />
-              </Field>
-            </div>
+            <CountryRegionFields
+              country={formData.country}
+              region={formData.region}
+              update={update}
+            />
           </div>
         )}
 
         {/* ── Step 1: Financials ── */}
         {step === 1 && (
           <div className="space-y-5">
-            <Field label="Annual Revenue (USD)">
+            <Field label="Annual Revenue (CAD)">
               <MoneyInput
                 value={formData.revenue}
                 onChange={(v) => update({ revenue: v })}
                 placeholder="500000"
               />
             </Field>
-            <Field label="Annual Net Profit (USD)">
+            <Field label="Annual Net Profit (CAD)">
               <MoneyInput
                 value={formData.netProfit}
                 onChange={(v) => update({ netProfit: v })}
@@ -904,6 +1033,7 @@ export default function ValuateClient({
                 className={inputCls}
               />
             </Field>
+            <p className="text-xs text-slate-400">All figures in Canadian dollars (CAD).</p>
           </div>
         )}
 
@@ -911,11 +1041,10 @@ export default function ValuateClient({
         {step === 2 && (
           <div className="space-y-6">
             <Field label="Revenue Trend (Last 3 Years)">
-              <SelectInput
+              <ChoiceButtons
                 value={formData.revenueTrend}
                 onChange={(v) => update({ revenueTrend: v })}
                 options={REVENUE_TRENDS}
-                placeholder="Select trend…"
               />
             </Field>
 
@@ -939,11 +1068,10 @@ export default function ValuateClient({
             </Field>
 
             <Field label="Customer Concentration">
-              <SelectInput
+              <ChoiceButtons
                 value={formData.customerConcentration}
                 onChange={(v) => update({ customerConcentration: v })}
                 options={CUSTOMER_CONCENTRATIONS}
-                placeholder="Select concentration…"
               />
             </Field>
           </div>
