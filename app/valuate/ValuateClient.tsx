@@ -523,6 +523,13 @@ function ResultsView({
   formData: FormData;
   isLoggedIn: boolean;
 }) {
+  // Strip the global nav + footer while results are shown so the only path
+  // forward is creating an account (see the .funnel-focus rule in globals.css).
+  useEffect(() => {
+    document.body.classList.add("funnel-focus");
+    return () => document.body.classList.remove("funnel-focus");
+  }, []);
+
   const listingHref = `/create-listing?industry=${encodeURIComponent(formData.industry)}&country=${encodeURIComponent(formData.country)}&region=${encodeURIComponent(formData.region)}&annual_revenue=${encodeURIComponent(formData.revenue)}&annual_profit=${encodeURIComponent(formData.netProfit)}&years_operating=${encodeURIComponent(formData.yearsInOperation)}&valuation_low=${encodeURIComponent(result.valuation_low)}&valuation_mid=${encodeURIComponent(result.valuation_mid)}&valuation_high=${encodeURIComponent(result.valuation_high)}&primary_method=${encodeURIComponent(result.primary_method)}&multiple_applied=${encodeURIComponent(String(result.multiple_applied))}&key_value_drivers=${encodeURIComponent(JSON.stringify(result.key_value_drivers))}&key_risks=${encodeURIComponent(JSON.stringify(result.key_risks))}`;
   const valuationSpan = result.valuation_high - result.valuation_low;
   const midPct =

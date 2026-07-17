@@ -316,8 +316,23 @@ export default async function ListingsPage({
                         const pc = l.profile_completeness ?? calculateCompleteness(l as unknown as Partial<Record<string, unknown>>)
                         if (pc <= 0) return null
                         const { label, color } = completenessLabel(pc)
+                        // A completed listing gets a prominent trust badge; partial
+                        // listings keep the subtle graded label.
+                        if (color === "emerald") {
+                          return (
+                            <span className="flex items-center gap-1 text-xs font-semibold text-white bg-emerald-600 px-2 py-0.5 rounded-md shadow-sm">
+                              <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.42 0l-3.5-3.5a1 1 0 011.42-1.42l2.79 2.79 6.79-6.79a1 1 0 011.42 0z" clipRule="evenodd" />
+                              </svg>
+                              Complete Profile
+                            </span>
+                          )
+                        }
+                        const cls = color === "amber"
+                          ? "bg-amber-50 border-amber-200 text-amber-700"
+                          : "bg-slate-50 border-slate-200 text-slate-600"
                         return (
-                          <span className={`text-xs px-2 py-0.5 rounded-md border bg-${color}-50 border-${color}-200 text-${color}-700 bg-white/90 backdrop-blur-sm shadow-sm`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-md border ${cls} bg-white/90 backdrop-blur-sm shadow-sm`}>
                             {label}
                           </span>
                         )

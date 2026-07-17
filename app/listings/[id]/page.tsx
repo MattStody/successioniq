@@ -10,6 +10,8 @@ import DeleteListingButton from "./DeleteListingButton";
 import BookmarkButton from "@/components/BookmarkButton";
 import NDASection from "./NDASection";
 import ListingTabs from "./ListingTabs";
+import ShareListingButton from "./ShareListingButton";
+import ListingAuthGate from "./ListingAuthGate";
 import { deriveFinancials, fmtMoney, fmtMultiple, fmtGrowth } from "@/lib/financials";
 
 function fmtCurrency(n: number): string {
@@ -34,7 +36,18 @@ export default async function ListingPage({
 
   const listing = listingResult.data as Listing;
   const { data: { user } } = await supabaseAuth.auth.getUser();
-  const isOwner = !!user && user.id === listing.user_id;
+
+  // Listings require an account to view — a shared link becomes a signup driver.
+  if (!user) {
+    return (
+      <ListingAuthGate
+        industry={listing.industry}
+        location={`${listing.region}, ${listing.country}`}
+      />
+    );
+  }
+
+  const isOwner = user.id === listing.user_id;
 
   let isBuyer = false;
   let isBookmarked = false;
@@ -410,6 +423,8 @@ export default async function ListingPage({
 
         {/* ── Right: Sticky sidebar ── */}
         <div className="lg:sticky lg:top-24 space-y-4">
+          <ShareListingButton />
+
           {/* Asking price card */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <div className="text-xs text-slate-400 mb-1 uppercase tracking-widest">

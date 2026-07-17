@@ -29,3 +29,11 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
+
+/* Conversion focus: on the valuation results page we hide the global nav and
+   footer so the only way forward is creating an account. Toggled by a body
+   class from the results view. */
+body.funnel-focus > nav,
+body.funnel-focus > footer {
+  display: none;
+}
