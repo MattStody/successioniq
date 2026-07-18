@@ -2,7 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import ValuateClient from "./ValuateClient";
 
 export const metadata = {
-  title: "Free Business Valuation — SuccessionIQ",
+  title: "Free Business Valuation — Mercato",
   description:
     "Get an AI-powered business valuation in under 3 minutes. Free, no strings attached.",
 };

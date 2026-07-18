@@ -13,7 +13,7 @@ export default function ShareListingButton() {
     const url = typeof window !== "undefined" ? window.location.href : "";
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ title: "Business for sale on SuccessionIQ", url });
+        await navigator.share({ title: "Business for sale on Mercato", url });
         return;
       } catch {
         // user dismissed the share sheet — fall through to copy

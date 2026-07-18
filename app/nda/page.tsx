@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Non-Disclosure Agreement — SuccessionIQ",
+  title: "Non-Disclosure Agreement — Mercato",
 };
 
 const SECTIONS = [
@@ -72,7 +72,7 @@ export default function NDAPage() {
         Non-Disclosure Agreement
       </h1>
       <p className="text-slate-500 text-sm mb-10">
-        Effective as of the date of form submission on the SuccessionIQ platform
+        Effective as of the date of form submission on the Mercato platform
       </p>
 
       <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
@@ -103,7 +103,7 @@ export default function NDAPage() {
       </div>
 
       <p className="text-xs text-slate-400 text-center mt-8">
-        SuccessionIQ · This agreement is governed by the laws of the State of Delaware.
+        Mercato · This agreement is governed by the laws of the State of Delaware.
       </p>
     </div>
   );

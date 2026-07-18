@@ -1,38 +1,56 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F8F9FB;
-  --foreground: #0F1724;
+  --background: #FFFFFF;
+  --foreground: #0E1330;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-serif: var(--font-inter);
+  /* Satoshi is the Mercato brand face; Inter (loaded via next/font) is the
+     approved fallback and renders if Satoshi hasn't loaded. */
+  --font-sans: "Satoshi", var(--font-inter), "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Satoshi", var(--font-inter), "Helvetica Neue", Arial, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
-/* SuccessionIQ palette — clean white + blue. (Brand tokens are kept so the
-   marketing pages share one source of truth; all map to the blue/white scheme.) */
+/* ── Mercato brand palette ──────────────────────────────────────────────────
+   Navy for headings/nav/body/dark surfaces, Mercato Blue for actions/links,
+   Sky Blue + Soft Grey as supporting neutrals, white as the dominant canvas. */
 @theme {
-  --color-navy: #1e3a8a;
-  --color-navy-light: #1e40af;
-  --color-accent: #1e3a8a;
-  --color-accent-dark: #1e40af;
-  --color-cream: #F8F9FB;
-  --color-cream-deep: #e2e8f0;
+  --color-navy: #0E1330;
+  --color-navy-light: #1b2350;
+  --color-brand: #4F6BFF;
+  --color-brand-dark: #3f57e6;
+  --color-sky: #E8EEFF;
+  --color-mist: #F1F3F6;
+
+  /* Legacy marketing tokens remapped onto the Mercato system */
+  --color-accent: #4F6BFF;
+  --color-accent-dark: #3f57e6;
+  --color-cream: #F1F3F6;       /* page background = Soft Grey */
+  --color-cream-deep: #E3E7F0;  /* borders / dividers */
+
+  /* Rebrand the built-in Tailwind classes the app already uses, in one place:
+     blue-* (actions) → Mercato Blue / Sky Blue, slate-900 (text) → Navy. */
+  --color-blue-900: #4F6BFF;
+  --color-blue-800: #3f57e6;
+  --color-blue-700: #3f57e6;
+  --color-blue-600: #4F6BFF;
+  --color-blue-200: #C2D0FF;
+  --color-blue-100: #D9E1FF;
+  --color-blue-50:  #E8EEFF;
+  --color-slate-900: #0E1330;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
 
-/* Conversion focus: on the valuation results page we hide the global nav and
-   footer so the only way forward is creating an account. Toggled by a body
-   class from the results view. */
+/* Conversion focus on the valuation results page: hide global nav + footer. */
 body.funnel-focus > nav,
 body.funnel-focus > footer {
   display: none;

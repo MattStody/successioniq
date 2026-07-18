@@ -2,9 +2,9 @@ import CTAButton from "@/components/CTAButton";
 import FinalCTA from "@/components/FinalCTA";
 
 export const metadata = {
-  title: "How It Works — Free Business Valuation in 3 Minutes | SuccessionIQ",
+  title: "How It Works — Free Business Valuation in 3 Minutes | Mercato",
   description:
-    "See exactly how SuccessionIQ turns 10 simple questions into a defensible business valuation — range, value drivers, risks, and a plain-English summary.",
+    "See exactly how Mercato turns 10 simple questions into a defensible business valuation — range, value drivers, risks, and a plain-English summary.",
 };
 
 const STEPS = [
@@ -43,11 +43,11 @@ const FAQS = [
   },
   {
     q: "Do I need to be ready to sell?",
-    a: "Not at all. Most people who use SuccessionIQ are just curious what they've built. Knowing your number is the first step — even if you're 5 years from selling.",
+    a: "Not at all. Most people who use Mercato are just curious what they've built. Knowing your number is the first step — even if you're 5 years from selling.",
   },
   {
     q: "What if I need a formal valuation for legal or tax purposes?",
-    a: "A Chartered Business Valuator (CBV) is still essential for anything requiring a formal, defensible report — tax, estate, legal disputes. SuccessionIQ helps you understand the landscape before you get there. Think of it as the step that helps you realize you need one.",
+    a: "A Chartered Business Valuator (CBV) is still essential for anything requiring a formal, defensible report — tax, estate, legal disputes. Mercato helps you understand the landscape before you get there. Think of it as the step that helps you realize you need one.",
   },
 ];
 

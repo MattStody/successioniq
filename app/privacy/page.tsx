@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Privacy Policy — SuccessionIQ",
-  description: "How SuccessionIQ handles your information. Short version: it stays yours.",
+  title: "Privacy Policy — Mercato",
+  description: "How Mercato handles your information. Short version: it stays yours.",
 };
 
 export default function PrivacyPage() {

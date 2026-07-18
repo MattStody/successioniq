@@ -517,7 +517,7 @@ export default async function ListingPage({
                 <p className="text-xs text-slate-500 leading-relaxed">
                   {listing.is_anonymous
                     ? "The seller's identity is protected. Business name and contact details are only released after an NDA is signed."
-                    : "All communications are managed through SuccessionIQ to protect both parties."}
+                    : "All communications are managed through Mercato to protect both parties."}
                 </p>
               </div>
             </div>

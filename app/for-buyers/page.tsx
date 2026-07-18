@@ -2,13 +2,13 @@ import CTAButton from "@/components/CTAButton";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 
 export const metadata = {
-  title: "For Buyers — Find Cash-Flowing Businesses for Sale | SuccessionIQ",
+  title: "For Buyers — Find Cash-Flowing Businesses for Sale | Mercato",
   description:
     "Browse vetted Canadian and American businesses with real financial data. Every listing starts with an AI valuation, so the asking price is grounded in reality.",
 };
 
 const POINTS = [
-  "Every listing on SuccessionIQ starts with an AI valuation — so you know the asking price is grounded in real data, not wishful thinking.",
+  "Every listing on Mercato starts with an AI valuation — so you know the asking price is grounded in real data, not wishful thinking.",
   "Filter by industry, location, revenue, and EBITDA. No noise. No stale listings.",
   "The largest pool of motivated sellers in history is entering the market right now. Get ahead of it.",
 ];
@@ -47,7 +47,7 @@ export default function ForBuyersPage() {
         />
       </section>
 
-      {/* Why SuccessionIQ */}
+      {/* Why Mercato */}
       <section className="bg-white">
         <div className="mx-auto max-w-3xl px-6 py-20">
           <h2 className="text-3xl font-bold text-navy md:text-4xl">
