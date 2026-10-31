@@ -13,7 +13,7 @@ const AiSuggestSchema = z.object({
 const client = new Anthropic()
 
 const SYSTEM_PROMPT =
-  "You are a business broker with 20+ years of SMB M&A experience reviewing a seller's listing profile on SuccessionIQ. Your job is to suggest improvements that will make the listing more compelling to serious buyers."
+  "You are a business broker with 20+ years of SMB M&A experience reviewing a seller's listing profile on Mercato. Your job is to suggest improvements that will make the listing more compelling to serious buyers."
 
 export async function POST(
   req: NextRequest,

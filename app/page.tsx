@@ -4,7 +4,7 @@ import ImagePlaceholder from "@/components/ImagePlaceholder";
 import FinalCTA from "@/components/FinalCTA";
 
 export const metadata = {
-  title: "What's Your Business Worth? — Free AI Valuation | SuccessionIQ",
+  title: "What's Your Business Worth? — Free AI Valuation | Mercato",
   description:
     "Free AI-powered business valuation in 3 minutes. No broker. No fees. No obligation. Built for retiring business owners across Canada and the United States.",
 };
@@ -57,7 +57,7 @@ const TRUST = [
   {
     title: "It's not replacing your advisor.",
     body:
-      "SuccessionIQ doesn't replace a formal appraisal or a good broker. It replaces the blank stare. Think of it as the first step — the one that gets you informed enough to have a real conversation.",
+      "Mercato doesn't replace a formal appraisal or a good broker. It replaces the blank stare. Think of it as the first step — the one that gets you informed enough to have a real conversation.",
   },
   {
     title: "Your data stays yours.",
@@ -143,7 +143,7 @@ export default function Home() {
             73% of Ontario business owners have no succession plan. The average business owner
             waits 3 years too long to start thinking about their exit.
           </p>
-          <p>SuccessionIQ was built to fix that.</p>
+          <p>Mercato was built to fix that.</p>
         </div>
       </section>
 
@@ -227,7 +227,7 @@ export default function Home() {
                 And most will leave money on the table — or simply close the doors.
               </p>
               <p>
-                SuccessionIQ exists to change that — starting with a simple question: what is
+                Mercato exists to change that — starting with a simple question: what is
                 your business actually worth?
               </p>
             </div>

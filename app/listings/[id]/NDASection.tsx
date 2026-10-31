@@ -115,13 +115,16 @@ export default function NDASection({
     return (
       <div className="space-y-3">
         <Link
-          href="/auth/login"
+          href="/auth/signup"
           className="block w-full text-center bg-blue-900 hover:bg-blue-800 text-white px-6 py-3.5 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm"
         >
-          Sign in to request information
+          Create a free account to request info
         </Link>
         <p className="text-center text-xs text-slate-400">
-          Sign in, then sign a quick NDA to access contact details
+          Free account, then a quick NDA to access contact details ·{" "}
+          <Link href="/auth/login" className="text-blue-900 hover:underline">
+            Sign in
+          </Link>
         </p>
       </div>
     );

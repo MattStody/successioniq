@@ -2,9 +2,9 @@ import CTAButton from "@/components/CTAButton";
 import FinalCTA from "@/components/FinalCTA";
 
 export const metadata = {
-  title: "About — Why We Built SuccessionIQ",
+  title: "About — Why We Built Mercato",
   description:
-    "SuccessionIQ was built in Hamilton, Ontario to give every business owner a dignified exit — starting with a simple answer to what their business is worth.",
+    "Mercato was built in Hamilton, Ontario to give every business owner a dignified exit — starting with a simple answer to what their business is worth.",
 };
 
 export default function AboutPage() {
@@ -21,7 +21,7 @@ export default function AboutPage() {
       <section className="mx-auto max-w-3xl px-6 py-16">
         <div className="space-y-6 text-lg leading-relaxed text-navy/75">
           <p>
-            SuccessionIQ started in Hamilton, Ontario, with a frustration that wouldn&apos;t go
+            Mercato started in Hamilton, Ontario, with a frustration that wouldn&apos;t go
             away. Everywhere I looked, I saw owners who had spent 25, 30, 35 years building
             real businesses — trades, clinics, shops, service companies — and not one of them
             could answer a simple question: <em>what is this thing actually worth?</em>
@@ -36,7 +36,7 @@ export default function AboutPage() {
           <p>
             I could see the wave coming. Over the next decade, more business owners will try to
             retire than at any point in history — and most have no plan and no number. That
-            problem was too big and too urgent to wait on. So I built SuccessionIQ in under a
+            problem was too big and too urgent to wait on. So I built Mercato in under a
             week using modern AI tools, because the owners living this don&apos;t have time for
             a five-year roadmap. They have a question that needs an answer today.
           </p>
