@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ValuatorTeaser } from "./ValuatorTeaser";
 import { ADVISORS_PATH, LISTINGS_PATH, VALUATOR_PATH } from "./config";
 
-// The global root layout provides the Mercato <Nav> and footer, plus the
+// The global root layout provides the FairMark <Nav> and footer, plus the
 // brand's Satoshi font (via next/font + the Fontshare stylesheet), so this page
 // inherits typography and chrome instead of shipping its own.
 

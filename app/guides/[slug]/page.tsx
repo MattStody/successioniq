@@ -30,10 +30,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const guide = getGuide(slug);
-  if (!guide) return { title: "Guide not found — Mercato" };
+  if (!guide) return { title: "Guide not found — FairMark" };
   const url = `${SITE_URL}/guides/${guide.slug}`;
   return {
-    title: `${guide.title} | Mercato Guides`,
+    title: `${guide.title} | FairMark Guides`,
     description: guide.description,
     alternates: { canonical: url },
     openGraph: {
@@ -73,8 +73,8 @@ export default async function GuidePage({
     description: guide.description,
     datePublished: guide.datePublished,
     dateModified: guide.datePublished,
-    author: { "@type": "Organization", name: "Mercato" },
-    publisher: { "@type": "Organization", name: "Mercato" },
+    author: { "@type": "Organization", name: "FairMark" },
+    publisher: { "@type": "Organization", name: "FairMark" },
     mainEntityOfPage: `${SITE_URL}/guides/${guide.slug}`,
   };
 
@@ -105,7 +105,7 @@ export default async function GuidePage({
           </h1>
           <p className="mt-5 text-xl leading-normal text-[#3B4566]">{guide.description}</p>
           <p className="mt-6 text-sm text-[#525C7A]">
-            Mercato · Updated {formatDate(guide.datePublished)}
+            FairMark · Updated {formatDate(guide.datePublished)}
           </p>
         </div>
       </header>

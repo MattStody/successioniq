@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /**
- * Navy closing CTA band in the Mercato landing palette (#0E1330 / #4F6BFF).
+ * Navy closing CTA band in the FairMark landing palette (#0E1330 / #4F6BFF).
  * Reused across the refreshed marketing pages and guide articles so the whole
  * surface shares one conversion moment. Defaults route to the free valuator.
  */

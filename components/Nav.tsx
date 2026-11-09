@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import NavAuth from "./NavAuth";
 import MobileMenu from "./MobileMenu";
@@ -41,14 +42,15 @@ export default async function Nav() {
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200 bg-cream/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          {/* Mercato cube mark — placeholder until the final logo asset is added */}
-          <svg className="h-7 w-7" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <path d="M16 3 3 10v12l13 7 13-7V10L16 3Z" fill="#0E1330" />
-            <path d="M16 3 3 10l13 7 13-7L16 3Z" fill="#1b2350" />
-            <path d="M16 17v12l7-3.77V13.23L16 17Z" fill="#4F6BFF" />
-          </svg>
-          <span className="text-xl font-bold tracking-tight text-navy">Mercato</span>
+        <Link href="/" className="flex items-center" aria-label="FairMark home">
+          <Image
+            src="/fairmark-logo.png"
+            alt="FairMark"
+            width={1032}
+            height={229}
+            priority
+            className="h-7 w-auto"
+          />
         </Link>
 
         {/* Desktop */}

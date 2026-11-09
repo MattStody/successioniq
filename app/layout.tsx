@@ -24,9 +24,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Mercato — The smarter way to buy or sell a business",
+  title: "FairMark — The smarter way to buy or sell a business",
   description:
-    "Mercato is the modern marketplace for buying, selling, and valuing businesses. Powered by AI.",
+    "FairMark is the modern marketplace for buying, selling, and valuing businesses. Powered by AI.",
 };
 
 export default function RootLayout({
@@ -81,7 +81,7 @@ export default function RootLayout({
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-6 text-sm text-cream/60">
               <span>
-                © {new Date().getFullYear()} Mercato · Proudly built in Hamilton, Ontario 🇨🇦
+                © {new Date().getFullYear()} FairMark · Proudly built in Hamilton, Ontario 🇨🇦
               </span>
               <a href={SITE_URL} className="hover:text-cream">
                 {SITE_HOST}

@@ -2,9 +2,9 @@ import Link from "next/link";
 import ValuationCTA from "@/components/marketing/ValuationCTA";
 
 export const metadata = {
-  title: "How It Works — Free Business Valuation in 3 Minutes | Mercato",
+  title: "How It Works — Free Business Valuation in 3 Minutes | FairMark",
   description:
-    "See exactly how Mercato turns 10 simple questions into a defensible business valuation — range, value drivers, risks, and a plain-English summary.",
+    "See exactly how FairMark turns 10 simple questions into a defensible business valuation — range, value drivers, risks, and a plain-English summary.",
 };
 
 const STEPS = [
@@ -43,11 +43,11 @@ const FAQS = [
   },
   {
     q: "Do I need to be ready to sell?",
-    a: "Not at all. Most people who use Mercato are just curious what they've built. Knowing your number is the first step — even if you're 5 years from selling.",
+    a: "Not at all. Most people who use FairMark are just curious what they've built. Knowing your number is the first step — even if you're 5 years from selling.",
   },
   {
     q: "What if I need a formal valuation for legal or tax purposes?",
-    a: "A Chartered Business Valuator (CBV) is still essential for anything requiring a formal, defensible report — tax, estate, legal disputes. Mercato helps you understand the landscape before you get there. Think of it as the step that helps you realize you need one.",
+    a: "A Chartered Business Valuator (CBV) is still essential for anything requiring a formal, defensible report — tax, estate, legal disputes. FairMark helps you understand the landscape before you get there. Think of it as the step that helps you realize you need one.",
   },
 ];
 
@@ -227,7 +227,7 @@ export default function HowItWorksPage() {
           <p className="mt-10 text-center text-[15px] text-[#525C7A]">
             Want to go deeper? Read the{" "}
             <Link href="/guides" className="font-semibold text-[#3f57e6] hover:underline">
-              Mercato guides
+              FairMark guides
             </Link>
             .
           </p>

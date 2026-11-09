@@ -2,9 +2,9 @@ import Link from "next/link";
 import ValuationCTA from "@/components/marketing/ValuationCTA";
 
 export const metadata = {
-  title: "About — Why We Built Mercato",
+  title: "About — Why We Built FairMark",
   description:
-    "Mercato was built in Hamilton, Ontario to give every business owner a dignified exit — starting with a simple answer to what their business is worth.",
+    "FairMark was built in Hamilton, Ontario to give every business owner a dignified exit — starting with a simple answer to what their business is worth.",
 };
 
 const readable = "mx-auto max-w-[760px] px-5 sm:px-8";
@@ -16,7 +16,7 @@ export default function AboutPage() {
       <section className="border-b border-[#E3E8F3] bg-[#F4F6FC]">
         <div className={`${readable} py-16 lg:py-24`}>
           <span className="text-sm font-bold uppercase tracking-widest text-[#4F6BFF]">
-            About Mercato
+            About FairMark
           </span>
           <h1 className="mt-4 text-[38px] font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-[52px]">
             Built by someone who saw the problem up close.
@@ -42,7 +42,7 @@ export default function AboutPage() {
       <section className={`${readable} py-16 lg:py-20`}>
         <div className="space-y-6 text-[19px] leading-[1.7] text-[#2C3656]">
           <p>
-            Mercato started in Hamilton, Ontario, with a frustration that
+            FairMark started in Hamilton, Ontario, with a frustration that
             wouldn&apos;t go away. Everywhere I looked, I saw owners who had spent
             25, 30, 35 years building real businesses — trades, clinics, shops,
             service companies — and not one of them could answer a simple question:{" "}
@@ -60,7 +60,7 @@ export default function AboutPage() {
             I could see the wave coming. Over the next decade, more business owners
             will try to retire than at any point in history — and most have no plan
             and no number. That problem was too big and too urgent to wait on. So I
-            built Mercato with modern AI tools, because the owners living this
+            built FairMark with modern AI tools, because the owners living this
             don&apos;t have time for a five-year roadmap. They have a question that
             needs an answer today.
           </p>

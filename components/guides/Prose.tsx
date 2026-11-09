@@ -1,7 +1,7 @@
 /**
  * Long-form typography for guide articles. Hand-rolled with Tailwind v4 child
  * selectors (no @tailwindcss/typography dependency) so the reading experience
- * matches the Mercato landing palette exactly. Author article bodies as plain
+ * matches the FairMark landing palette exactly. Author article bodies as plain
  * semantic JSX (<h2>, <p>, <ul>, <blockquote>, …) and wrap them in <Prose>.
  */
 export default function Prose({ children }: { children: React.ReactNode }) {

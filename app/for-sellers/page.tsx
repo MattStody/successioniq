@@ -4,7 +4,7 @@ import ValueRevealCard from "@/components/marketing/ValueRevealCard";
 import { GUIDES } from "@/lib/guides";
 
 export const metadata = {
-  title: "For Sellers — Find Out What Your Business Is Worth | Mercato",
+  title: "For Sellers — Find Out What Your Business Is Worth | FairMark",
   description:
     "Your business is probably worth more than you think. Start with a free AI valuation, then turn it into a listing in one click when you're ready.",
 };
@@ -21,7 +21,7 @@ const ACTS = [
       "Most owners call a broker and get a pitch, not an answer. Or they pay thousands for a formal appraisal they didn't really need yet. Or they do nothing — and the years slip by.",
   },
   {
-    label: "The Mercato way",
+    label: "The FairMark way",
     body:
       "Start with the free valuation. Understand your range, your value drivers, your risks. Then, if you're ready, turn it into a listing in one click. We'll write the description for you.",
   },

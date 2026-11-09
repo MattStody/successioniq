@@ -5,7 +5,7 @@ import { SITE_URL } from "@/lib/site";
 import ValuationCTA from "@/components/marketing/ValuationCTA";
 
 export const metadata: Metadata = {
-  title: "Guides — Selling Your Business, Explained | Mercato",
+  title: "Guides — Selling Your Business, Explained | FairMark",
   description:
     "Plain-English guides to valuing, preparing, and selling your business. Written for owner-operators across Canada and the United States — no jargon, no retainer.",
   alternates: { canonical: `${SITE_URL}/guides` },
@@ -28,7 +28,7 @@ export default function GuidesHubPage() {
       <section className="border-b border-[#E3E8F3] bg-[#F4F6FC]">
         <div className="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 lg:py-20">
           <p className="text-sm font-bold uppercase tracking-widest text-[#4F6BFF]">
-            Mercato Guides
+            FairMark Guides
           </p>
           <h1 className="mt-3 max-w-[18em] text-[38px] font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-[54px]">
             Selling your business, explained.

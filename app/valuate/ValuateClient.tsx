@@ -732,7 +732,7 @@ function ResultsView({
           Ready to meet qualified buyers?
         </h3>
         <p className="text-slate-500 text-sm mb-6 max-w-md mx-auto">
-          List your business on Mercato and connect with vetted private equity firms,
+          List your business on FairMark and connect with vetted private equity firms,
           family offices, and strategic acquirers.
         </p>
         <ListYourBusinessCTA isLoggedIn={isLoggedIn} listingHref={listingHref} tone="light" />

@@ -97,7 +97,7 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
             <span className="text-2xl font-bold tracking-tight text-slate-900">
-              Mercato
+              FairMark
             </span>
           </Link>
         </div>
@@ -132,14 +132,14 @@ export default function SignUpPage() {
       <div className="text-center mb-8">
         <Link href="/" className="inline-block mb-6">
           <span className="text-2xl font-bold tracking-tight text-slate-900">
-            Mercato
+            FairMark
           </span>
         </Link>
         <h1 className="font-serif text-3xl font-bold text-slate-900 mb-2">
           Create your account
         </h1>
         <p className="text-slate-500 text-sm">
-          Join Mercato to buy, sell, or broker businesses.
+          Join FairMark to buy, sell, or broker businesses.
         </p>
       </div>
 

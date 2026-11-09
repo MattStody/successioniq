@@ -2,7 +2,7 @@ import Link from "next/link";
 import ValuationCTA from "@/components/marketing/ValuationCTA";
 
 export const metadata = {
-  title: "For Buyers — Find Cash-Flowing Businesses for Sale | Mercato",
+  title: "For Buyers — Find Cash-Flowing Businesses for Sale | FairMark",
   description:
     "Browse vetted Canadian and American businesses with real financial data. Every listing starts with an AI valuation, so the asking price is grounded in reality.",
 };
@@ -11,7 +11,7 @@ const POINTS = [
   {
     title: "Grounded asking prices",
     body:
-      "Every listing on Mercato starts with an AI valuation — so you know the asking price is based on real data, not wishful thinking.",
+      "Every listing on FairMark starts with an AI valuation — so you know the asking price is based on real data, not wishful thinking.",
   },
   {
     title: "Signal, not noise",
@@ -115,7 +115,7 @@ export default function ForBuyersPage() {
         </div>
       </section>
 
-      {/* Why Mercato */}
+      {/* Why FairMark */}
       <section className={`${wrap} py-20 lg:py-24`}>
         <h2 className="max-w-[14em] text-[32px] font-extrabold leading-[1.1] tracking-[-0.025em] sm:text-[42px]">
           Real businesses. Real numbers.

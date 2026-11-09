@@ -3,9 +3,9 @@ import Link from "next/link";
 import Prose from "@/components/guides/Prose";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Mercato",
+  title: "Privacy Policy — FairMark",
   description:
-    "How Mercato collects, uses, and protects your information — including the business details you enter for a valuation.",
+    "How FairMark collects, uses, and protects your information — including the business details you enter for a valuation.",
 };
 
 // Set this to the date the policy actually takes effect once reviewed.
@@ -33,8 +33,8 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-[760px] px-5 py-14 sm:px-8 lg:py-16">
         <Prose>
           <p>
-            This Privacy Policy describes how Mercato, operated by{" "}
-            <strong>Boldly Media Inc.</strong> (&ldquo;Mercato,&rdquo; &ldquo;we,&rdquo;
+            This Privacy Policy describes how FairMark, operated by{" "}
+            <strong>Boldly Media Inc.</strong> (&ldquo;FairMark,&rdquo; &ldquo;we,&rdquo;
             &ldquo;us,&rdquo; or &ldquo;our&rdquo;), collects, uses, discloses, and protects
             personal information when you use our website and services (the
             &ldquo;Service&rdquo;). We are based in Hamilton, Ontario, Canada, and serve
@@ -130,11 +130,11 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>For legal reasons</strong> — to comply with applicable law, respond to
-              lawful requests, or protect the rights, safety, and property of Mercato, our
+              lawful requests, or protect the rights, safety, and property of FairMark, our
               users, or others.
             </li>
             <li>
-              <strong>In a business transfer</strong> — if Mercato is involved in a merger,
+              <strong>In a business transfer</strong> — if FairMark is involved in a merger,
               acquisition, or sale of assets, subject to this policy.
             </li>
           </ul>
@@ -175,7 +175,7 @@ export default function PrivacyPage() {
 
           <h2>9. International transfers</h2>
           <p>
-            Mercato is operated from Canada, and our service providers may process information
+            FairMark is operated from Canada, and our service providers may process information
             in the United States and elsewhere. Where required, we take steps to ensure your
             information receives appropriate protection when transferred across borders.
           </p>

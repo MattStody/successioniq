@@ -8,15 +8,15 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* Satoshi is the Mercato brand face; Inter (loaded via next/font) is the
+  /* Satoshi is the FairMark brand face; Inter (loaded via next/font) is the
      approved fallback and renders if Satoshi hasn't loaded. */
   --font-sans: "Satoshi", var(--font-inter), "Helvetica Neue", Arial, sans-serif;
   --font-serif: "Satoshi", var(--font-inter), "Helvetica Neue", Arial, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
-/* ── Mercato brand palette ──────────────────────────────────────────────────
-   Navy for headings/nav/body/dark surfaces, Mercato Blue for actions/links,
+/* ── FairMark brand palette ──────────────────────────────────────────────────
+   Navy for headings/nav/body/dark surfaces, FairMark Blue for actions/links,
    Sky Blue + Soft Grey as supporting neutrals, white as the dominant canvas. */
 @theme {
   --color-navy: #0E1330;
@@ -26,14 +26,14 @@
   --color-sky: #E8EEFF;
   --color-mist: #F1F3F6;
 
-  /* Legacy marketing tokens remapped onto the Mercato system */
+  /* Legacy marketing tokens remapped onto the FairMark system */
   --color-accent: #4F6BFF;
   --color-accent-dark: #3f57e6;
   --color-cream: #F1F3F6;       /* page background = Soft Grey */
   --color-cream-deep: #E3E7F0;  /* borders / dividers */
 
   /* Rebrand the built-in Tailwind classes the app already uses, in one place:
-     blue-* (actions) → Mercato Blue / Sky Blue, slate-900 (text) → Navy. */
+     blue-* (actions) → FairMark Blue / Sky Blue, slate-900 (text) → Navy. */
   --color-blue-900: #4F6BFF;
   --color-blue-800: #3f57e6;
   --color-blue-700: #3f57e6;

@@ -3,9 +3,9 @@ import Link from "next/link";
 import Prose from "@/components/guides/Prose";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Mercato",
+  title: "Terms of Service — FairMark",
   description:
-    "The terms that govern your use of Mercato — including how valuations and the marketplace work, and the limits of what we provide.",
+    "The terms that govern your use of FairMark — including how valuations and the marketplace work, and the limits of what we provide.",
 };
 
 // Set this to the date the terms actually take effect once reviewed.
@@ -22,7 +22,7 @@ export default function TermsPage() {
           </h1>
           <p className="mt-4 text-sm text-[#525C7A]">Last updated: {LAST_UPDATED}</p>
           <p className="mt-6 text-lg leading-normal text-[#3B4566]">
-            These terms govern your use of Mercato. Please read them carefully — they explain
+            These terms govern your use of FairMark. Please read them carefully — they explain
             how our valuations and marketplace work, and the limits of what we provide.
           </p>
         </div>
@@ -33,7 +33,7 @@ export default function TermsPage() {
         <Prose>
           <p>
             These Terms of Service (&ldquo;Terms&rdquo;) are a legal agreement between you and
-            Mercato, operated by <strong>Boldly Media Inc.</strong> (&ldquo;Mercato,&rdquo;
+            FairMark, operated by <strong>Boldly Media Inc.</strong> (&ldquo;FairMark,&rdquo;
             &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;), governing your access to
             and use of our website and services (the &ldquo;Service&rdquo;).
           </p>
@@ -52,10 +52,10 @@ export default function TermsPage() {
             authorized to bind that business to these Terms.
           </p>
 
-          <h2>3. What Mercato provides</h2>
+          <h2>3. What FairMark provides</h2>
           <p>
-            Mercato offers an AI-assisted business valuation tool and an online marketplace
-            that helps business owners and prospective buyers connect. Mercato is a technology
+            FairMark offers an AI-assisted business valuation tool and an online marketplace
+            that helps business owners and prospective buyers connect. FairMark is a technology
             platform. <strong>We are not a business broker, dealer, investment adviser,
             accountant, appraiser, or law firm</strong>, and we are not a party to any
             transaction between users.
@@ -90,7 +90,7 @@ export default function TermsPage() {
               false, misleading, or confidential third-party information.
             </li>
             <li>
-              Mercato does not verify, endorse, or guarantee any listing, user, valuation, or
+              FairMark does not verify, endorse, or guarantee any listing, user, valuation, or
               the outcome of any discussion or transaction, and does not guarantee that a
               business will sell.
             </li>
@@ -105,7 +105,7 @@ export default function TermsPage() {
           <p>
             The Service may let a buyer sign a non-disclosure agreement (NDA) to request a
             seller&apos;s contact details or confidential information. Any such NDA is an
-            agreement between the buyer and the seller. Mercato provides the tool but is not a
+            agreement between the buyer and the seller. FairMark provides the tool but is not a
             party to it and is not responsible for its negotiation, performance, or enforcement.
             If you receive confidential information, you must use it only for evaluating a
             potential transaction and keep it confidential.
@@ -131,7 +131,7 @@ export default function TermsPage() {
           <h2>10. Intellectual property</h2>
           <p>
             The Service, including its software, design, and content (excluding your content),
-            is owned by Mercato or its licensors and is protected by law. We grant you a
+            is owned by FairMark or its licensors and is protected by law. We grant you a
             limited, non-exclusive, non-transferable right to use the Service under these Terms.
             You retain ownership of the content you submit, and you grant us a license to host,
             process, and display it as needed to operate the Service.
@@ -156,7 +156,7 @@ export default function TermsPage() {
 
           <h2>13. Limitation of liability</h2>
           <p>
-            To the fullest extent permitted by law, Mercato and its operators will not be liable
+            To the fullest extent permitted by law, FairMark and its operators will not be liable
             for any indirect, incidental, special, consequential, or punitive damages, or for
             any loss of profits, revenue, data, business, or goodwill, arising out of or related
             to your use of (or inability to use) the Service — including any reliance on a
@@ -167,7 +167,7 @@ export default function TermsPage() {
 
           <h2>14. Indemnification</h2>
           <p>
-            You agree to indemnify and hold harmless Mercato and its operators from any claims,
+            You agree to indemnify and hold harmless FairMark and its operators from any claims,
             losses, and expenses (including reasonable legal fees) arising out of your use of
             the Service, your content or listings, your dealings with other users, or your
             breach of these Terms.
