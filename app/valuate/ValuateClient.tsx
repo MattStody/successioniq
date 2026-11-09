@@ -467,8 +467,16 @@ function EmailGateView({
         </button>
       </form>
 
-      <p className="text-xs text-slate-400 mt-4">
-        No spam, ever. Unsubscribe any time.
+      <p className="text-xs text-slate-400 mt-4 leading-relaxed">
+        By continuing, you agree to our{" "}
+        <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
+          Terms
+        </a>{" "}
+        and{" "}
+        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
+          Privacy Policy
+        </a>
+        . We&apos;ll email your valuation and occasional related updates — unsubscribe any time.
       </p>
     </div>
   );
