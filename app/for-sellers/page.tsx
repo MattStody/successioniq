@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ValuationCTA from "@/components/marketing/ValuationCTA";
+import ValueRevealCard from "@/components/marketing/ValueRevealCard";
 import { GUIDES } from "@/lib/guides";
 
 export const metadata = {
@@ -74,32 +75,28 @@ export default function ForSellersPage() {
                 Read the guides
               </Link>
             </div>
-          </div>
-
-          {/* Reassurance card */}
-          <div className="rounded-3xl border border-[#DCE3F2] bg-white p-8 shadow-[0_24px_60px_-32px_rgba(14,26,60,0.35)]">
-            <p className="text-sm font-semibold uppercase tracking-widest text-[#525C7A]">
-              What you get, free
-            </p>
-            <ul className="mt-5 flex flex-col gap-4">
+            {/* quick reassurance strip */}
+            <ul className="mt-1 flex flex-col gap-2.5">
               {[
                 "An estimated value range for your business",
-                "Your key value drivers — what's working in your favour",
-                "Your biggest risks — what buyers will push on",
+                "Your key value drivers and biggest risks",
                 "A one-click path to list when you're ready",
               ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#E8EEFF] text-xs font-bold text-[#3f57e6]">
+                <li
+                  key={item}
+                  className="flex items-center gap-2.5 text-[15px] text-[#3B4566]"
+                >
+                  <span className="flex h-4 w-4 flex-none items-center justify-center rounded-full bg-[#E8EEFF] text-[10px] font-bold text-[#3f57e6]">
                     ✓
                   </span>
-                  <span className="text-[#2C3656]">{item}</span>
+                  {item}
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-sm text-[#525C7A]">
-              No account needed to see your range · private · no obligation
-            </p>
           </div>
+
+          {/* Hero animation — value reveal */}
+          <ValueRevealCard />
         </div>
       </section>
 
