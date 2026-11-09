@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GUIDES, getFeaturedGuide } from "@/lib/guides";
+import { SITE_URL } from "@/lib/site";
 import ValuationCTA from "@/components/marketing/ValuationCTA";
 
 export const metadata: Metadata = {
   title: "Guides — Selling Your Business, Explained | Mercato",
   description:
     "Plain-English guides to valuing, preparing, and selling your business. Written for owner-operators across Canada and the United States — no jargon, no retainer.",
-  alternates: { canonical: "https://successioniq.vercel.app/guides" },
+  alternates: { canonical: `${SITE_URL}/guides` },
 };
 
 // Short "what you'll take away" lines for the hero guide's panel.

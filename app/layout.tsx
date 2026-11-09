@@ -3,6 +3,7 @@ import { Inter, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import { SITE_URL, SITE_HOST } from "@/lib/site";
 
 // Inter is the approved fallback for Satoshi (loaded from Fontshare in <head>).
 const inter = Inter({
@@ -16,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Mercato — The smarter way to buy or sell a business",
   description:
     "Mercato is the modern marketplace for buying, selling, and valuing businesses. Powered by AI.",
@@ -58,8 +60,8 @@ export default function RootLayout({
               <span>
                 © {new Date().getFullYear()} Mercato · Proudly built in Hamilton, Ontario 🇨🇦
               </span>
-              <a href="https://successioniq.vercel.app" className="hover:text-cream">
-                successioniq.vercel.app
+              <a href={SITE_URL} className="hover:text-cream">
+                {SITE_HOST}
               </a>
             </div>
           </div>

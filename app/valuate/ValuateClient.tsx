@@ -107,7 +107,7 @@ function fmtCurrency(n: number): string {
 // ─── Shared UI primitives ─────────────────────────────────────────────────────
 
 const inputCls =
-  "w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100 transition-colors";
+  "w-full bg-white border border-[#C9D2E8] rounded-xl px-4 py-3 text-[#0E1330] placeholder-slate-400 focus:outline-none focus:border-[#4F6BFF] focus:ring-2 focus:ring-[#E8EEFF] transition-colors";
 
 function Field({
   label,
@@ -226,8 +226,8 @@ function CountryRegionFields({
   const toggleCls = (active: boolean) =>
     `rounded-xl border px-2 py-2.5 text-sm font-medium transition-all ${
       active
-        ? "bg-blue-900 text-white border-blue-900 shadow-sm"
-        : "bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:text-slate-900"
+        ? "bg-[#0E1330] text-white border-[#0E1330] shadow-sm"
+        : "bg-white text-[#0E1330] border-[#C9D2E8] hover:border-[#0E1330]"
     }`;
 
   return (
@@ -287,8 +287,8 @@ function IndustryChips({ value, onChange }: { value: string; onChange: (v: strin
           onClick={() => onChange(opt)}
           className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
             value === opt
-              ? "bg-blue-900 text-white border-blue-900 shadow-sm"
-              : "bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:text-slate-900"
+              ? "bg-[#0E1330] text-white border-[#0E1330] shadow-sm"
+              : "bg-white text-[#0E1330] border-[#C9D2E8] hover:border-[#0E1330]"
           }`}
         >
           {opt}
@@ -318,8 +318,8 @@ function ChoiceButtons({
           onClick={() => onChange(opt)}
           className={`w-full text-left rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
             value === opt
-              ? "bg-blue-900 text-white border-blue-900 shadow-sm"
-              : "bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:text-slate-900"
+              ? "bg-[#0E1330] text-white border-[#0E1330] shadow-sm"
+              : "bg-white text-[#0E1330] border-[#C9D2E8] hover:border-[#0E1330]"
           }`}
         >
           {opt}
@@ -435,7 +435,7 @@ function EmailGateView({
         {isAiReady ? "Valuation complete" : "Analysing your business…"}
       </div>
 
-      <h2 className="font-serif text-3xl font-bold text-slate-900 mb-3">
+      <h2 className="text-3xl font-extrabold tracking-[-0.02em] text-[#0E1330] mb-3">
         Where should we send your results?
       </h2>
       <p className="text-slate-500 text-sm mb-8 leading-relaxed">
@@ -449,7 +449,7 @@ function EmailGateView({
           placeholder="you@company.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100 transition-colors text-base"
+          className="w-full bg-white border border-[#C9D2E8] rounded-xl px-4 py-3.5 text-[#0E1330] placeholder-slate-400 focus:outline-none focus:border-[#4F6BFF] focus:ring-2 focus:ring-[#E8EEFF] transition-colors text-base"
           required
           autoFocus
         />
@@ -581,14 +581,14 @@ function ResultsView({
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           Valuation Complete
         </div>
-        <h1 className="font-serif text-4xl font-bold mb-2 text-slate-900">Your Business Valuation</h1>
+        <h1 className="text-4xl font-extrabold tracking-[-0.025em] mb-2 text-[#0E1330]">Your Business Valuation</h1>
         <p className="text-slate-500">
           {formData.industry} · {formData.region}, {formData.country}
         </p>
       </div>
 
       {/* Valuation range card */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-8 mb-6 shadow-sm">
+      <div className="bg-white border border-[#DCE3F2] rounded-2xl p-8 mb-6 shadow-sm">
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-8">
           Estimated Value Range · CAD
         </p>
@@ -602,7 +602,7 @@ function ResultsView({
               {fmtCurrency(result.valuation_low)}
             </div>
           </div>
-          <div className="border-x border-slate-200 px-4">
+          <div className="border-x border-[#DCE3F2] px-4">
             <div className="text-xs text-blue-900 font-semibold mb-1.5 uppercase tracking-wider">
               Most Likely
             </div>
@@ -629,7 +629,7 @@ function ResultsView({
         </div>
 
         {/* Method metadata */}
-        <div className="mt-8 pt-6 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+        <div className="mt-8 pt-6 border-t border-[#DCE3F2] grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
           <div>
             <div className="text-slate-400 mb-1">Primary Method</div>
             <div className="text-slate-900 font-medium">{result.primary_method}</div>
@@ -658,7 +658,7 @@ function ResultsView({
       {/* Prominent list CTA — placed at the moment of peak interest, right
           under the number, so it isn't buried below the analysis. */}
       <div className="bg-blue-900 rounded-2xl p-8 mb-6 shadow-md text-center">
-        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white mb-2">
+        <h2 className="text-2xl md:text-3xl font-extrabold tracking-[-0.02em] text-white mb-2">
           Ready to find the right buyer?
         </h2>
         <p className="text-blue-200 text-sm mb-6 max-w-md mx-auto leading-relaxed">
@@ -675,7 +675,7 @@ function ResultsView({
 
       {/* Drivers & Risks */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="bg-white border border-[#DCE3F2] rounded-2xl p-6 shadow-sm">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-emerald-700 mb-5 uppercase tracking-wider">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200 text-xs">
               ✓
@@ -692,7 +692,7 @@ function ResultsView({
           </ul>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="bg-white border border-[#DCE3F2] rounded-2xl p-6 shadow-sm">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-red-600 mb-5 uppercase tracking-wider">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-50 border border-red-200 text-xs">
               !
@@ -711,7 +711,7 @@ function ResultsView({
       </div>
 
       {/* Analyst summary */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
+      <div className="bg-white border border-[#DCE3F2] rounded-2xl p-6 mb-6 shadow-sm">
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
           Analyst Summary
         </p>
@@ -719,8 +719,8 @@ function ResultsView({
       </div>
 
       {/* List your business CTA */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
-        <h3 className="font-serif text-2xl font-bold text-slate-900 mb-2">
+      <div className="bg-white border border-[#DCE3F2] rounded-2xl p-8 text-center shadow-sm">
+        <h3 className="text-2xl font-extrabold tracking-[-0.02em] text-[#0E1330] mb-2">
           Ready to meet qualified buyers?
         </h3>
         <p className="text-slate-500 text-sm mb-6 max-w-md mx-auto">
@@ -927,7 +927,7 @@ export default function ValuateClient({
             <span className="h-1.5 w-1.5 rounded-full bg-blue-700" />
             Almost there
           </div>
-          <h1 className="font-serif text-4xl font-bold mb-3 text-slate-900">
+          <h1 className="text-4xl font-extrabold tracking-[-0.025em] mb-3 text-[#0E1330]">
             Unlock your full valuation
           </h1>
           <p className="text-slate-500 text-sm">
@@ -949,7 +949,7 @@ export default function ValuateClient({
           </div>
         )}
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-5">
+        <div className="bg-white border border-[#DCE3F2] rounded-2xl p-8 shadow-sm space-y-5">
           <Field
             label="Annual Profit (CAD)"
             hint="Roughly what the business earns in a year before tax — include what you pay yourself."
@@ -1012,7 +1012,7 @@ export default function ValuateClient({
           <span className="h-1.5 w-1.5 rounded-full bg-blue-700" />
           AI Valuation Engine
         </div>
-        <h1 className="font-serif text-4xl font-bold mb-3 text-slate-900">
+        <h1 className="text-4xl font-extrabold tracking-[-0.025em] mb-3 text-[#0E1330]">
           {editMode ? "Refine your valuation" : "Get your free business valuation"}
         </h1>
         <p className="text-slate-500 text-sm">
@@ -1024,8 +1024,8 @@ export default function ValuateClient({
       <StepProgress current={step} />
 
       {/* Form card */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-700 mb-6 pb-4 border-b border-slate-200">
+      <div className="bg-white border border-[#DCE3F2] rounded-2xl p-8 shadow-sm">
+        <h2 className="text-base font-semibold text-slate-700 mb-6 pb-4 border-b border-[#DCE3F2]">
           Step {step + 1} of {STEPS.length} — {STEPS[step]}
         </h2>
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GUIDES, getGuide, getRelatedGuides } from "@/lib/guides";
+import { SITE_URL } from "@/lib/site";
 import Prose from "@/components/guides/Prose";
 import ValuationCTA from "@/components/marketing/ValuationCTA";
 
@@ -17,8 +18,6 @@ const BODIES: Record<string, React.ComponentType> = {
   "ebitda-sde-multiples-explained": EbitdaExplained,
   "sellers-timeline": SellersTimeline,
 };
-
-const SITE_URL = "https://successioniq.vercel.app";
 
 export function generateStaticParams() {
   return GUIDES.map((g) => ({ slug: g.slug }));
