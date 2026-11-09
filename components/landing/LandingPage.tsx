@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ValuatorTeaser } from "./ValuatorTeaser";
-import ValueRevealCard from "@/components/marketing/ValueRevealCard";
+import ListingJourneyCard from "@/components/marketing/ListingJourneyCard";
 import { ADVISORS_PATH, LISTINGS_PATH, VALUATOR_PATH } from "./config";
 
 // The global root layout provides the FairMark <Nav> and footer, plus the
@@ -70,7 +70,7 @@ export default function LandingPage() {
               <li className="flex items-start gap-3"><Check d="M4 21V9l8-5 8 5v12M9.5 21v-6.5h5V21" /><span>Built for owner-run businesses, not Wall Street deals</span></li>
             </ul>
           </div>
-          <ValueRevealCard />
+          <ListingJourneyCard />
         </div>
       </section>
 
