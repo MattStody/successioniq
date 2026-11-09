@@ -9,7 +9,6 @@ const NAV_LINKS = [
   { href: "/for-sellers", label: "Sell" },
   { href: "/for-buyers", label: "Buy" },
   { href: "/guides", label: "Guides" },
-  { href: "/about", label: "About" },
 ];
 
 export default async function Nav() {
@@ -63,15 +62,10 @@ export default async function Nav() {
               {l.label}
             </Link>
           ))}
-          <Link
-            href="/listings"
-            className="text-sm font-medium text-navy/70 transition-colors hover:text-navy"
-          >
-            Browse Listings
-          </Link>
+          {/* One primary action. Sign in is a quiet link; the avatar replaces it when signed in. */}
           <NavAuth initialUser={user} firstName={firstName} userRole={userRole} />
           <CTAButton href="/valuate" className="!px-5 !py-2.5 !text-sm">
-            Get My Free Valuation →
+            Get my free valuation
           </CTAButton>
         </div>
 

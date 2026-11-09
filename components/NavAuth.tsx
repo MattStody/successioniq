@@ -35,21 +35,14 @@ export default function NavAuth({ initialUser, firstName, userRole }: NavAuthPro
       : "/dashboard";
 
   if (!user) {
+    // A single quiet link — the one primary action (free valuation) lives beside it.
     return (
-      <div className="flex items-center gap-3">
-        <Link
-          href="/auth/login"
-          className="text-slate-600 hover:text-slate-900 transition-colors text-sm font-medium"
-        >
-          Sign In
-        </Link>
-        <Link
-          href="/auth/signup"
-          className="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-        >
-          Get Started
-        </Link>
-      </div>
+      <Link
+        href="/auth/login"
+        className="text-sm font-medium text-navy/70 transition-colors hover:text-navy"
+      >
+        Sign in
+      </Link>
     );
   }
 
