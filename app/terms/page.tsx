@@ -198,7 +198,7 @@ export default function TermsPage() {
 
           <h2>18. Contact us</h2>
           <p>
-            Questions about these Terms? Contact us at <strong>[legal@yourdomain.com]</strong>,
+            Questions about these Terms? Contact us at <strong>legal@gofairmarket.com</strong>,
             or write to <strong>[Legal Entity Name], [mailing address], Hamilton, Ontario,
             Canada]</strong>.
           </p>

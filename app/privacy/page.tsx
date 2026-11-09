@@ -169,7 +169,7 @@ export default function PrivacyPage() {
             your personal information, and withdraw consent to certain processing. Residents of
             certain jurisdictions (for example, under Canada&apos;s PIPEDA or applicable U.S.
             state privacy laws) may have additional rights. To exercise any of these, contact
-            us at <strong>[privacy@yourdomain.com]</strong>. We will respond within the time
+            us at <strong>privacy@gofairmarket.com</strong>. We will respond within the time
             required by applicable law.
           </p>
 
@@ -198,7 +198,7 @@ export default function PrivacyPage() {
           <h2>12. Contact us</h2>
           <p>
             Questions or requests about your privacy? Contact our privacy contact at{" "}
-            <strong>[privacy@yourdomain.com]</strong>, or write to us at{" "}
+            <strong>privacy@gofairmarket.com</strong>, or write to us at{" "}
             <strong>[Legal Entity Name], [mailing address], Hamilton, Ontario, Canada]</strong>.
           </p>
           <p>

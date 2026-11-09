@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import Script from "next/script";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import { SITE_URL, SITE_HOST } from "@/lib/site";
+
+// Google Tag Manager. Overridable via NEXT_PUBLIC_GTM_ID; loaded only in
+// production builds so local dev doesn't pollute analytics.
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || "GTM-MPMQ8S2J";
+const analyticsEnabled = process.env.NODE_ENV === "production" && !!GTM_ID;
 
 // Inter is the approved fallback for Satoshi (loaded from Fontshare in <head>).
 const inter = Inter({
@@ -39,8 +45,24 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap"
         />
+        {analyticsEnabled && (
+          <Script id="gtm-init" strategy="afterInteractive">
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`}
+          </Script>
+        )}
       </head>
       <body className="flex min-h-full flex-col bg-cream text-slate-900">
+        {analyticsEnabled && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="gtm"
+            />
+          </noscript>
+        )}
         <Nav />
         <main className="flex-1">{children}</main>
         <footer className="bg-navy text-cream/80">
