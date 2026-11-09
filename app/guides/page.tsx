@@ -22,11 +22,11 @@ export default function GuidesHubPage() {
   const rest = GUIDES.filter((g) => g.slug !== featured.slug);
 
   return (
-    <div className="bg-white text-[#0E1A3C]">
+    <div className="bg-white text-[#0E1330]">
       {/* Hero */}
       <section className="border-b border-[#E3E8F3] bg-[#F4F6FC]">
         <div className="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 lg:py-20">
-          <p className="text-sm font-bold uppercase tracking-widest text-[#4565E6]">
+          <p className="text-sm font-bold uppercase tracking-widest text-[#4F6BFF]">
             Mercato Guides
           </p>
           <h1 className="mt-3 max-w-[18em] text-[38px] font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-[54px]">
@@ -46,7 +46,7 @@ export default function GuidesHubPage() {
           href={`/guides/${featured.slug}`}
           className="group grid overflow-hidden rounded-3xl border border-[#DCE3F2] bg-white transition-shadow hover:shadow-[0_28px_70px_-32px_rgba(14,26,60,0.4)] lg:grid-cols-2"
         >
-          <div className="flex items-center bg-[#0E1A3C] p-9 sm:p-12">
+          <div className="flex items-center bg-[#0E1330] p-9 sm:p-12">
             <div>
               <span className="text-xs font-semibold uppercase tracking-widest text-[#8FA3E6]">
                 Start here · {featured.category}
@@ -67,7 +67,7 @@ export default function GuidesHubPage() {
               <ul className="mt-4 flex flex-col gap-3">
                 {FEATURED_HIGHLIGHTS.map((h) => (
                   <li key={h} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#E8EEFF] text-xs font-bold text-[#3550D4]">
+                    <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#E8EEFF] text-xs font-bold text-[#3f57e6]">
                       ✓
                     </span>
                     <span className="text-[15px] leading-snug text-[#2C3656]">{h}</span>
@@ -76,7 +76,7 @@ export default function GuidesHubPage() {
               </ul>
             </div>
             <div className="flex items-center gap-4">
-              <span className="inline-flex items-center gap-2 text-[17px] font-bold text-[#3550D4] group-hover:underline">
+              <span className="inline-flex items-center gap-2 text-[17px] font-bold text-[#3f57e6] group-hover:underline">
                 Read the guide →
               </span>
               <span className="text-sm font-semibold text-[#525C7A]">
@@ -89,7 +89,7 @@ export default function GuidesHubPage() {
 
       {/* All guides */}
       <section className="mx-auto max-w-[1240px] px-5 py-14 sm:px-8 lg:py-20">
-        <h2 className="text-[22px] font-bold tracking-[-0.01em] text-[#0E1A3C]">
+        <h2 className="text-[22px] font-bold tracking-[-0.01em] text-[#0E1330]">
           All guides
         </h2>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -99,10 +99,10 @@ export default function GuidesHubPage() {
               href={`/guides/${g.slug}`}
               className="group flex flex-col rounded-2xl border border-[#DCE3F2] bg-white p-7 transition-shadow hover:shadow-[0_20px_48px_-26px_rgba(14,26,60,0.32)]"
             >
-              <span className="text-xs font-semibold uppercase tracking-widest text-[#4565E6]">
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#4F6BFF]">
                 {g.category}
               </span>
-              <h3 className="mt-3 text-[21px] font-bold leading-snug tracking-[-0.01em] text-[#0E1A3C] group-hover:text-[#3550D4]">
+              <h3 className="mt-3 text-[21px] font-bold leading-snug tracking-[-0.01em] text-[#0E1330] group-hover:text-[#3f57e6]">
                 {g.title}
               </h3>
               <p className="mt-3 flex-1 text-[15px] leading-relaxed text-[#525C7A]">

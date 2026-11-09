@@ -45,12 +45,12 @@ export default function ForSellersPage() {
   const sellerGuides = GUIDES.filter((g) => g.audience !== "buyer").slice(0, 3);
 
   return (
-    <div className="bg-white text-[#0E1A3C]">
+    <div className="bg-white text-[#0E1330]">
       {/* Hero */}
       <section className="bg-[#F4F6FC]">
         <div className={`${wrap} grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24`}>
           <div className="flex flex-col gap-6">
-            <span className="text-sm font-bold uppercase tracking-widest text-[#4565E6]">
+            <span className="text-sm font-bold uppercase tracking-widest text-[#4F6BFF]">
               For owners
             </span>
             <h1 className="text-[40px] font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-[58px]">
@@ -63,13 +63,13 @@ export default function ForSellersPage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/valuate"
-                className="inline-flex min-h-13 items-center rounded-xl bg-[#4565E6] px-7 py-3.5 text-[17px] font-bold text-white transition-colors hover:bg-[#3550D4]"
+                className="inline-flex min-h-13 items-center rounded-xl bg-[#4F6BFF] px-7 py-3.5 text-[17px] font-bold text-white transition-colors hover:bg-[#3f57e6]"
               >
                 Start with your free valuation →
               </Link>
               <Link
                 href="/guides"
-                className="inline-flex min-h-13 items-center rounded-xl border-2 border-[#0E1A3C] px-6 py-3 text-[17px] font-bold text-[#0E1A3C] transition-colors hover:bg-[#0E1A3C] hover:text-white"
+                className="inline-flex min-h-13 items-center rounded-xl border-2 border-[#0E1330] px-6 py-3 text-[17px] font-bold text-[#0E1330] transition-colors hover:bg-[#0E1330] hover:text-white"
               >
                 Read the guides
               </Link>
@@ -89,7 +89,7 @@ export default function ForSellersPage() {
                 "A one-click path to list when you're ready",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#E8EEFF] text-xs font-bold text-[#3550D4]">
+                  <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#E8EEFF] text-xs font-bold text-[#3f57e6]">
                     ✓
                   </span>
                   <span className="text-[#2C3656]">{item}</span>
@@ -114,7 +114,7 @@ export default function ForSellersPage() {
               key={act.label}
               className="flex flex-col gap-3 rounded-2xl border border-[#DCE3F2] bg-[#F4F6FC] p-7"
             >
-              <span className="text-sm font-bold text-[#4565E6]">
+              <span className="text-sm font-bold text-[#4F6BFF]">
                 {String(i + 1).padStart(2, "0")} — {act.label}
               </span>
               <p className="text-[17px] leading-relaxed text-[#2C3656]">{act.body}</p>
@@ -141,7 +141,7 @@ export default function ForSellersPage() {
                   key={item}
                   className="flex items-start gap-4 rounded-2xl border border-[#DCE3F2] bg-white p-5"
                 >
-                  <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full bg-[#E8EEFF] text-sm font-bold text-[#3550D4]">
+                  <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full bg-[#E8EEFF] text-sm font-bold text-[#3f57e6]">
                     ✓
                   </span>
                   <span className="text-[17px] leading-relaxed text-[#2C3656]">{item}</span>
@@ -166,7 +166,7 @@ export default function ForSellersPage() {
           </div>
           <Link
             href="/guides"
-            className="text-[16px] font-semibold text-[#3550D4] hover:underline"
+            className="text-[16px] font-semibold text-[#3f57e6] hover:underline"
           >
             All guides →
           </Link>
@@ -178,10 +178,10 @@ export default function ForSellersPage() {
               href={`/guides/${g.slug}`}
               className="group flex flex-col rounded-2xl border border-[#DCE3F2] bg-white p-7 transition-shadow hover:shadow-[0_20px_48px_-26px_rgba(14,26,60,0.32)]"
             >
-              <span className="text-xs font-semibold uppercase tracking-widest text-[#4565E6]">
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#4F6BFF]">
                 {g.category}
               </span>
-              <h3 className="mt-3 text-[20px] font-bold leading-snug tracking-[-0.01em] text-[#0E1A3C] group-hover:text-[#3550D4]">
+              <h3 className="mt-3 text-[20px] font-bold leading-snug tracking-[-0.01em] text-[#0E1330] group-hover:text-[#3f57e6]">
                 {g.title}
               </h3>
               <span className="mt-4 text-sm font-semibold text-[#525C7A]">

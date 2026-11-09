@@ -37,12 +37,12 @@ const wrap = "mx-auto max-w-[1240px] px-5 sm:px-8";
 
 export default function ForBuyersPage() {
   return (
-    <div className="bg-white text-[#0E1A3C]">
+    <div className="bg-white text-[#0E1330]">
       {/* Hero */}
       <section className="bg-[#F4F6FC]">
         <div className={`${wrap} grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24`}>
           <div className="flex flex-col gap-6">
-            <span className="text-sm font-bold uppercase tracking-widest text-[#4565E6]">
+            <span className="text-sm font-bold uppercase tracking-widest text-[#4F6BFF]">
               For buyers
             </span>
             <h1 className="text-[40px] font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-[58px]">
@@ -55,13 +55,13 @@ export default function ForBuyersPage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/listings"
-                className="inline-flex min-h-13 items-center rounded-xl bg-[#4565E6] px-7 py-3.5 text-[17px] font-bold text-white transition-colors hover:bg-[#3550D4]"
+                className="inline-flex min-h-13 items-center rounded-xl bg-[#4F6BFF] px-7 py-3.5 text-[17px] font-bold text-white transition-colors hover:bg-[#3f57e6]"
               >
                 Browse current listings →
               </Link>
               <Link
                 href="/guides/ebitda-sde-multiples-explained"
-                className="inline-flex min-h-13 items-center rounded-xl border-2 border-[#0E1A3C] px-6 py-3 text-[17px] font-bold text-[#0E1A3C] transition-colors hover:bg-[#0E1A3C] hover:text-white"
+                className="inline-flex min-h-13 items-center rounded-xl border-2 border-[#0E1330] px-6 py-3 text-[17px] font-bold text-[#0E1330] transition-colors hover:bg-[#0E1330] hover:text-white"
               >
                 How valuation works
               </Link>
@@ -88,7 +88,7 @@ export default function ForBuyersPage() {
               ].map((chip) => (
                 <span
                   key={chip}
-                  className="rounded-full border border-[#C9D2E8] bg-[#F4F6FC] px-3.5 py-2 text-sm font-semibold text-[#0E1A3C]"
+                  className="rounded-full border border-[#C9D2E8] bg-[#F4F6FC] px-3.5 py-2 text-sm font-semibold text-[#0E1330]"
                 >
                   {chip}
                 </span>
@@ -96,7 +96,7 @@ export default function ForBuyersPage() {
             </div>
             <Link
               href="/listings"
-              className="mt-7 inline-flex items-center text-[16px] font-bold text-[#3550D4] hover:underline"
+              className="mt-7 inline-flex items-center text-[16px] font-bold text-[#3f57e6] hover:underline"
             >
               See what&apos;s listed now →
             </Link>
@@ -115,7 +115,7 @@ export default function ForBuyersPage() {
               key={p.title}
               className="flex flex-col gap-3 rounded-2xl border border-[#DCE3F2] bg-[#F4F6FC] p-7"
             >
-              <h3 className="text-[20px] font-bold tracking-[-0.01em] text-[#0E1A3C]">
+              <h3 className="text-[20px] font-bold tracking-[-0.01em] text-[#0E1330]">
                 {p.title}
               </h3>
               <p className="text-[17px] leading-relaxed text-[#2C3656]">{p.body}</p>
@@ -138,9 +138,9 @@ export default function ForBuyersPage() {
                 key={f.title}
                 className="flex items-center justify-between rounded-2xl border border-[#DCE3F2] bg-white p-6"
               >
-                <span className="font-semibold text-[#0E1A3C]">{f.title}</span>
+                <span className="font-semibold text-[#0E1330]">{f.title}</span>
                 {f.soon && (
-                  <span className="rounded-full bg-[#E8EEFF] px-2.5 py-1 text-xs font-semibold text-[#3550D4]">
+                  <span className="rounded-full bg-[#E8EEFF] px-2.5 py-1 text-xs font-semibold text-[#3f57e6]">
                     Coming soon
                   </span>
                 )}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /**
- * Navy closing CTA band in the Mercato landing palette (#0E1A3C / #4565E6).
+ * Navy closing CTA band in the Mercato landing palette (#0E1330 / #4F6BFF).
  * Reused across the refreshed marketing pages and guide articles so the whole
  * surface shares one conversion moment. Defaults route to the free valuator.
  */
@@ -17,7 +17,7 @@ export default function ValuationCTA({
   href?: string;
 }) {
   return (
-    <section className="bg-[#0E1A3C] text-white">
+    <section className="bg-[#0E1330] text-white">
       <div className="mx-auto flex max-w-[1240px] flex-col items-center gap-6 px-5 py-20 text-center sm:px-8 lg:py-24">
         <h2 className="max-w-[16em] text-[32px] font-extrabold leading-[1.1] tracking-[-0.025em] sm:text-[44px]">
           {headline}
@@ -25,7 +25,7 @@ export default function ValuationCTA({
         <p className="max-w-[40em] text-lg text-[#C3CCE6]">{subtext}</p>
         <Link
           href={href}
-          className="mt-1 inline-flex min-h-14 items-center rounded-[14px] bg-[#4565E6] px-8 py-4 text-[18px] font-bold text-white transition-colors hover:bg-[#3550D4]"
+          className="mt-1 inline-flex min-h-14 items-center rounded-[14px] bg-[#4F6BFF] px-8 py-4 text-[18px] font-bold text-white transition-colors hover:bg-[#3f57e6]"
         >
           {cta}
         </Link>

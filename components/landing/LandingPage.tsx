@@ -22,13 +22,13 @@ const STEPS = [
   { title: "Choose your next step", body: "Keep the number for planning, talk to an advisor, or list privately for qualified buyers." },
 ];
 
-const primaryBtn = "inline-flex items-center rounded-xl bg-[#4565E6] font-bold text-white hover:bg-[#3550D4]";
-const outlineBtn = "mt-2 inline-flex min-h-12 items-center rounded-xl border-2 border-[#0E1A3C] px-[22px] py-3 text-[17px] font-bold text-[#0E1A3C] hover:bg-[#0E1A3C] hover:text-white";
+const primaryBtn = "inline-flex items-center rounded-xl bg-[#4F6BFF] font-bold text-white hover:bg-[#3f57e6]";
+const outlineBtn = "mt-2 inline-flex min-h-12 items-center rounded-xl border-2 border-[#0E1330] px-[22px] py-3 text-[17px] font-bold text-[#0E1330] hover:bg-[#0E1330] hover:text-white";
 const wrap = "mx-auto max-w-[1240px] px-5 sm:px-8";
 
 function Check({ d }: { d: string }) {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4565E6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="mt-0.5 flex-none">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F6BFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="mt-0.5 flex-none">
       <path d={d} />
     </svg>
   );
@@ -36,7 +36,7 @@ function Check({ d }: { d: string }) {
 
 export default function LandingPage() {
   return (
-    <div className="bg-white text-lg leading-[1.55] text-[#0E1A3C] [&_a:focus-visible]:outline-[3px] [&_a:focus-visible]:outline-offset-[3px] [&_a:focus-visible]:outline-[#4565E6]">
+    <div className="bg-white text-lg leading-[1.55] text-[#0E1330] [&_a:focus-visible]:outline-[3px] [&_a:focus-visible]:outline-offset-[3px] [&_a:focus-visible]:outline-[#4F6BFF]">
       {/* Hero */}
       <section className="bg-[#F4F6FC]">
         <div className={`${wrap} grid items-center gap-14 pt-14 pb-20 lg:grid-cols-2 lg:pt-[72px] lg:pb-[88px]`}>
@@ -62,8 +62,8 @@ export default function LandingPage() {
           </div>
           <ol className="grid gap-10 md:grid-cols-3">
             {STEPS.map((s, i) => (
-              <li key={s.title} className="flex flex-col gap-3.5 border-t-2 border-[#0E1A3C] pt-6">
-                <span className="font-bold text-[#4565E6]">Step {i + 1}</span>
+              <li key={s.title} className="flex flex-col gap-3.5 border-t-2 border-[#0E1330] pt-6">
+                <span className="font-bold text-[#4F6BFF]">Step {i + 1}</span>
                 <h3 className="text-2xl font-bold tracking-[-0.01em]">{s.title}</h3>
                 <p className="text-[#3B4566]">{s.body}</p>
               </li>
@@ -99,7 +99,7 @@ export default function LandingPage() {
                 <Image src={`/mercato/${ind.img}.jpg`} alt="" width={404} height={288} className="aspect-[7/5] w-full rounded-[18px] object-cover" />
                 <span className="flex items-baseline justify-between gap-3">
                   <span className="text-[22px] font-bold">{ind.name}</span>
-                  <span className="text-base font-semibold text-[#3550D4] group-hover:underline">Value my business</span>
+                  <span className="text-base font-semibold text-[#3f57e6] group-hover:underline">Value my business</span>
                 </span>
               </Link>
             ))}
@@ -111,13 +111,13 @@ export default function LandingPage() {
       <section>
         <div className={`${wrap} grid gap-8 py-20 md:grid-cols-2 lg:py-[104px]`}>
           <div id="buyers" className="flex scroll-mt-6 flex-col items-start gap-4 rounded-3xl border border-[#DCE3F2] p-8 sm:p-11">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4565E6" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5L21 21" /></svg>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4F6BFF" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5L21 21" /></svg>
             <h2 className="text-[30px] font-extrabold tracking-[-0.02em]">Looking to buy a business?</h2>
             <p className="text-[#3B4566]">Browse confidential listings from owners planning their exit. Full financials are shared once both sides are ready.</p>
             <Link href={LISTINGS_PATH} className={outlineBtn}>Browse listings</Link>
           </div>
           <div id="advisors" className="flex scroll-mt-6 flex-col items-start gap-4 rounded-3xl border border-[#DCE3F2] p-8 sm:p-11">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4565E6" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c.6-3.6 3.2-5.8 6.5-5.8s5.9 2.2 6.5 5.8" /><circle cx="17" cy="7" r="2.6" /><path d="M16.5 12.4c2.6.2 4.4 2 5 4.8" /></svg>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4F6BFF" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c.6-3.6 3.2-5.8 6.5-5.8s5.9 2.2 6.5 5.8" /><circle cx="17" cy="7" r="2.6" /><path d="M16.5 12.4c2.6.2 4.4 2 5 4.8" /></svg>
             <h2 className="text-[30px] font-extrabold tracking-[-0.02em]">Brokers and business valuators</h2>
             <p className="text-[#3B4566]">Give clients a free starting number, co-list mandates, and meet owners who are ready for expert help.</p>
             <Link href={ADVISORS_PATH} className={outlineBtn}>Become a referral partner</Link>
@@ -126,7 +126,7 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-[#0E1A3C] text-white">
+      <section className="bg-[#0E1330] text-white">
         <div className={`${wrap} flex flex-col items-center gap-7 py-24 text-center lg:py-28`}>
           <h2 className="max-w-[15em] text-[38px] leading-[1.08] font-extrabold tracking-[-0.03em] sm:text-[54px]">You spent years building it. Knowing what it’s worth takes a minute.</h2>
           <a href="#valuator" className={`${primaryBtn} min-h-15 rounded-[14px] px-[34px] py-5 text-xl`}>Get my free valuation</a>

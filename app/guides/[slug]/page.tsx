@@ -80,7 +80,7 @@ export default async function GuidePage({
   };
 
   return (
-    <article className="bg-white text-[#0E1A3C]">
+    <article className="bg-white text-[#0E1330]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -91,12 +91,12 @@ export default async function GuidePage({
         <div className="mx-auto max-w-[760px] px-5 pb-12 pt-10 sm:px-8 lg:pt-14">
           <Link
             href="/guides"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#3550D4] hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#3f57e6] hover:underline"
           >
             ← All guides
           </Link>
           <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
-            <span className="rounded-full bg-[#E8EEFF] px-3 py-1 font-semibold text-[#3550D4]">
+            <span className="rounded-full bg-[#E8EEFF] px-3 py-1 font-semibold text-[#3f57e6]">
               {guide.category}
             </span>
             <span className="text-[#525C7A]">{guide.readingTime}</span>
@@ -119,7 +119,7 @@ export default async function GuidePage({
 
         {/* Inline nudge */}
         <div className="mt-14 rounded-3xl border border-[#DCE3F2] bg-[#F4F6FC] p-7 text-center sm:p-9">
-          <h2 className="text-[24px] font-extrabold tracking-[-0.015em] text-[#0E1A3C]">
+          <h2 className="text-[24px] font-extrabold tracking-[-0.015em] text-[#0E1330]">
             See your number in about a minute
           </h2>
           <p className="mx-auto mt-2 max-w-md text-[#3B4566]">
@@ -128,7 +128,7 @@ export default async function GuidePage({
           </p>
           <Link
             href="/valuate"
-            className="mt-6 inline-flex min-h-13 items-center rounded-xl bg-[#4565E6] px-7 py-3.5 text-[17px] font-bold text-white transition-colors hover:bg-[#3550D4]"
+            className="mt-6 inline-flex min-h-13 items-center rounded-xl bg-[#4F6BFF] px-7 py-3.5 text-[17px] font-bold text-white transition-colors hover:bg-[#3f57e6]"
           >
             Get my free valuation →
           </Link>
@@ -139,7 +139,7 @@ export default async function GuidePage({
       {related.length > 0 && (
         <section className="border-t border-[#E3E8F3] bg-[#F4F6FC]">
           <div className="mx-auto max-w-[1000px] px-5 py-16 sm:px-8">
-            <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-[#0E1A3C]">
+            <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-[#0E1330]">
               Keep reading
             </h2>
             <div className="mt-8 grid gap-6 sm:grid-cols-3">
@@ -149,10 +149,10 @@ export default async function GuidePage({
                   href={`/guides/${g.slug}`}
                   className="group flex flex-col rounded-2xl border border-[#DCE3F2] bg-white p-6 transition-shadow hover:shadow-[0_18px_40px_-24px_rgba(14,26,60,0.3)]"
                 >
-                  <span className="text-xs font-semibold uppercase tracking-widest text-[#4565E6]">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-[#4F6BFF]">
                     {g.category}
                   </span>
-                  <span className="mt-3 text-[18px] font-bold leading-snug text-[#0E1A3C] group-hover:text-[#3550D4]">
+                  <span className="mt-3 text-[18px] font-bold leading-snug text-[#0E1330] group-hover:text-[#3f57e6]">
                     {g.title}
                   </span>
                   <span className="mt-2 text-sm leading-relaxed text-[#525C7A]">

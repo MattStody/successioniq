@@ -33,7 +33,7 @@ export function ValuatorTeaser() {
 
         <div className="flex flex-col gap-2.5">
           <label htmlFor="revenue" className="text-base font-semibold">Annual revenue, last 12 months</label>
-          <div className="flex items-center rounded-xl border-2 border-[#C9D2E8] px-4 focus-within:border-[#4565E6]">
+          <div className="flex items-center rounded-xl border-2 border-[#C9D2E8] px-4 focus-within:border-[#4F6BFF]">
             <span aria-hidden="true" className="text-[26px] font-semibold text-[#525C7A]">$</span>
             <input
               id="revenue"
@@ -58,7 +58,7 @@ export function ValuatorTeaser() {
                   aria-pressed={on}
                   onClick={() => setRevenue(p.value)}
                   className={`min-h-11 rounded-full border px-4 py-2.5 text-[15px] font-semibold ${
-                    on ? "border-[#0E1A3C] bg-[#0E1A3C] text-white" : "border-[#C9D2E8] bg-white text-[#0E1A3C] hover:border-[#0E1A3C]"
+                    on ? "border-[#0E1330] bg-[#0E1330] text-white" : "border-[#C9D2E8] bg-white text-[#0E1330] hover:border-[#0E1330]"
                   }`}
                 >
                   {p.label}
@@ -82,7 +82,7 @@ export function ValuatorTeaser() {
           )}
         </div>
 
-        <Link href={href} className="flex min-h-14 items-center justify-center rounded-xl bg-[#4565E6] px-6 py-[18px] text-[19px] font-bold text-white hover:bg-[#3550D4]">
+        <Link href={href} className="flex min-h-14 items-center justify-center rounded-xl bg-[#4F6BFF] px-6 py-[18px] text-[19px] font-bold text-white hover:bg-[#3f57e6]">
           Sharpen my estimate
         </Link>
         <p className="-mt-2 text-center text-sm text-[#525C7A]">A few more questions. Each one narrows the range.</p>
