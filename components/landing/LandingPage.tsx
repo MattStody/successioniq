@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ValuatorTeaser } from "./ValuatorTeaser";
+import ValueRevealCard from "@/components/marketing/ValueRevealCard";
 import { ADVISORS_PATH, LISTINGS_PATH, VALUATOR_PATH } from "./config";
 
 // The global root layout provides the FairMark <Nav> and footer, plus the
@@ -39,17 +40,37 @@ export default function LandingPage() {
     <div className="bg-white text-lg leading-[1.55] text-[#0E1330] [&_a:focus-visible]:outline-[3px] [&_a:focus-visible]:outline-offset-[3px] [&_a:focus-visible]:outline-[#4F6BFF]">
       {/* Hero */}
       <section className="bg-[#F4F6FC]">
-        <div className={`${wrap} grid items-center gap-14 pt-14 pb-20 lg:grid-cols-2 lg:pt-[72px] lg:pb-[88px]`}>
+        <div className={`${wrap} grid items-center gap-14 pt-14 pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:pt-[72px] lg:pb-[88px]`}>
           <div className="flex flex-col gap-7">
-            <h1 className="text-[42px] leading-[1.04] font-extrabold tracking-[-0.03em] sm:text-[62px]">What is your business worth? Find out in a minute.</h1>
-            <p className="max-w-[30em] text-[21px] leading-normal text-[#3B4566]">Type in last year’s revenue and see an estimated value range right away. No account, no broker, no cost.</p>
-            <ul className="flex flex-col gap-3.5">
+            <span className="text-sm font-bold uppercase tracking-widest text-[#4F6BFF]">
+              Free · private · built for owners
+            </span>
+            <h1 className="text-[42px] leading-[1.03] font-extrabold tracking-[-0.03em] sm:text-[60px]">
+              You built something real. Find out what it’s worth.
+            </h1>
+            <p className="max-w-[32em] text-[21px] leading-normal text-[#3B4566]">
+              A free, private business valuation that gives owner-run companies a clear
+              starting number — no broker, no account, no cost. Take the first step
+              whenever you’re ready.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <a href="#valuator" className={`${primaryBtn} min-h-13 px-[26px] py-3.5 text-[17px]`}>
+                Get my free valuation →
+              </a>
+              <a
+                href="#how"
+                className="inline-flex min-h-13 items-center rounded-xl border-2 border-[#0E1330] px-6 py-3 text-[17px] font-bold text-[#0E1330] transition-colors hover:bg-[#0E1330] hover:text-white"
+              >
+                See how it works
+              </a>
+            </div>
+            <ul className="flex flex-col gap-3.5 pt-1">
               <li className="flex items-start gap-3"><Check d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM7.5 12.5l3 3 6-6.5" /><span>See your range before you give us your email</span></li>
               <li className="flex items-start gap-3"><Check d="M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6zM8.5 12l2.5 2.5 4.5-5" /><span>Private. Nothing is listed or shared without your say</span></li>
               <li className="flex items-start gap-3"><Check d="M4 21V9l8-5 8 5v12M9.5 21v-6.5h5V21" /><span>Built for owner-run businesses, not Wall Street deals</span></li>
             </ul>
           </div>
-          <ValuatorTeaser />
+          <ValueRevealCard />
         </div>
       </section>
 
@@ -69,7 +90,22 @@ export default function LandingPage() {
               </li>
             ))}
           </ol>
-          <div><a href="#valuator" className={`${primaryBtn} min-h-13 px-[26px] py-4 text-lg`}>Get my free valuation</a></div>
+        </div>
+      </section>
+
+      {/* Try the valuator — the interactive tool, now below the fold */}
+      <section className="bg-[#F4F6FC]">
+        <div className={`${wrap} grid items-center gap-12 py-20 lg:grid-cols-2 lg:py-[104px]`}>
+          <div className="flex flex-col gap-4">
+            <h2 className="text-[34px] leading-[1.1] font-extrabold tracking-[-0.025em] sm:text-[44px]">
+              See your number. Start with one figure.
+            </h2>
+            <p className="text-xl text-[#3B4566]">
+              Enter last year’s revenue and get an estimated range right away — no account,
+              no obligation. You can add more later to sharpen it.
+            </p>
+          </div>
+          <ValuatorTeaser />
         </div>
       </section>
 
