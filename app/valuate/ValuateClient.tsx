@@ -109,12 +109,41 @@ function fmtCurrency(n: number): string {
 const inputCls =
   "w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100 transition-colors";
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <label className="block text-sm font-medium text-slate-600 mb-2">{label}</label>
+      {hint && <p className="-mt-1 mb-2 text-xs leading-snug text-slate-400">{hint}</p>}
       {children}
     </div>
+  );
+}
+
+/**
+ * Live, derived profit-margin readout shown under the profit input. It is a
+ * reassurance/sanity-check, never an input — owners enter profit in dollars
+ * (what they actually know), and this flags an implausible margin so a
+ * misunderstanding (e.g. entering revenue twice) gets caught on the spot.
+ */
+function MarginHint({ revenue, profit }: { revenue: string; profit: string }) {
+  const r = Number(revenue);
+  const p = Number(profit);
+  if (!(r > 0) || profit.trim() === "" || !Number.isFinite(p)) return null;
+  const pct = Math.round((p / r) * 100);
+  const implausible = pct > 60;
+  return (
+    <p className={`mt-1.5 text-xs ${implausible ? "text-amber-600" : "text-slate-400"}`}>
+      ≈ {pct}% profit margin
+      {implausible && " — unusually high, double-check this is profit, not revenue"}
+    </p>
   );
 }
 
@@ -921,12 +950,16 @@ export default function ValuateClient({
         )}
 
         <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-5">
-          <Field label="Annual Net Profit (CAD)">
+          <Field
+            label="Annual Profit (CAD)"
+            hint="Roughly what the business earns in a year before tax — include what you pay yourself."
+          >
             <MoneyInput
               value={formData.netProfit}
               onChange={(v) => update({ netProfit: v })}
               placeholder="120000"
             />
+            <MarginHint revenue={formData.revenue} profit={formData.netProfit} />
           </Field>
           <Field label="Years in Operation">
             <input
@@ -1023,12 +1056,16 @@ export default function ValuateClient({
                 placeholder="500000"
               />
             </Field>
-            <Field label="Annual Net Profit (CAD)">
+            <Field
+              label="Annual Profit (CAD)"
+              hint="Roughly what the business earns in a year before tax — include what you pay yourself."
+            >
               <MoneyInput
                 value={formData.netProfit}
                 onChange={(v) => update({ netProfit: v })}
                 placeholder="120000"
               />
+              <MarginHint revenue={formData.revenue} profit={formData.netProfit} />
             </Field>
             <Field label="Years in Operation">
               <input
