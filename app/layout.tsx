@@ -55,6 +55,7 @@ export default function RootLayout({
               <Link href="/guides" className="hover:text-cream">Guides</Link>
               <Link href="/about" className="hover:text-cream">About</Link>
               <Link href="/privacy" className="hover:text-cream">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-cream">Terms</Link>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-6 text-sm text-cream/60">
               <span>
