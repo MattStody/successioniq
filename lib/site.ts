@@ -11,7 +11,7 @@ const configured =
   (process.env.NEXT_PUBLIC_VERCEL_URL
     ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
     : "") ||
-  "https://gofairmarket.com";
+  "https://gofairmark.com";
 
 /** Absolute origin, no trailing slash — e.g. "https://mercato.com". */
 export const SITE_URL = configured.replace(/\/+$/, "");

@@ -33,7 +33,7 @@ export default function TermsPage() {
         <Prose>
           <p>
             These Terms of Service (&ldquo;Terms&rdquo;) are a legal agreement between you and
-            Mercato, operated by <strong>[Legal Entity Name]</strong> (&ldquo;Mercato,&rdquo;
+            Mercato, operated by <strong>Boldly Media Inc.</strong> (&ldquo;Mercato,&rdquo;
             &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;), governing your access to
             and use of our website and services (the &ldquo;Service&rdquo;).
           </p>
@@ -198,9 +198,12 @@ export default function TermsPage() {
 
           <h2>18. Contact us</h2>
           <p>
-            Questions about these Terms? Contact us at <strong>legal@gofairmarket.com</strong>,
-            or write to <strong>[Legal Entity Name], [mailing address], Hamilton, Ontario,
-            Canada]</strong>.
+            Questions about these Terms? Contact us at <strong>matt@boldlymedia.com</strong>,
+            or write to{" "}
+            <strong>
+              Boldly Media Inc., 800 Paramount Drive, Unit 47, Stoney Creek, Ontario, Canada
+            </strong>
+            .
           </p>
         </Prose>
 

@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         <Prose>
           <p>
             This Privacy Policy describes how Mercato, operated by{" "}
-            <strong>[Legal Entity Name]</strong> (&ldquo;Mercato,&rdquo; &ldquo;we,&rdquo;
+            <strong>Boldly Media Inc.</strong> (&ldquo;Mercato,&rdquo; &ldquo;we,&rdquo;
             &ldquo;us,&rdquo; or &ldquo;our&rdquo;), collects, uses, discloses, and protects
             personal information when you use our website and services (the
             &ldquo;Service&rdquo;). We are based in Hamilton, Ontario, Canada, and serve
@@ -169,7 +169,7 @@ export default function PrivacyPage() {
             your personal information, and withdraw consent to certain processing. Residents of
             certain jurisdictions (for example, under Canada&apos;s PIPEDA or applicable U.S.
             state privacy laws) may have additional rights. To exercise any of these, contact
-            us at <strong>privacy@gofairmarket.com</strong>. We will respond within the time
+            us at <strong>matt@boldlymedia.com</strong>. We will respond within the time
             required by applicable law.
           </p>
 
@@ -198,8 +198,11 @@ export default function PrivacyPage() {
           <h2>12. Contact us</h2>
           <p>
             Questions or requests about your privacy? Contact our privacy contact at{" "}
-            <strong>privacy@gofairmarket.com</strong>, or write to us at{" "}
-            <strong>[Legal Entity Name], [mailing address], Hamilton, Ontario, Canada]</strong>.
+            <strong>matt@boldlymedia.com</strong>, or write to us at{" "}
+            <strong>
+              Boldly Media Inc., 800 Paramount Drive, Unit 47, Stoney Creek, Ontario, Canada
+            </strong>
+            .
           </p>
           <p>
             See also our{" "}
