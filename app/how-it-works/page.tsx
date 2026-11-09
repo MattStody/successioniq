@@ -75,6 +75,35 @@ export default function HowItWorksPage() {
           >
             Get my free valuation →
           </Link>
+
+          {/* Hero animation — a few inputs flow into a valuation */}
+          <div className="mt-14 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+            {["Revenue", "Profit", "A few details"].map((label, i) => (
+              <div
+                key={label}
+                className="flex items-center gap-2 rounded-xl border border-[#DCE3F2] bg-white px-4 py-2.5 text-sm font-semibold text-[#0E1330] shadow-sm motion-safe:animate-[fade-up_0.5s_ease-out_both]"
+                style={{ animationDelay: `${0.15 + i * 0.2}s` }}
+              >
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#E8EEFF] text-[10px] font-bold text-[#3f57e6]">
+                  ✓
+                </span>
+                {label}
+              </div>
+            ))}
+            <span
+              className="hidden text-lg text-[#8A93A8] motion-safe:animate-[fade-in_0.5s_ease-out_both] sm:inline"
+              style={{ animationDelay: "0.85s" }}
+              aria-hidden="true"
+            >
+              →
+            </span>
+            <div
+              className="rounded-xl bg-[#0E1330] px-5 py-2.5 text-sm font-extrabold text-white motion-safe:animate-[fade-up_0.6s_ease-out_both]"
+              style={{ animationDelay: "1.05s" }}
+            >
+              $740K estimate
+            </div>
+          </div>
         </div>
       </section>
 

@@ -65,8 +65,12 @@ export default function GuidesHubPage() {
                 In this guide
               </p>
               <ul className="mt-4 flex flex-col gap-3">
-                {FEATURED_HIGHLIGHTS.map((h) => (
-                  <li key={h} className="flex items-start gap-3">
+                {FEATURED_HIGHLIGHTS.map((h, i) => (
+                  <li
+                    key={h}
+                    className="flex items-start gap-3 motion-safe:animate-[fade-up_0.5s_ease-out_both]"
+                    style={{ animationDelay: `${0.2 + i * 0.18}s` }}
+                  >
                     <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#E8EEFF] text-xs font-bold text-[#3f57e6]">
                       ✓
                     </span>

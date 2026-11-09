@@ -21,6 +21,20 @@ export default function AboutPage() {
           <h1 className="mt-4 text-[38px] font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-[52px]">
             Built by someone who saw the problem up close.
           </h1>
+
+          {/* Hero animation — the succession wave rising */}
+          <div className="mt-10 flex h-[120px] items-end gap-1.5 sm:gap-2" aria-hidden="true">
+            {[22, 30, 28, 42, 55, 50, 68, 84, 78, 100, 116, 120].map((h, i) => (
+              <div
+                key={i}
+                className="flex-1 origin-bottom rounded-t-md bg-gradient-to-t from-[#4F6BFF] to-[#8299FF] motion-safe:animate-[rise_0.7s_ease-out_both]"
+                style={{ height: `${h}%`, animationDelay: `${i * 0.08}s` }}
+              />
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-[#525C7A]">
+            The largest transfer of business ownership in history — now underway.
+          </p>
         </div>
       </section>
 

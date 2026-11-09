@@ -55,3 +55,21 @@ body.funnel-focus > nav,
 body.funnel-focus > footer {
   display: none;
 }
+
+/* ── Hero-animation keyframes ────────────────────────────────────────────────
+   Used via Tailwind arbitrary + motion-safe: utilities, e.g.
+   `motion-safe:animate-[fade-up_0.6s_ease-out_both]`. They only run when the
+   visitor has NOT asked for reduced motion; elements default to their final
+   state so reduced-motion users see a static, fully-rendered hero. */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes rise {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}

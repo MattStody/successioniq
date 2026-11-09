@@ -71,34 +71,45 @@ export default function ForBuyersPage() {
             </p>
           </div>
 
-          {/* Filters preview card */}
-          <div className="rounded-3xl border border-[#DCE3F2] bg-white p-8 shadow-[0_24px_60px_-32px_rgba(14,26,60,0.35)]">
-            <p className="text-sm font-semibold uppercase tracking-widest text-[#525C7A]">
-              Browse with real filters
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
+          {/* Hero animation — listings revealing (matches appearing) */}
+          <div className="rounded-3xl border border-[#DCE3F2] bg-white p-7 shadow-[0_24px_60px_-32px_rgba(14,19,48,0.35)]">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold uppercase tracking-widest text-[#525C7A]">
+                Businesses for sale
+              </p>
+              <span className="rounded-full bg-[#F1F3F6] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#8A93A8]">
+                Example
+              </span>
+            </div>
+            <div className="mt-5 flex flex-col gap-3">
               {[
-                "Construction & trades",
-                "Healthcare",
-                "Under $1M",
-                "$1M–$5M",
-                "EBITDA 15%+",
-                "Recurring revenue",
-                "Ontario",
-              ].map((chip) => (
-                <span
-                  key={chip}
-                  className="rounded-full border border-[#C9D2E8] bg-[#F4F6FC] px-3.5 py-2 text-sm font-semibold text-[#0E1330]"
+                { name: "HVAC & Plumbing Co.", meta: "Ontario · 22 yrs", value: "$780K", tag: "Trades" },
+                { name: "Family Dental Clinic", meta: "British Columbia", value: "$1.4M", tag: "Healthcare" },
+                { name: "B2B SaaS Platform", meta: "Remote · recurring", value: "$2.1M", tag: "Technology" },
+              ].map((l, i) => (
+                <div
+                  key={l.name}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-[#E3E8F3] bg-[#F8FAFF] p-4 motion-safe:animate-[fade-up_0.6s_ease-out_both]"
+                  style={{ animationDelay: `${0.15 + i * 0.18}s` }}
                 >
-                  {chip}
-                </span>
+                  <div>
+                    <div className="text-[15px] font-bold text-[#0E1330]">{l.name}</div>
+                    <div className="mt-0.5 text-xs text-[#525C7A]">{l.meta}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[15px] font-extrabold text-[#0E1330]">{l.value}</div>
+                    <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#3f57e6]">
+                      {l.tag}
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
             <Link
               href="/listings"
-              className="mt-7 inline-flex items-center text-[16px] font-bold text-[#3f57e6] hover:underline"
+              className="mt-6 inline-flex items-center text-[16px] font-bold text-[#3f57e6] hover:underline"
             >
-              See what&apos;s listed now →
+              Browse all listings →
             </Link>
           </div>
         </div>

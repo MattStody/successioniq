@@ -23,7 +23,7 @@ export function ValuatorTeaser() {
   const href = hasRevenue ? `${VALUATOR_PATH}?revenue=${revenue}` : VALUATOR_PATH;
 
   return (
-    <div id="valuator" className="scroll-mt-24 overflow-hidden rounded-3xl border border-[#DCE3F2] bg-white shadow-[0_24px_60px_-28px_rgba(14,26,60,0.35)]">
+    <div id="valuator" className="scroll-mt-24 overflow-hidden rounded-3xl border border-[#DCE3F2] bg-white shadow-[0_24px_60px_-28px_rgba(14,26,60,0.35)] motion-safe:animate-[fade-up_0.7s_ease-out_both]">
       <Image src="/mercato/hero.jpg" alt="" width={696} height={690} priority className="h-[170px] w-full object-cover object-[50%_8%]" />
       <div className="flex flex-col gap-[22px] p-6 sm:p-8">
         <div className="flex flex-col gap-1">
