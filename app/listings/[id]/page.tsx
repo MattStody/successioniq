@@ -145,6 +145,11 @@ export default async function ListingPage({
               Anonymous Listing
             </span>
           )}
+          {listing.is_sample && (
+            <span className="text-xs font-semibold text-white bg-[#4F6BFF]/90 backdrop-blur-sm px-2.5 py-1.5 rounded-md border border-white/25">
+              Representative listing
+            </span>
+          )}
         </div>
       </div>
 
@@ -493,6 +498,12 @@ export default async function ListingPage({
                   buyerName={buyerProfileName}
                   buyerEmail={buyerProfileEmail}
                 />
+                {listing.is_sample && (
+                  <p className="mt-3 rounded-lg border border-[#C2D0FF] bg-[#E8EEFF] px-3 py-2 text-xs leading-relaxed text-[#3f57e6]">
+                    Representative listing — a sample of the businesses FairMark is
+                    onboarding. Inquiries are handled by the FairMark team.
+                  </p>
+                )}
                 {isBuyer && (
                   <div className="mt-3">
                     <BookmarkButton

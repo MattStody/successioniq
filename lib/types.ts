@@ -7,6 +7,8 @@ export interface Listing {
   id: string;
   created_at: string;
   status: ListingStatus;
+  /** Representative/seed listing — shown with a badge; contact routes to FairMark. */
+  is_sample?: boolean;
   is_anonymous: boolean;
   business_name: string | null;
   industry: string;

@@ -302,6 +302,11 @@ export default async function ListingsPage({
                       {l.industry}
                     </span>
                     <div className="flex items-center gap-1.5">
+                      {l.is_sample && (
+                        <span className="text-xs font-semibold text-[#3f57e6] bg-[#E8EEFF] backdrop-blur-sm border border-[#C2D0FF] px-2 py-0.5 rounded-md shadow-sm">
+                          Representative
+                        </span>
+                      )}
                       {match && match.score >= 75 && (
                         <span className="text-xs font-semibold text-emerald-700 bg-white/90 backdrop-blur-sm border border-emerald-200 px-2 py-0.5 rounded-md shadow-sm">
                           Matches criteria
