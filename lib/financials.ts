@@ -17,6 +17,45 @@ export const INDUSTRIES = [
 ] as const;
 
 /**
+ * Maps a loose industry identifier — a landing-page slug (e.g. "trades",
+ * "restaurant") or a human label — to the canonical INDUSTRIES value the
+ * valuation funnel expects. Returns null when nothing matches, so callers can
+ * skip pre-filling rather than forcing an invalid selection.
+ */
+const INDUSTRY_SLUG_MAP: Record<string, (typeof INDUSTRIES)[number]> = {
+  retail: "Retail",
+  restaurant: "Restaurant/Food",
+  food: "Restaurant/Food",
+  "restaurant-food": "Restaurant/Food",
+  healthcare: "Healthcare",
+  health: "Healthcare",
+  "professional-services": "Professional Services",
+  professional: "Professional Services",
+  services: "Professional Services",
+  trades: "Construction/Trades",
+  construction: "Construction/Trades",
+  "construction-trades": "Construction/Trades",
+  manufacturing: "Manufacturing",
+  technology: "Technology",
+  tech: "Technology",
+  saas: "Technology",
+  "real-estate": "Real Estate",
+  realestate: "Real Estate",
+  other: "Other",
+};
+
+export function normalizeIndustry(input: string): (typeof INDUSTRIES)[number] | null {
+  const raw = input.trim();
+  if (!raw) return null;
+  // Exact canonical label (case-insensitive) wins first.
+  const exact = INDUSTRIES.find((i) => i.toLowerCase() === raw.toLowerCase());
+  if (exact) return exact;
+  // Otherwise try the slug map on a normalized key.
+  const key = raw.toLowerCase().replace(/[\s/_]+/g, "-");
+  return INDUSTRY_SLUG_MAP[key] ?? INDUSTRY_SLUG_MAP[key.replace(/-/g, "")] ?? null;
+}
+
+/**
  * Rough revenue-multiple bands by industry for the *instant* (non-AI) range we
  * show before any wall. These are deliberately wide ballpark figures for SMB
  * sale comps — the AI valuation later refines this with profit and other inputs.
