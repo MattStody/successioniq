@@ -97,7 +97,7 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
             <span className="text-2xl font-bold tracking-tight text-slate-900">
-              Succession<span className="text-blue-900">IQ</span>
+              FairMark
             </span>
           </Link>
         </div>
@@ -132,14 +132,14 @@ export default function SignUpPage() {
       <div className="text-center mb-8">
         <Link href="/" className="inline-block mb-6">
           <span className="text-2xl font-bold tracking-tight text-slate-900">
-            Succession<span className="text-blue-900">IQ</span>
+            FairMark
           </span>
         </Link>
         <h1 className="font-serif text-3xl font-bold text-slate-900 mb-2">
           Create your account
         </h1>
         <p className="text-slate-500 text-sm">
-          Join SuccessionIQ to buy, sell, or broker businesses.
+          Join FairMark to buy, sell, or broker businesses.
         </p>
       </div>
 
@@ -247,7 +247,15 @@ export default function SignUpPage() {
           </button>
 
           <p className="text-center text-xs text-slate-400">
-            By creating an account you agree to our Terms of Service and Privacy Policy.
+            By creating an account you agree to our{" "}
+            <Link href="/terms" className="text-blue-900 hover:underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-blue-900 hover:underline">
+              Privacy Policy
+            </Link>
+            .
           </p>
         </form>
       </div>

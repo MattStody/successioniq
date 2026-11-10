@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import NavAuth from "./NavAuth";
 import MobileMenu from "./MobileMenu";
@@ -8,7 +9,7 @@ const NAV_LINKS = [
   { href: "/how-it-works", label: "How It Works" },
   { href: "/for-sellers", label: "Sell" },
   { href: "/for-buyers", label: "Buy" },
-  { href: "/about", label: "About" },
+  { href: "/guides", label: "Guides" },
 ];
 
 export default async function Nav() {
@@ -41,10 +42,15 @@ export default async function Nav() {
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200 bg-cream/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold tracking-tight text-navy">
-            Succession<span className="text-accent">IQ</span>
-          </span>
+        <Link href="/" className="flex items-center" aria-label="FairMark home">
+          <Image
+            src="/fairmark-logo.png"
+            alt="FairMark"
+            width={1032}
+            height={229}
+            priority
+            className="h-7 w-auto"
+          />
         </Link>
 
         {/* Desktop */}
@@ -58,15 +64,10 @@ export default async function Nav() {
               {l.label}
             </Link>
           ))}
-          <Link
-            href="/listings"
-            className="text-sm font-medium text-navy/70 transition-colors hover:text-navy"
-          >
-            Browse Listings
-          </Link>
+          {/* One primary action. Sign in is a quiet link; the avatar replaces it when signed in. */}
           <NavAuth initialUser={user} firstName={firstName} userRole={userRole} />
           <CTAButton href="/valuate" className="!px-5 !py-2.5 !text-sm">
-            Get My Free Valuation →
+            Get my free valuation
           </CTAButton>
         </div>
 

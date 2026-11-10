@@ -10,6 +10,8 @@ import DeleteListingButton from "./DeleteListingButton";
 import BookmarkButton from "@/components/BookmarkButton";
 import NDASection from "./NDASection";
 import ListingTabs from "./ListingTabs";
+import ShareListingButton from "./ShareListingButton";
+import FinancialsGate from "./FinancialsGate";
 import { deriveFinancials, fmtMoney, fmtMultiple, fmtGrowth } from "@/lib/financials";
 
 function fmtCurrency(n: number): string {
@@ -35,6 +37,7 @@ export default async function ListingPage({
   const listing = listingResult.data as Listing;
   const { data: { user } } = await supabaseAuth.auth.getUser();
   const isOwner = !!user && user.id === listing.user_id;
+  const isLoggedIn = !!user;
 
   let isBuyer = false;
   let isBookmarked = false;
@@ -142,6 +145,11 @@ export default async function ListingPage({
               Anonymous Listing
             </span>
           )}
+          {listing.is_sample && (
+            <span className="text-xs font-semibold text-white bg-[#4F6BFF]/90 backdrop-blur-sm px-2.5 py-1.5 rounded-md border border-white/25">
+              Representative listing
+            </span>
+          )}
         </div>
       </div>
 
@@ -231,7 +239,10 @@ export default async function ListingPage({
             </div>
           )}
 
-          {/* Financials */}
+          {/* Financials — gated behind a free account for logged-out visitors */}
+          {!isLoggedIn ? (
+            <FinancialsGate />
+          ) : (
           <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-5">
               Financial Overview
@@ -307,6 +318,7 @@ export default async function ListingPage({
               </div>
             )}
           </div>
+          )}
 
           {/* Tabbed content or fallback */}
           {(() => {
@@ -410,17 +422,32 @@ export default async function ListingPage({
 
         {/* ── Right: Sticky sidebar ── */}
         <div className="lg:sticky lg:top-24 space-y-4">
+          <ShareListingButton />
+
           {/* Asking price card */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <div className="text-xs text-slate-400 mb-1 uppercase tracking-widest">
               Asking Price
             </div>
-            <div className="font-serif text-4xl font-bold text-slate-900 mb-1">
-              {fmtCurrency(askingPrice)}
-            </div>
-            <div className="text-xs text-slate-400 mb-6">
-              AI Valuation: {fmtCurrency(listing.valuation_low)} – {fmtCurrency(listing.valuation_high)}
-            </div>
+            {isLoggedIn ? (
+              <>
+                <div className="font-serif text-4xl font-bold text-slate-900 mb-1">
+                  {fmtCurrency(askingPrice)}
+                </div>
+                <div className="text-xs text-slate-400 mb-6">
+                  AI Valuation: {fmtCurrency(listing.valuation_low)} – {fmtCurrency(listing.valuation_high)}
+                </div>
+              </>
+            ) : (
+              <div className="mb-6">
+                <div className="font-serif text-3xl font-bold text-slate-300 blur-[5px] select-none">
+                  $•••,•••
+                </div>
+                <div className="mt-2 text-xs text-slate-400">
+                  Create a free account to see the asking price &amp; valuation.
+                </div>
+              </div>
+            )}
 
             {isOwner ? (
               <div className="space-y-3">
@@ -471,6 +498,12 @@ export default async function ListingPage({
                   buyerName={buyerProfileName}
                   buyerEmail={buyerProfileEmail}
                 />
+                {listing.is_sample && (
+                  <p className="mt-3 rounded-lg border border-[#C2D0FF] bg-[#E8EEFF] px-3 py-2 text-xs leading-relaxed text-[#3f57e6]">
+                    Representative listing — a sample of the businesses FairMark is
+                    onboarding. Inquiries are handled by the FairMark team.
+                  </p>
+                )}
                 {isBuyer && (
                   <div className="mt-3">
                     <BookmarkButton
@@ -495,7 +528,7 @@ export default async function ListingPage({
                 <p className="text-xs text-slate-500 leading-relaxed">
                   {listing.is_anonymous
                     ? "The seller's identity is protected. Business name and contact details are only released after an NDA is signed."
-                    : "All communications are managed through SuccessionIQ to protect both parties."}
+                    : "All communications are managed through FairMark to protect both parties."}
                 </p>
               </div>
             </div>
