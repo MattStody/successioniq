@@ -5,9 +5,9 @@ import { fmtMoney } from "@/lib/financials";
 import { SITE_URL } from "@/lib/site";
 import {
   SEO_INDUSTRIES,
-  SEO_LOCATIONS,
   getSeoIndustry,
   indefinite,
+  locationGroups,
 } from "@/lib/seo-data";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import Faq from "@/components/seo/Faq";
@@ -50,8 +50,7 @@ export default async function IndustryHub({
   const exLow = fmtMoney(industry.typicalRevenue * industry.low);
   const exHigh = fmtMoney(industry.typicalRevenue * industry.high);
   const valuateHref = `/valuate?industry=${encodeURIComponent(industry.category)}`;
-  const cities = SEO_LOCATIONS.filter((l) => !l.isProvince);
-  const province = SEO_LOCATIONS.find((l) => l.isProvince);
+  const groups = locationGroups();
 
   const faq = [
     {
@@ -128,27 +127,34 @@ export default async function IndustryHub({
           <p className="mt-4 max-w-[42em] text-[18px] text-[#3B4566]">
             Choose your area to see what {indefinite(industry)} {industry.noun} is worth there and how to sell it.
           </p>
-          <div className="mt-8 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-            {cities.map((l) => (
-              <Link
-                key={l.slug}
-                href={`/sell/${industry.slug}/${l.slug}`}
-                className="rounded-xl border border-[#DCE3F2] bg-white px-4 py-3 text-[15px] font-semibold text-[#0E1330] transition-colors hover:border-[#4F6BFF] hover:text-[#3f57e6]"
-              >
-                {industry.name} in {l.name}
-              </Link>
+          <div className="mt-10 flex flex-col gap-9">
+            {groups.map((g) => (
+              <div key={g.province}>
+                <div className="flex items-baseline justify-between gap-4 border-b border-[#DCE3F2] pb-2">
+                  <h3 className="text-[18px] font-bold text-[#0E1330]">{g.province}</h3>
+                  {g.provinceSlug && (
+                    <Link
+                      href={`/sell/${industry.slug}/${g.provinceSlug}`}
+                      className="flex-none text-sm font-semibold text-[#3f57e6] hover:underline"
+                    >
+                      {g.province} overview →
+                    </Link>
+                  )}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {g.cities.map((l) => (
+                    <Link
+                      key={l.slug}
+                      href={`/sell/${industry.slug}/${l.slug}`}
+                      className="rounded-full border border-[#C9D2E8] bg-white px-3.5 py-2 text-sm font-semibold text-[#0E1330] transition-colors hover:border-[#4F6BFF] hover:text-[#3f57e6]"
+                    >
+                      {l.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
-          {province && (
-            <div className="mt-4">
-              <Link
-                href={`/sell/${industry.slug}/${province.slug}`}
-                className="text-[16px] font-semibold text-[#3f57e6] hover:underline"
-              >
-                See {industry.name.toLowerCase()} valuations across {province.province} →
-              </Link>
-            </div>
-          )}
         </div>
       </section>
 

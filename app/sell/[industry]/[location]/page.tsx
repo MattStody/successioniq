@@ -218,7 +218,7 @@ export default async function SellPage({
         <p className="mt-4 text-[18px] leading-[1.7] text-[#2C3656]">
           {location.isProvince
             ? `Across ${location.province}, demand for well-run ${industry.blurb} stays steady — the largest transfer of business ownership in history is underway as owners retire.`
-            : `${where} and the surrounding ${location.area} area are home to many established ${industry.blurb}, and there is a steady pool of buyers looking for a profitable, well-run business to step into.`}{" "}
+            : `${where} and the surrounding area are home to many established ${industry.blurb}, and there is a steady pool of buyers looking for a profitable, well-run business to step into.`}{" "}
           FairMark gives you a free valuation first, then a confidential listing that reaches
           qualified buyers — you decide if and when anything is shared.
         </p>
