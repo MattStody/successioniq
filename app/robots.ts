@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         // Keep private/app areas out of the index; marketing + content stay open.
-        disallow: ["/dashboard", "/broker", "/buyer", "/seller", "/auth", "/api", "/create-listing"],
+        disallow: ["/admin", "/dashboard", "/broker", "/buyer", "/seller", "/auth", "/api", "/create-listing"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
