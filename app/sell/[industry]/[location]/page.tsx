@@ -18,6 +18,7 @@ import {
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import Faq from "@/components/seo/Faq";
 import JsonLd from "@/components/seo/JsonLd";
+import InlineValuator from "@/components/seo/InlineValuator";
 import ValuationCTA from "@/components/marketing/ValuationCTA";
 
 const wrap = "mx-auto max-w-[900px] px-5 sm:px-8";
@@ -136,51 +137,49 @@ export default async function SellPage({
             then sell it on your terms. No broker, no account, no cost.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              href={valuateHref}
+            <a
+              href="#estimate"
               className="inline-flex min-h-13 items-center rounded-xl bg-[#4F6BFF] px-7 py-3.5 text-[17px] font-bold text-white transition-colors hover:bg-[#3f57e6]"
             >
-              Get my free valuation →
-            </Link>
+              Estimate my business →
+            </a>
             <Link
-              href={listingsHref}
+              href={valuateHref}
               className="inline-flex min-h-13 items-center rounded-xl border-2 border-[#0E1330] px-6 py-3 text-[17px] font-bold text-[#0E1330] transition-colors hover:bg-[#0E1330] hover:text-white"
             >
-              Browse {industry.name.toLowerCase()} listings
+              Get my free valuation
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Valuation explainer + example */}
-      <section className={`${wrap} py-14 lg:py-16`}>
-        <h2 className="text-[28px] font-extrabold tracking-[-0.025em] text-[#0E1330] sm:text-[34px]">
-          How {industry.name.toLowerCase()} businesses are valued
-        </h2>
-        <p className="mt-4 text-[18px] leading-[1.7] text-[#2C3656]">
-          Buyers value a {industry.noun} on the profit it reliably produces — your SDE or EBITDA —
-          times a multiple that reflects how transferable and dependable that profit is. As a
-          rule of thumb, {industry.blurb} change hands for roughly{" "}
-          <strong>{industry.low}–{industry.high}× annual revenue</strong>, though the earnings
-          multiple is what really sets the price.
-        </p>
-
-        <div className="mt-8 rounded-3xl border border-[#DCE3F2] bg-[#F4F6FC] p-7 sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#525C7A]">
-            Example · {industry.name}
-          </p>
-          <p className="mt-3 text-[20px] leading-relaxed text-[#0E1330]">
-            {indefiniteCap(industry)} {industry.name.toLowerCase()} business in {where} doing{" "}
-            <strong>{ex.revenue}</strong> in annual revenue would typically be worth around{" "}
-            <strong className="text-[#3f57e6]">
-              {ex.low} – {ex.high}
-            </strong>
-            .
-          </p>
-          <p className="mt-3 text-sm text-[#525C7A]">
-            Illustrative range based on revenue alone. Your real number depends on profit and the
-            details below — see it with a free valuation.
-          </p>
+      {/* Interactive estimator — the conversion driver, high on the page */}
+      <section className={`${wrap} py-12 lg:py-14`}>
+        <div className="grid items-start gap-10 lg:grid-cols-[1fr_1.05fr]">
+          <div>
+            <h2 className="text-[28px] font-extrabold tracking-[-0.025em] text-[#0E1330] sm:text-[34px]">
+              See what your {industry.noun} is worth
+            </h2>
+            <p className="mt-4 text-[18px] leading-[1.7] text-[#2C3656]">
+              Buyers value {indefinite(industry)} {industry.noun} on the profit it reliably
+              produces — your SDE or EBITDA — times a multiple. As a rule of thumb,{" "}
+              {industry.blurb} change hands for roughly{" "}
+              <strong>{industry.low}–{industry.high}× annual revenue</strong>. Put your number in
+              to see a range, then get an exact figure free.
+            </p>
+            <p className="mt-4 text-[15px] text-[#525C7A]">
+              Example: {indefinite(industry)} {industry.name.toLowerCase()} business doing{" "}
+              <strong>{ex.revenue}</strong> is typically worth around{" "}
+              <strong className="text-[#3f57e6]">{ex.low} – {ex.high}</strong>.
+            </p>
+          </div>
+          <InlineValuator
+            industryName={industry.name}
+            category={industry.category}
+            low={industry.low}
+            high={industry.high}
+            defaultRevenue={industry.typicalRevenue}
+          />
         </div>
       </section>
 
@@ -210,6 +209,24 @@ export default async function SellPage({
         </div>
       </section>
 
+      {/* Mid-page CTA back to the estimator */}
+      <section className="bg-[#EEF2FD]">
+        <div className={`${wrap} flex flex-col items-center gap-4 py-12 text-center sm:flex-row sm:justify-between sm:text-left`}>
+          <div>
+            <h2 className="text-[22px] font-extrabold tracking-[-0.015em] text-[#0E1330] sm:text-[26px]">
+              Ready to see your exact number?
+            </h2>
+            <p className="mt-1 text-[#3B4566]">Free, private, and takes about a minute.</p>
+          </div>
+          <a
+            href="#estimate"
+            className="inline-flex min-h-13 flex-none items-center rounded-xl bg-[#4F6BFF] px-7 py-3.5 text-[17px] font-bold text-white transition-colors hover:bg-[#3f57e6]"
+          >
+            Estimate my business →
+          </a>
+        </div>
+      </section>
+
       {/* Local + selling */}
       <section className={`${wrap} py-14 lg:py-16`}>
         <h2 className="text-[28px] font-extrabold tracking-[-0.025em] text-[#0E1330] sm:text-[34px]">
@@ -221,6 +238,11 @@ export default async function SellPage({
             : `${where} and the surrounding area are home to many established ${industry.blurb}, and there is a steady pool of buyers looking for a profitable, well-run business to step into.`}{" "}
           FairMark gives you a free valuation first, then a confidential listing that reaches
           qualified buyers — you decide if and when anything is shared.
+        </p>
+        <p className="mt-4 text-[15px]">
+          <Link href={listingsHref} className="font-semibold text-[#3f57e6] hover:underline">
+            Looking to buy instead? Browse {industry.name.toLowerCase()} businesses for sale →
+          </Link>
         </p>
 
         {nearby.length > 0 && (
