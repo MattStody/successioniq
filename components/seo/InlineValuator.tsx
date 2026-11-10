@@ -19,12 +19,15 @@ const PRESETS = [
 
 export default function InlineValuator({
   industryName,
+  heading,
   category,
   low,
   high,
   defaultRevenue,
 }: {
   industryName: string;
+  /** Overrides the default "Estimate your {industry} business" eyebrow. */
+  heading?: string;
   category: string;
   low: number;
   high: number;
@@ -32,9 +35,11 @@ export default function InlineValuator({
 }) {
   const [revenue, setRevenue] = useState(defaultRevenue);
   const hasRevenue = revenue > 0;
-  const href = hasRevenue
-    ? `/valuate?industry=${encodeURIComponent(category)}&revenue=${revenue}`
-    : `/valuate?industry=${encodeURIComponent(category)}`;
+  const params = new URLSearchParams();
+  if (category) params.set("industry", category);
+  if (hasRevenue) params.set("revenue", String(revenue));
+  const query = params.toString();
+  const href = query ? `/valuate?${query}` : "/valuate";
 
   return (
     <div
@@ -43,7 +48,7 @@ export default function InlineValuator({
     >
       <div className="border-b border-[#E3E8F3] bg-[#F4F6FC] px-6 py-5 sm:px-8">
         <p className="text-sm font-bold uppercase tracking-widest text-[#4F6BFF]">
-          Estimate your {industryName.toLowerCase()} business
+          {heading ?? `Estimate your ${industryName.toLowerCase()} business`}
         </p>
         <p className="mt-1 text-[#525C7A]">
           Enter last year&apos;s revenue to see your range right away.

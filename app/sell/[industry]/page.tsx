@@ -11,6 +11,7 @@ import {
 } from "@/lib/seo-data";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import Faq from "@/components/seo/Faq";
+import InlineValuator from "@/components/seo/InlineValuator";
 import ValuationCTA from "@/components/marketing/ValuationCTA";
 
 const wrap = "mx-auto max-w-[1100px] px-5 sm:px-8";
@@ -92,14 +93,49 @@ export default async function IndustryHub({
             with a free, private valuation. {industry.blurb.charAt(0).toUpperCase() + industry.blurb.slice(1)}{" "}
             typically sell for {industry.low}–{industry.high}× revenue.
           </p>
-          <div className="mt-7">
-            <Link
-              href={valuateHref}
+          <div className="mt-7 flex flex-wrap gap-3">
+            <a
+              href="#estimate"
               className="inline-flex min-h-13 items-center rounded-xl bg-[#4F6BFF] px-7 py-3.5 text-[17px] font-bold text-white transition-colors hover:bg-[#3f57e6]"
             >
-              Get my free valuation →
+              Estimate my business →
+            </a>
+            <Link
+              href={valuateHref}
+              className="inline-flex min-h-13 items-center rounded-xl border-2 border-[#0E1330] px-6 py-3 text-[17px] font-bold text-[#0E1330] transition-colors hover:bg-[#0E1330] hover:text-white"
+            >
+              Get my free valuation
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Interactive estimator */}
+      <section className={`${wrap} py-12 lg:py-14`}>
+        <div className="grid items-start gap-10 lg:grid-cols-[1fr_1.05fr]">
+          <div>
+            <h2 className="text-[28px] font-extrabold tracking-[-0.025em] text-[#0E1330] sm:text-[34px]">
+              See what your {industry.noun} is worth
+            </h2>
+            <p className="mt-4 text-[18px] leading-[1.7] text-[#2C3656]">
+              {industry.blurb.charAt(0).toUpperCase() + industry.blurb.slice(1)} typically sell
+              for <strong>{industry.low}–{industry.high}× annual revenue</strong>. Put your number
+              in to see a range for your business, then get an exact figure free — no account
+              needed.
+            </p>
+            <p className="mt-4 text-[15px] text-[#525C7A]">
+              Example: {indefinite(industry)} {industry.name.toLowerCase()} business doing{" "}
+              <strong>{fmtMoney(industry.typicalRevenue)}</strong> is typically worth around{" "}
+              <strong className="text-[#3f57e6]">{exLow} – {exHigh}</strong>.
+            </p>
+          </div>
+          <InlineValuator
+            industryName={industry.name}
+            category={industry.category}
+            low={industry.low}
+            high={industry.high}
+            defaultRevenue={industry.typicalRevenue}
+          />
         </div>
       </section>
 
