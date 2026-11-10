@@ -4,7 +4,30 @@ import Link from "next/link";
 import Script from "next/script";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import JsonLd from "@/components/seo/JsonLd";
 import { SITE_URL, SITE_HOST } from "@/lib/site";
+
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "FairMark",
+      url: SITE_URL,
+      description:
+        "FairMark is a free AI-powered business valuation tool and confidential marketplace for buying and selling businesses, built for owner-operators across Canada and the United States.",
+      areaServed: ["Canada", "United States"],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "FairMark",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+  ],
+};
 
 // Google Tag Manager. Overridable via NEXT_PUBLIC_GTM_ID; loaded only in
 // production builds so local dev doesn't pollute analytics.
@@ -63,6 +86,7 @@ export default function RootLayout({
             />
           </noscript>
         )}
+        <JsonLd data={orgJsonLd} />
         <Nav />
         <main className="flex-1">{children}</main>
         <footer className="bg-navy text-cream/80">
@@ -73,6 +97,7 @@ export default function RootLayout({
             <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2 text-sm">
               <Link href="/how-it-works" className="hover:text-cream">How It Works</Link>
               <Link href="/for-sellers" className="hover:text-cream">For Sellers</Link>
+              <Link href="/sell" className="hover:text-cream">Sell a Business</Link>
               <Link href="/for-buyers" className="hover:text-cream">For Buyers</Link>
               <Link href="/guides" className="hover:text-cream">Guides</Link>
               <Link href="/about" className="hover:text-cream">About</Link>
