@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { instantValuationRange } from "@/lib/financials";
 import { PENDING_LISTING_KEY, GATE_EMAIL_KEY } from "@/lib/post-auth";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -393,6 +394,9 @@ function EmailGateView({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, source: "valuation_gate", industry }),
       });
+      // Fire the Meta Pixel "Lead" standard event so ad campaigns can optimize
+      // for actual lead capture, not just page views. Safe no-op off-production.
+      trackMetaEvent("Lead", { content_category: industry || "business" });
       if (typeof window !== "undefined") {
         localStorage.setItem("siq_email_captured", "1");
         localStorage.setItem(GATE_EMAIL_KEY, email);
